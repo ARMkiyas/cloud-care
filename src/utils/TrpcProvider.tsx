@@ -12,9 +12,13 @@ import {useState} from "react"
 import {apiclient} from "@/utils/Trpc"
 
 export const TrpcProvider: React.FC<{children: React.ReactNode}> = p => {
+    // Create a new QueryClient
     const [queryClient] = useState(() => new QueryClient())
+  
+
+    // Create a new trpcClient
     const [trpcClient] = useState(() =>
-    apiclient.createClient({
+        apiclient.createClient({
             links: [
                 httpBatchLink({
                     url: `${process.env.NEXT_PUBLIC_API_URL}/api/trpc`
@@ -25,6 +29,7 @@ export const TrpcProvider: React.FC<{children: React.ReactNode}> = p => {
 
 
     return (
+        // Wrap the trpcClient in the apiclient.Provider
         <apiclient.Provider client={trpcClient} queryClient={queryClient}>
             <QueryClientProvider client={queryClient}>
                 {p.children}
