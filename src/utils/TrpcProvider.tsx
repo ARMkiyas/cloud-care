@@ -14,6 +14,7 @@ import {apiclient} from "@/utils/Trpc"
 export const TrpcProvider: React.FC<{children: React.ReactNode}> = p => {
     // Create a new QueryClient
     const [queryClient] = useState(() => new QueryClient())
+  
 
     // Create a new trpcClient
     const [trpcClient] = useState(() =>
