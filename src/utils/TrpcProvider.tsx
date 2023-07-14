@@ -28,6 +28,7 @@ export const TrpcProvider: React.FC<{children: React.ReactNode}> = p => {
     )
 
 
+        
     return (
         // Wrap the trpcClient in the apiclient.Provider
         <apiclient.Provider client={trpcClient} queryClient={queryClient}>
