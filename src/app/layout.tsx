@@ -1,15 +1,13 @@
 /**
  *  This root layout of the entire app
- * 
+ *
  */
 
-import "./globals.css";
+import "@/styles/globals.css";
 import { Inter } from "next/font/google";
+import AppRootProvider from "./AppRootProvider";
 import { TrpcProvider } from "@/utils/TrpcProvider";
 
-
-//font declaration
-const inter = Inter({ subsets: ["latin"] });
 
 
 // creating metedata
@@ -23,15 +21,13 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
-
-
   return (
-    
-    <TrpcProvider>
-      <html lang="en">
-        <body className={inter.className}>{children}</body>
-      </html>
-    </TrpcProvider>
+    <AppRootProvider>
+      <TrpcProvider>
+        <html lang="en">
+          <body >{children}</body>
+        </html>
+      </TrpcProvider>
+    </AppRootProvider>
   );
 }
