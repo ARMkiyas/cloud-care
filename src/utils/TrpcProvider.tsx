@@ -24,6 +24,7 @@ export const TrpcProvider: React.FC<{children: React.ReactNode}> = p => {
                     url: `${process.env.NEXT_PUBLIC_API_URL}/api/trpc`
                 })
             ],
+            transformer: undefined
         })
     )
 
