@@ -7,15 +7,15 @@ import { apiclient } from "@/utils/Trpc";
 
 export default function Testclient() {
   // Call the API server's hello function, passing in the text "From Client"
-  const { data ,isFetching } = apiclient.example.hello.useQuery({
+  const { data, isFetching } = apiclient.example.hello.useQuery({
     text: "From Client",
   });
 
   return (
     <>
-
-    {isFetching ? <div> loading... </div> : <div>{data?.greeting}</div>}
-    
+      <div className="">
+        {isFetching ? <div> loading... </div> : <div>{data?.greeting}</div>}
+      </div>
     </>
   );
 }

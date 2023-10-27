@@ -1,5 +1,6 @@
 /**
  *  This root layout of the entire app
+ *  do not change this file if you don't know what you are doing
  *
  */
 
@@ -7,8 +8,6 @@ import "@/styles/globals.css";
 import { Inter } from "next/font/google";
 import AppRootProvider from "./AppRootProvider";
 import { TrpcProvider } from "@/utils/TrpcProvider";
-
-
 
 // creating metedata
 export const metadata = {
@@ -25,7 +24,7 @@ export default async function RootLayout({
     <AppRootProvider>
       <TrpcProvider>
         <html lang="en">
-          <body >{children}</body>
+          <body className="">{children}</body>
         </html>
       </TrpcProvider>
     </AppRootProvider>
