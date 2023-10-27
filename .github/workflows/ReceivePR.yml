@@ -21,8 +21,10 @@ jobs:
         run: npm install
       - name: Build
         run: npm run build
+      - name: zip artifact
+        run: zip -r cloudCare-app.zip . # path to the build folder
       - name: upload artifact
         uses: actions/upload-artifact@v2
         with:
           name: cloudCare-app
-          path: . # path to the build folder
+          path: cloudCare-app.zip # path to the build folder
