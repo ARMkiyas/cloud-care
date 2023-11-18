@@ -1,0 +1,204 @@
+html {
+	font-size:62.5%;
+}
+* {
+	margin: 0;
+	padding: 0;
+}
+ul, li {
+	list-style: none;
+}
+input {
+	border: none;
+}
+body {
+  width: 213.333rem;
+}.forgot-using-mail-zEM {
+  width: 100%;
+  height: 120rem;
+  background-color: #ffffff;
+}
+.forgot-using-mail-zEM .main-wfP {
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD {
+  box-sizing: border-box;
+  padding: 33.693rem 74.667rem 30.493rem 74.667rem;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  background-color: #111827;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .logo-inline-2Rw {
+  margin-bottom: 5rem;
+  width: 25.3rem;
+  height: 6.6rem;
+  object-fit: cover;
+  vertical-align: top;
+  flex-shrink: 0;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm {
+  box-sizing: border-box;
+  padding: 6.399rem 6.335rem 4.907rem 6.399rem;
+  width: 100%;
+  height: 44.214rem;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0.1rem 0.2rem rgba(0, 0, 0, 0.1000000015), 0 0.1rem 0.3rem rgba(0, 0, 0, 0.1000000015);
+  background-color: #1f2937;
+  border-radius: 0.8rem;
+  flex-shrink: 0;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 {
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .auto-group-jocw-p6u {
+  box-sizing: border-box;
+  padding-bottom: 3.276rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .auto-group-jocw-p6u .forgot-your-password-AAm {
+  margin-bottom: 1.121rem;
+  display: flex;
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #ffffff;
+  font-family: Inter, 'Source Sans Pro';
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .auto-group-jocw-p6u .dont-fret-just-type-in-your-email-and-we-will-send-you-a-link-to-reset-your-password-5Hj {
+  max-width: 47.6rem;
+  display: flex;
+  font-size: 1.6rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #9ca3af;
+  font-family: Inter, 'Source Sans Pro';
+  flex-shrink: 0;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .form-y8D {
+  width: 100%;
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .form-y8D .divh2d-97c640a4-j7P {
+  margin: 0rem 0.065rem 2.611rem 0rem;
+  width: 51.201rem;
+  flex-shrink: 0;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .form-y8D .divh2d-97c640a4-j7P .your-email-TJH {
+  margin-bottom: 0.799rem;
+  display: flex;
+  font-size: 1.4rem;
+  font-weight: 500;
+  line-height: 1.4285714286;
+  color: #ffffff;
+  font-family: Inter, 'Source Sans Pro';
+  white-space: nowrap;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .form-y8D .divh2d-97c640a4-j7P .input-NRF {
+  margin-bottom: 0.399rem;
+  box-sizing: border-box;
+  padding: 1.122rem 1.111rem 1.4rem 1.111rem;
+  width: 100%;
+  height: 4.222rem;
+  border: solid 0.1rem #4b5563;
+  background-color: #374151;
+  border-radius: 0.8rem;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .form-y8D .divh2d-97c640a4-j7P .input-NRF .pseudo-66M {
+  margin-right: 34.779rem;
+  width: 14.2rem;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  font-size: 1.4rem;
+  font-weight: 400;
+  line-height: 1.2125;
+  color: #9ca3af;
+  font-family: Inter, 'Source Sans Pro';
+  white-space: nowrap;
+  align-items: center;
+  justify-content: center;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .form-y8D .divh2d-97c640a4-j7P .i-dont-have-email-access-right-now-use-phone-instead-Yyw {
+  margin-left: 26.101rem;
+  text-align: right;
+  display: flex;
+  font-size: 1rem;
+  font-weight: 300;
+  line-height: 2;
+  text-decoration-line: underline;
+  color: rgba(255, 255, 255, 0.6999999881);
+  font-family: Open Sans, 'Source Sans Pro';
+  white-space: nowrap;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .form-y8D .divyrrcjsrj5nopfm4duuc-F7f {
+  margin: 0rem 25.667rem 1.28rem 0rem;
+  width: calc(100% - 25.6665rem);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .form-y8D .divyrrcjsrj5nopfm4duuc-F7f .input-mLu {
+  margin: 0.177rem 1.2rem 0rem 0rem;
+  width: 1.599rem;
+  height: 1.599rem;
+  border: solid 0.1rem #4b5563;
+  box-sizing: border-box;
+  background-color: #374151;
+  border-radius: 0.4rem;
+  flex-shrink: 0;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .form-y8D .divyrrcjsrj5nopfm4duuc-F7f .i-accept-the-terms-and-conditions-fx5 {
+  display: flex;
+  font-size: 1.4rem;
+  font-weight: 500;
+  line-height: 1.4285714286;
+  color: #ffffff;
+  font-family: Inter, 'Source Sans Pro';
+  white-space: nowrap;
+  align-items: baseline;
+  flex-shrink: 0;
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .form-y8D .divyrrcjsrj5nopfm4duuc-F7f .i-accept-the-terms-and-conditions-fx5 .i-accept-the-terms-and-conditions-fx5-sub-0 {
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .form-y8D .divyrrcjsrj5nopfm4duuc-F7f .i-accept-the-terms-and-conditions-fx5 .i-accept-the-terms-and-conditions-fx5-sub-1 {
+  font-size: 1.4rem;
+  font-weight: 500;
+  line-height: 1.4285714286;
+  color: #4ade80;
+  font-family: Inter, 'Source Sans Pro';
+}
+.forgot-using-mail-zEM .main-wfP .divyrrcjsrj5nopfm4duuc-ucD .divt6gkcsf0bt4mlitxvdj-Zgm .divivhclggvmltygow0uba-5v1 .form-y8D .button-PFo {
+  width: 16.231rem;
+  height: 4.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #ffffff;
+  font-family: Inter, 'Source Sans Pro';
+  white-space: nowrap;
+  background-color: #16a34a;
+  border-radius: 0.8rem;
+  flex-shrink: 0;
+}
