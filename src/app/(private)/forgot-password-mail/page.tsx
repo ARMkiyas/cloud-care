@@ -1,16 +1,17 @@
 import React from 'react'
-import "./styles/forgot-using-mail.css";
+
 import Image from 'next/image'
 import myImage from './assets/logo-inline-qRb.png'
 
 export default function page() {
   return (
 
-    <div className="forgot-using-mail-zEM">
-  <div className="main-wfP">
+    <div className="flex flex-col">
+  <div className="bg-[#111827] h-screen w-screen pt:mt-0 mx-auto items-center justify-center">
     <div className="divyrrcjsrj5nopfm4duuc-ucD">
-      <Image className="logo-inline-2Rw" src={myImage} alt="Cloudcare"/>
-      <div className="divt6gkcsf0bt4mlitxvdj-Zgm">
+      <Image className="mx-auto w-1/4 h-20 flex items-center my-10"
+       src={myImage} alt="Cloudcare"/>
+      <div className="bg-[#1F2937] grid grid-cols-5 w-1/2 container mx-auto rounded-lg">
         <div className="divivhclggvmltygow0uba-5v1">
            <div className="auto-group-jocw-p6u">
               <div className="forgot-your-password-AAm">Forgot your password?</div>
