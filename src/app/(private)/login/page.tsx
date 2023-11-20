@@ -72,18 +72,17 @@ export default function page() {
         <div className="mx-12 my-10 mt-15 col-span-3">
           <div className="text-white text-[30px] leading-[36px] py-5 font-bold">Sign in to platform</div>
           <form onSubmit={ProceedLogin} className="form-EaD">
-            <div className="auto-group-q1du-mq3">
-              <div className="divh2d-41398376-Wnd">
+            <div>
+              <div>
                 <div className="text-white">Your email</div>
                    <input value={usermail}
                     onChange={e=>usermailupdate(e.target.value)}
                    type="text" 
-                   className="bg-[#374151] text-[#9CA3AF] p-3 my-5 w-full border-none
-                   rounded-md text-sm" 
+                   className="bg-[#374151] text-[#9CA3AF] p-3 my-5 w-full border-none rounded-md text-sm" 
                    placeholder="name@company.com"/>
                   
               </div>
-              <div className="divh2d-fe85bb5b-K7o">
+              <div>
                 <div className="text-white">Your password</div>
                 <input value={password}
                 onChange={e=>passwordupdate(e.target.value)}
@@ -96,7 +95,7 @@ export default function page() {
               <div className="flex flex-wrap">
               <input type="checkbox" className="mr-2 box-content h-4 w-4"/>
               <div className="text-white leading-3">Remember me</div></div>
-              <a href="" className="text-[#16A34A] justify-self-start md:justify-self-end">
+              <a href="/forgot-password-mail" className="text-[#16A34A] justify-self-start md:justify-self-end">
                 Lost Password?</a>
             </div>
             <button type="submit"

@@ -1,25 +1,72 @@
-import React from 'react'
-import "./styles/confirmation-styles.css";
+"use client"
+import React,{useState} from 'react'
+
 import Image from 'next/image'
 import btnIcon from './assets/svg-margin.png'
 import myImage from './assets/logo-inline.png'
+import userImage from './assets/bonnie-greenpng.png'
 
 export default function page() {
+
+ // const { email, otp, setPage } = useState('');
+  const [timerCount, setTimer] = useState(60);
+  const [OTPinput, setOTPinput] = useState([0, 0, 0, 0]);
+  const [disable, setDisable] = useState(true);
+
+  function resendOTP() {
+   /* if (disable) return;
+    axios
+      .post("http://localhost:5000/send_recovery_email", {
+        OTP: otp,
+        recipient_email: email,
+      })
+      .then(() => setDisable(true))
+      .then(() => alert("A new OTP has succesfully been sent to your email."))
+      .then(() => setTimer(60))
+      .catch(console.log);*/
+  }
+
+  function verfiyOTP() {
+   /* if (parseInt(OTPinput.join("")) === otp) {
+      setPage("");
+      return;
+    }
+    alert(
+      "The code you have entered is not correct, try again or re-send the link"
+    );
+    return;*/
+  }
+
+  React.useEffect(() => {
+    let interval = setInterval(() => {
+      setTimer((lastTimerCount) => {
+        lastTimerCount <= 1 && clearInterval(interval);
+        if (lastTimerCount <= 1) setDisable(false);
+        if (lastTimerCount <= 0) return lastTimerCount;
+        return lastTimerCount - 1;
+      });
+    }, 1000); //each count lasts for a second
+    //cleanup the interval on complete
+    return () => clearInterval(interval);
+  }, [disable]);
+  
   return (
-    <div className="login-h37">
-  <div className="main-F4d">
-    <div className="divyrrcjsrj5nopfm4duuc-p7j">
-      <Image className="logo-inline-LLy" src={myImage} alt="Cloudcare"/>
-      <div className="divt6gkcsf0bt4mlitxvdj-UCH">
-        <div className="divt6gkcsf0bt4mlitxvdj-PKF">
+    <div className="flex flex-col">
+  <div className="bg-[#111827] h-screen w-screen pt:mt-0 mx-auto items-center justify-center">
+    <div className="mt-20">
+      <Image className="mx-auto w-1/6 h-20 flex items-center my-10" 
+      src={myImage} alt="Cloudcare"/>
+      <div className="bg-[#1F2937] w-2/5 container mx-auto rounded-lg py-4 pb-1">
+        <div className="mx-10 my-10 mt-15">
           <div className="auto-group-9hz3-jtu">
-            <div className="divyrrcjsrj5nopfm4duuc-V7P">
-              <div className="bonnie-greenpng-15j">
+            <div className="flex">
+              <div className="flex-none h-auto w-auto">
+                <Image className="rounded-full h-[42px] w-[41px]" src={userImage} alt="user"/>
               </div>
-              <div className="heading-2-bonnie-green-VWh">Dr.Bonnie Green</div>
+              <div className="text-white text-[30px] leading-[36px] px-4 pb-4 font-[700]">Dr.Bonnie Green</div>
             </div>
             <div className="auto-group-pkuk-ywf">
-              <div className="we-have-sent-2fa-otp-to-your-email-address-and-phone-please-enter-it-to-unlock-Vv1">
+              <div className="text-[#9CA3AF] text-[16px] leading-[24px] font-[400]">
               We have sent 2FA OTP to your Email Address and phone, Please enter it
               <br/>
               to unlock    
@@ -28,12 +75,25 @@ export default function page() {
           </div>
           <div className="form-zbs">
             <div className="divh2d-e1227081-Lfj">
-              <div className="otp-G3b">OTP</div>
-              <input type="text" className="input-BgM" placeholder="••••••••"/>
+              <div className="text-white text-[14px] leading-[20px] font-[500] pt-3">OTP</div>
+              <input type="text" 
+              onChange={(e) =>
+                setOTPinput(
+                  OTPinput[e.target.value]
+                )}
+               className="bg-[#374151] text-[#9CA3AF] p-3 my-5 w-full border-none
+                   rounded-md text-sm" placeholder="••••••••"/>
             </div>
-            <button className="button-Qp1">
-              <Image className="svg-margin-iph" src={btnIcon} alt="unlock"/>
-              <div className="unlock-qPX">Unlock</div>
+            <div className="text-[#9CA3AF] text-[16px] leading-[24px] font-[400] mx-1">Didn't receive code?
+                 <a href="" className="text-white" onClick={() => resendOTP()}> 
+                 {disable ? `Resend OTP in ${timerCount}s` : "Resend OTP"}
+                 </a>
+            </div>
+
+            <button className="text-white bg-[#16A34A] text-[17px] font-[500]text-center leading-[25px] my-8 py-2 w-1/4  border
+             border-slate-300 rounded-md text-sm file:border-solid shadow-lg shadow-black/50">
+              <Image className="w-[16px] h-[16px] mx-2 ml-0" src={btnIcon} alt="unlock"/>
+              Unlock
             </button>
           </div>
         </div>
