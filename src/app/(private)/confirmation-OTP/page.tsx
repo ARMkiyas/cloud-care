@@ -53,8 +53,8 @@ export default function page() {
   return (
     <div className="flex flex-col">
   <div className="bg-[#111827] h-screen w-screen pt:mt-0 mx-auto items-center justify-center">
-    <div className="mt-20">
-      <Image className="mx-auto w-1/6 h-20 flex items-center my-10" 
+    <div className="p-10">
+      <Image className="mx-auto w-1/6 h-20 flex items-center my-5" 
       src={myImage} alt="Cloudcare"/>
       <div className="bg-[#1F2937] w-2/5 container mx-auto rounded-lg py-4 pb-1">
         <div className="mx-10 my-10 mt-15">
@@ -82,16 +82,17 @@ export default function page() {
                   OTPinput[e.target.value]
                 )}
                className="bg-[#374151] text-[#9CA3AF] p-3 my-5 w-full border-none
-                   rounded-md text-sm" placeholder="••••••••"/>
+                   rounded-md text-sm hover:bg-[#3f4b61] hover:text-white hover:text-[16px] leading-4" placeholder="••••••••"/>
             </div>
             <div className="text-[#9CA3AF] text-[16px] leading-[24px] font-[400] mx-1">Didn't receive code?
-                 <a href="" className="text-white" onClick={() => resendOTP()}> 
+                 <a href="" className="text-white hover:text-yellow-300 hover:text-[17px]" onClick={() => resendOTP()}> 
                  {disable ? `Resend OTP in ${timerCount}s` : "Resend OTP"}
                  </a>
             </div>
 
-            <button className="text-white bg-[#16A34A] text-[17px] font-[500]text-center leading-[25px] my-8 py-2 w-1/4  border
-             border-slate-300 rounded-md text-sm file:border-solid shadow-lg shadow-black/50">
+            <button className="w-1/4 text-white bg-gradient-to-r from-green-800 from-5% via-green-600 via-50% to-green-400 to-95% ... 
+             hover:from-blue-500 hover:via-green-600 hover:to-green-400 hover:text-black hover:text-[17px] 
+             text-[16px] text-center leading-[26px] my-8 py-2 border border-slate-500 rounded-md text-sm   shadow-black/50 shadow-inner ...">
               <Image className="w-[16px] h-[16px] mx-2 ml-0" src={btnIcon} alt="unlock"/>
               Unlock
             </button>
