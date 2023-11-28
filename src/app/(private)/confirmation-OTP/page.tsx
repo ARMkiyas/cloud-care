@@ -5,98 +5,114 @@ import Image from 'next/image'
 import btnIcon from './assets/svg-margin.png'
 import myImage from './assets/logo-inline.png'
 import userImage from './assets/bonnie-greenpng.png'
+import { z } from 'zod';
 
-export default function page() {
+// Define the schema for OTP validation using Zod
+const OTPSchema = z.object({
+  otp: z.string().nonempty('OTP is required').min(6, 'OTP must be at least 6 characters'),
+});
 
- // const { email, otp, setPage } = useState('');
-  const [timerCount, setTimer] = useState(60);
-  const [OTPinput, setOTPinput] = useState([0, 0, 0, 0]);
-  const [disable, setDisable] = useState(true);
+const Page = ({ email }) => {
+  const [otpValue, setOTPValue] = useState('');
+  const [verificationError, setVerificationError] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  
 
-  function resendOTP() {
-   /* if (disable) return;
-    axios
-      .post("http://localhost:5000/send_recovery_email", {
-        OTP: otp,
-        recipient_email: email,
-      })
-      .then(() => setDisable(true))
-      .then(() => alert("A new OTP has succesfully been sent to your email."))
-      .then(() => setTimer(60))
-      .catch(console.log);*/
-  }
+  const handleOTPVerification = (e) => {
+    e.preventDefault();
 
-  function verfiyOTP() {
-   /* if (parseInt(OTPinput.join("")) === otp) {
-      setPage("");
-      return;
+    const formData = {
+      otp: otpValue,
+    };
+
+    try {
+      // Validate the OTP against the schema
+      OTPSchema.parse(formData);
+
+      
+      const verificationResult = verifyOTP(formData.otp, email);
+
+      if (verificationResult) {
+       
+        alert('OTP Verified Successfully!');
+        
+      } else {
+        // Handle error if OTP verification fails
+        setVerificationError('Invalid OTP. Please try again.');
+      }
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Handle validation errors
+        setVerificationError(error.errors[0]?.message || 'Invalid OTP format');
+      }
     }
-    alert(
-      "The code you have entered is not correct, try again or re-send the link"
-    );
-    return;*/
-  }
+  };
 
-  React.useEffect(() => {
-    let interval = setInterval(() => {
-      setTimer((lastTimerCount) => {
-        lastTimerCount <= 1 && clearInterval(interval);
-        if (lastTimerCount <= 1) setDisable(false);
-        if (lastTimerCount <= 0) return lastTimerCount;
-        return lastTimerCount - 1;
-      });
-    }, 1000); //each count lasts for a second
-    //cleanup the interval on complete
-    return () => clearInterval(interval);
-  }, [disable]);
+  // Simulated function to verify OTP (replace with actual implementation)
+  const verifyOTP = (enteredOTP, userEmail) => {
+    
+    const storedOTP = '123456'; 
+
+    return enteredOTP === storedOTP;
+  };
+
+  const handleResendOTP = () => {
+    setOtpSent(true);
+    alert('New OTP has been sent to your email!');
+  };
+
+
   
   return (
     <div className="flex flex-col">
   <div className="bg-[#111827] h-screen w-screen pt:mt-0 mx-auto items-center justify-center">
-    <div className="p-10">
-      <Image className="mx-auto w-1/6 h-20 flex items-center my-5" 
+    <div className="mt-10">
+      <Image className="mx-auto xl:w-1/6 xl:h-20 flex items-center xl:my-5 md:h-18 md:w-1/3
+      w-1/2 h-10 mb-8 lg:h-20 lg:mt-10" 
       src={myImage} alt="Cloudcare"/>
-      <div className="bg-[#1F2937] w-2/5 container mx-auto rounded-lg py-4 pb-1">
-        <div className="mx-10 my-10 mt-15">
-          <div className="auto-group-9hz3-jtu">
+      <div className="bg-[#1F2937] w-4/5 container mx-auto rounded-lg xl:py-4 xl:pb-1 xl:w-2/5
+      pt-5 px-5 md:w-1/2">
+        <div className="xl:mx-12 xl:my-5 xl:mt-5">
+          <div>
             <div className="flex">
               <div className="flex-none h-auto w-auto">
                 <Image className="rounded-full h-[42px] w-[41px]" src={userImage} alt="user"/>
               </div>
-              <div className="text-white text-[30px] leading-[36px] px-4 pb-4 font-[700]">Dr.Bonnie Green</div>
+              <div className="text-white
+               xl:text-[30px] xl:leading-[36px] xl:py-2 font-[700]
+              text-[25px]">Dr.Bonnie Green</div>
             </div>
-            <div className="auto-group-pkuk-ywf">
+            <div>
               <div className="text-[#9CA3AF] text-[16px] leading-[24px] font-[400]">
-              We have sent 2FA OTP to your Email Address and phone, Please enter it
-              <br/>
-              to unlock    
+              We have sent 2FA OTP to your Email Address and phone, Please enter it to unlock    
               </div>
             </div>
           </div>
-          <div className="form-zbs">
-            <div className="divh2d-e1227081-Lfj">
-              <div className="text-white text-[14px] leading-[20px] font-[500] pt-3">OTP</div>
+          <form onSubmit={handleOTPVerification}>
+            <div>
+              <div className="text-white text-[14px] leading-[20px] font-[500] pt-8 2xl:text-[22px] xl:text-[22px]">OTP</div>
               <input type="text" 
+              value={otpValue}
               onChange={(e) =>
-                setOTPinput(
-                  OTPinput[e.target.value]
-                )}
+                setOTPValue(e.target.value)}
                className="bg-[#374151] text-[#9CA3AF] p-3 my-5 w-full border-none
-                   rounded-md text-sm hover:bg-[#3f4b61] hover:text-white hover:text-[16px] leading-4" placeholder="••••••••"/>
+               rounded-md text-sm hover:bg-[#3f4b61] hover:text-white hover:text-[16px]" 
+                   placeholder="••••••••"/>
+               {verificationError && <span>{verificationError}</span>}    
             </div>
             <div className="text-[#9CA3AF] text-[16px] leading-[24px] font-[400] mx-1">Didn't receive code?
-                 <a href="" className="text-white hover:text-yellow-300 hover:text-[17px]" onClick={() => resendOTP()}> 
-                 {disable ? `Resend OTP in ${timerCount}s` : "Resend OTP"}
+                 <a href="" className="text-white "onClick={handleResendOTP}> 
+                 Resend OTP
                  </a>
             </div>
 
-            <button className="w-1/4 text-white bg-gradient-to-r from-green-800 from-5% via-green-600 via-50% to-green-400 to-95% ... 
-             hover:from-blue-500 hover:via-green-600 hover:to-green-400 hover:text-black hover:text-[17px] 
-             text-[16px] text-center leading-[26px] my-8 py-2 border border-slate-500 rounded-md text-sm   shadow-black/50 shadow-inner ...">
+            <button className="xl:w-auto text-white  bg-green-600 hover:bg-green-500 hover:text-black hover:text-[17px] hover:w-auto
+             text-[16px] text-center leading-[26px] my-8 py-2 border border-slate-500 rounded-md text-sm   shadow-black/50 shadow-inner ...
+             w-auto p-4">
               <Image className="w-[16px] h-[16px] mx-2 ml-0" src={btnIcon} alt="unlock"/>
               Unlock
             </button>
-          </div>
+          </form>
         </div>
       </div>
     </div>
@@ -105,3 +121,4 @@ export default function page() {
   )
 }
 
+export default Page;

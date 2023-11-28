@@ -4,64 +4,111 @@ import React from 'react'
 import { useState } from 'react'
 import Image from 'next/image'
 import myImage from './assets/logo-inline-r33.png'
+import {z} from 'zod'
 
-export default function page() {
+const mobileNumberSchema = z.object({
+  mobileNumber: z.string().min(10, 'Mobile number must be at least 10 digits'),
+});
 
-  const [phnno, setPhnno] = useState('');
-  const [setPage, setOTP ] = useState('')
+const Page=()=>{
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [verificationError, setVerificationError] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
 
-  function nagigateToOtp() {
-    if (phnno) {
-      const OTP = Math.floor(Math.random() * 9000 + 1000);
-      console.log(OTP);
-      setOTP(this.state.OTP);
+  const handleMobileVerification = (e) => {
+    e.preventDefault();
 
-      /*axios
-        .post("http://localhost:5000/send_recovery_email", {
-          OTP,
-          recipient_email: email,
-        })
-        .then(() => setPage(""))
-        .catch(console.log);*/
-      return;
+    const formData = {
+      mobileNumber,
+    };
+
+    try {
+   
+      mobileNumberSchema.parse(formData);
+
+      if (!isChecked) {
+        throw new Error('Please agree to the terms');
+      }
+
+      setOtpSent(true);
+      alert('OTP has been sent to your mobile number!');
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        // Handle validation errors
+        setVerificationError(error.errors[0]?.message || 'Invalid mobile number');
+      }
     }
-    return alert("Please enter your phone number");
-  }
+  };
+
+  const handleOTPVerification = (enteredOTP) => {
+
+    const storedOTP = '123456'; // Replace this with the actual stored OTP
+
+    return enteredOTP === storedOTP;
+  };
+
+  const handleVerifyOTP = (e) => {
+    e.preventDefault();
+    
+    const enteredOTP = e.target.elements.otp.value; 
+    const verificationResult = handleOTPVerification(enteredOTP);
+    if (verificationResult) {
+      // Redirect to OTP verification success page or any other page
+      alert('OTP Verified Successfully!');
+      // Replace the alert with navigation logic to another page
+    } else {
+      setVerificationError('Invalid OTP. Please try again.');
+    }
+  };
+
+  const handleCheckboxChange = (e) => {
+    setIsChecked(e.target.checked);
+  };
 
   return (
     <div className="flex flex-col">
   <div className="bg-[#111827] h-screen w-screen pt:mt-0 mx-auto items-center justify-center">
     <div className="mt-10">
-      <Image className="mx-auto w-1/6 h-20 flex items-center my-5"
+      <Image className="mx-auto xl:w-1/6 xl:h-20 flex items-center xl:my-5 md:h-18 md:w-1/3
+      w-1/2 h-10 mb-8 lg:h-20 lg:mt-10"
        src={myImage} alt="Cloudcare"/>
-      <div className="bg-[#1F2937] w-2/5 container mx-auto rounded-lg py-4 pb-1">
-        <div className="mx-12 my-10 mt-15">
-          <div className="text-white text-[30px] leading-[36px] py-5 font-[700]">Forgot your password?</div>
-          <div className="text-[#9CA3AF] text-[16px] leading-[24px] font-[400]">Don&#39;t fret! Just type in your phone number and we will send you a link/OTP to reset your password!</div>
-          <div>
+      <div className="bg-[#1F2937] w-4/5 container mx-auto rounded-lg xl:py-4 xl:pb-1 xl:w-2/5
+      pt-5 px-5 md:w-1/2 ">
+        <div className="xl:mx-12 xl:my-5 xl:mt-5">
+          <div className="text-white
+               xl:text-[30px] xl:leading-[36px] xl:py-2 font-[700] text-[25px]">Forgot your password?</div>
+          <div className="text-[#9CA3AF] text-[16px] leading-[24px] font-[400]">
+            Don&#39;t fret! Just type in your phone number and we will send you a link/OTP to reset your password!</div>
+          <form onSubmit={handleMobileVerification}>
             <div>
-              <div className="text-white text-[14px] leading-[20px] font-[500] pt-8">Your phone number</div>
-              <input type="text" onChange={(e) => setPhnno(e.target.value)}
+              <div className="text-white text-[14px] leading-[20px] font-[500] pt-8 2xl:text-[23px]">Your phone number</div>
+              <input type="text" 
+              value={mobileNumber}
+              onChange={(e) => setMobileNumber(e.target.value)}
                    className="bg-[#374151] text-[#9CA3AF] p-3 my-5 w-full border-none
-                   rounded-md text-sm hover:bg-[#3f4b61] hover:text-white hover:text-[16px] leading-4" placeholder="+94123456789"/>
-              <a href="/forgot-password-mail" className="text-white text-[10px] font-[300] leading-[20px] flex flex-row-reverse
-              hover:text-yellow-300 hover:text-[12px]">
+                   rounded-md text-sm hover:bg-[#3f4b61] hover:text-white hover:text-[16px]" placeholder="+94123456789"/>
+                   {verificationError && <span>{verificationError}</span>}
+
+              <a href="/forgot-password-mail" className="text-white text-[10px] font-[300] xl:leading-[20px] flex xl:flex-row-reverse mb-3">
                 I don’t have phone access right now !, use Email instead </a>
             </div>
             <div className="flex flex-wrap">
-              <input type="checkbox" className="mr-2 box-content h-4 w-4 hover:h-5 hover:w-5
-              invalid:border-red-500 valid:border-green-600"/>
+              <input type="checkbox"
+              checked={isChecked}
+              onChange={handleCheckboxChange}
+               className="mr-2 box-content h-4 w-4 "/>
               <div className="text-[14px] leading-[20px] font-[500]">
                 <span className="text-white">I accept the </span>
                 <span><a href=""className="text-[#4ADE80]">Terms and Conditions</a></span>
               </div>
             </div>
-            <button onClick={() => nagigateToOtp()}
-              className="w-1/4 text-white bg-gradient-to-r from-green-800 from-5% via-green-600 via-50% to-green-400 to-95% ... 
-              hover:from-blue-500 hover:via-green-600 hover:to-green-400 hover:text-black hover:text-[17px] hover:w-auto
-              text-[16px] text-center leading-[26px] my-8 py-2 border border-slate-500 rounded-md text-sm   shadow-black/50 shadow-inner ...">
+            <button
+              className="xl:w-auto text-white  bg-green-600 hover:bg-green-500 hover:text-black hover:text-[17px] hover:w-auto
+              text-[16px] text-center leading-[26px] my-8 py-2 border border-slate-500 rounded-md text-sm   shadow-black/50 shadow-inner ...
+              w-auto">
                 Reset password</button>
-          </div>
+          </form>
         </div>
       </div>
     </div>
@@ -70,3 +117,4 @@ export default function page() {
   )
 }
 
+export default Page;
