@@ -2,7 +2,8 @@
 import React,{useState} from 'react'
 
 import Image from 'next/image'
-import myImage from '../forgot-password-mail/assets/logo-inline-qRb.png'
+import Link from 'next/link'
+import myImage from '../forgot-password/assets/logo-inline-qRb.png'
 import { z } from 'zod';
 
 // Define the schema for password validation using Zod
@@ -55,8 +56,8 @@ return (
     <div className="flex flex-col">
   <div className="bg-[#111827] h-screen w-screen  mx-auto flex items-center justify-center">
     <div className="mt-5">
-      <Image className="mx-auto xl:h-20 flex items-center xl:my-5 md:h-18 md:w-1/3
-      w-1/2 h-10 mb-8 lg:h-20"
+      <Image className="mx-auto flex items-center xl:my-5 md:h-18 md:w-1/2 md:h-20
+      w-1/2 h-12 mb-8  "
        src={myImage} alt="Cloudcare"/>
       <div className="bg-[#1F2937] w-auto  container mx-auto rounded-lg  flex justify-center items-center">
         <div className="mx-8 my-3">
@@ -91,15 +92,16 @@ return (
                 className="mr-2 box-content h-4 w-4 "/>
                <div className="text-[14px] leading-[20px] font-[500]">
                   <span className="text-white">I accept the </span>
-                  <span><a href="" className="text-[#4ADE80]">Terms and Conditions</a></span>
+                  <span><Link href="" className="text-[#4ADE80]">Terms and Conditions</Link></span>
                </div>
             </div>
+            <div className="flex justify-end">
             <button
              className="xl:w-auto text-white  bg-green-600 hover:bg-green-500  hover:text-[17px] hover:w-auto px-3
              text-[16px] text-center leading-[26px] my-8 py-2 border border-slate-500 rounded-md text-sm   shadow-black/50 shadow-inner ...
              w-auto  ">
               Reset password
-              </button>
+              </button></div>
           </form>
         </div>
       </div>

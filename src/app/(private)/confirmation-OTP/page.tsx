@@ -2,6 +2,7 @@
 import React,{useState} from 'react'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import btnIcon from './assets/svg-margin.png'
 import myImage from './assets/logo-inline.png'
 import userImage from './assets/bonnie-greenpng.png'
@@ -67,17 +68,18 @@ const Page = ({ email }) => {
     <div className="flex flex-col">
   <div className="bg-[#111827] h-screen w-screen  mx-auto flex items-center justify-center">
     <div className="mt-5">
-      <Image className="mx-auto xl:h-20 flex items-center xl:my-5 md:h-18 md:w-1/3
-      w-1/2 h-10 mb-8 lg:h-20" 
+      <Image className="mx-auto xl:w-1/3 xl:h-20 flex items-center xl:my-5 md:h-18 md:w-1/3 md:h-20
+      w-1/2 h-12 mb-8  " 
       src={myImage} alt="Cloudcare"/>
       <div className="bg-[#1F2937] w-4/5  container mx-auto rounded-lg  flex justify-center items-center">
         <div className="mx-8 my-3">
           <div>
-            <div className="flex">
+            <div className="flex items-center justify-start">
               <div className="flex-none h-auto w-auto">
-                <Image className="rounded-full h-[42px] w-[41px]" src={userImage} alt="user"/>
+                <Image className="rounded-full h-[42px] w-[41px] mr-2" src={userImage} alt="user"/>
               </div>
-              <div className="text-white xl:text-[30px] xl:leading-[36px] xl:py-2 font-[700] text-[22px] xl:pr-20">Dr.Bonnie Green</div>
+              <div className="text-white xl:text-[30px] xl:leading-[36px] font-[700] text-[22px]">
+                Dr.Bonnie Green</div>
             </div>
             <div>
               <div className="text-[#9CA3AF] text-[14px] lg:text-[16px] leading-[24px] font-[400]">
@@ -98,17 +100,18 @@ const Page = ({ email }) => {
                {verificationError && <span>{verificationError}</span>}    
             </div>
             <div className="text-[#9CA3AF] text-[16px] leading-[24px] font-[400] mx-1">Didn't receive code?
-                 <a href="" className="text-white "onClick={handleResendOTP}> 
+                 <Link href="" className="text-white "onClick={handleResendOTP}> 
                  Resend OTP
-                 </a>
+                 </Link>
             </div>
-
-            <button className="flex xl:w-auto text-white  bg-green-600 hover:bg-green-500  hover:text-[17px] hover:w-auto px-3
+            <div className="flex justify-end">
+            <button className="flex xl:w-auto text-white  bg-green-600 hover:bg-green-500  hover:text-[17px] hover:w-auto px-4
               text-[16px] text-center leading-[26px] my-8 py-2 border border-slate-500 rounded-md text-sm   shadow-black/50 shadow-inner ...
               w-auto ">
-              <Image className="w-[16px] h-[16px] mx-2 ml-0 hover:w-[18px] hover:h-[18px]" src={btnIcon} alt="unlock"/>
+           
+                <Image className="w-[16px] h-[16px] hover:w-[18px] hover:h-[18px] my-1 mr-1" src={btnIcon} alt="unlock"/>
               Unlock
-            </button>
+            </button></div>
           </form>
         </div>
       </div>

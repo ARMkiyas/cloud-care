@@ -4,6 +4,7 @@ import React from "react";
 import { useEffect,useState } from "react"
 
 import Image from "next/image"
+import Link from "next/link";
 import myImage from "./assets/logo-inline-vhw.png"
 import logImage from "./assets/loginjpg.png"
 import {z} from "zod"
@@ -52,8 +53,8 @@ export default function Page() {
   <div>
     <div className="container mx-auto">
       <Image 
-      className="mx-auto xl:w-1/6 xl:h-20 flex items-center xl:my-5 md:h-18 md:w-1/3
-      w-1/2 h-10 mb-8 lg:h-20 " 
+      className="mx-auto xl:w-1/6 xl:h-20 flex items-center xl:my-5 md:h-18 md:w-1/3 md:h-20
+      w-1/2 h-10 mb-8  " 
       src={myImage} alt="cloudcare"/>
       <div className="bg-[#1F2937] mx-auto grid-cols-5 w-auto
       md:h-3/4 flex justify-center items-center
@@ -93,11 +94,11 @@ export default function Page() {
               <input type="checkbox" className="mr-2 box-content h-4 w-4 "/>
               <div className="text-white leading-3 ">
                 Remember me</div></div>
-              <a href="/forgot-password-mail" className="text-[#16A34A] justify-self-start md:justify-self-end">
-                Lost Password?</a>
+              <Link href="/forgot-password" className="text-[#16A34A] justify-self-start md:justify-self-end">
+                Lost Password?</Link>
             </div>
             <button type="submit"
-            className="text-white bg-green-600 hover:bg-green-500 hover:text-black hover:text-[17px] 
+            className="text-white bg-green-600 hover:bg-green-500 hover:text-[17px] 
             text-[16px] text-center leading-[26px] my-8 py-2 w-full border border-slate-500 rounded-md text-sm   shadow-black/50 shadow-inner ...">
               Login to your account</button>
           </form>
