@@ -22,6 +22,9 @@ export default function layout({ children }: { children: React.ReactNode }) {
           <div>
             <Link href="/contact">Contact</Link>
           </div>
+          <div>
+            <Link href="/login">Login</Link>
+          </div>
         </ul>
       </nav>
       <div className="">{children}</div>
