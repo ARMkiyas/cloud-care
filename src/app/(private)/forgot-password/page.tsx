@@ -13,7 +13,11 @@ const forgotPasswordSchema = z.object({
 });
 
 
-const Page=({setOtpSent,setEmail}) =>{
+
+const Page=() =>{
+
+
+
   const [emailValue, setEmailValue] = useState('');
   const [mobileNumber, setMobileNumber] = useState('');
   const [isChecked, setIsChecked] = useState(false);
@@ -38,7 +42,7 @@ const Page=({setOtpSent,setEmail}) =>{
       }
       console.log('Validation successful:', validationResult);
       // Simulate verification logic
-      setOtpSent(true);
+
     } catch (error) {
       console.error('Validation failed:', error.errors);
       // Handle validation errors here

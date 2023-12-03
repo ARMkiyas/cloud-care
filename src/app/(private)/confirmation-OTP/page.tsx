@@ -13,7 +13,9 @@ const OTPSchema = z.object({
   otp: z.string().nonempty('OTP is required').min(6, 'OTP must be at least 6 characters'),
 });
 
-const Page = ({ email }) => {
+const Page = () => {
+    const email=""
+
   const [otpValue, setOTPValue] = useState('');
   const [verificationError, setVerificationError] = useState('');
   const [otpSent, setOtpSent] = useState(false);
@@ -99,7 +101,7 @@ const Page = ({ email }) => {
                    placeholder="••••••••"/>
                {verificationError && <span>{verificationError}</span>}    
             </div>
-            <div className="text-[#9CA3AF] text-[16px] leading-[24px] font-[400] mx-1">Didn't receive code?
+            <div className="text-[#9CA3AF] text-[16px] leading-[24px] font-[400] mx-1">Didn&apos;t receive code?
                  <Link href="" className="text-white "onClick={handleResendOTP}> 
                  Resend OTP
                  </Link>
