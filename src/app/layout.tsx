@@ -4,7 +4,6 @@
  *
  */
 
-import "@/styles/globals.css";
 import { Inter } from "next/font/google";
 import AppRootProvider from "./AppRootProvider";
 import { TrpcProvider } from "@/utils/TrpcProvider";

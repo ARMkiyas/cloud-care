@@ -11,10 +11,11 @@ import { ModalsProvider } from "@mantine/modals";
 import { Notifications } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import RootStyleRegistry from "./_helpers/emotion";
+import "@styles/mantinerootcss.module.css";
+import "@/styles/globals.css";
 
 // import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 // import { useConfigStore } from '@/stores/config';
-
 
 const queryClient = new QueryClient();
 
@@ -23,7 +24,11 @@ const rtlCache = createEmotionCache({
   prepend: true,
 });
 
-export default function AppRootProvider({ children }: { children: React.ReactNode }) {
+export default function AppRootProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   // const { colorScheme, direction, setColorScheme } = useConfigStore();
   // const theme = useGlobalTheme({ colorScheme });
 
@@ -40,6 +45,7 @@ export default function AppRootProvider({ children }: { children: React.ReactNod
         <MantineProvider
           withGlobalStyles
           withNormalizeCSS
+
           // emotionCache={direction === 'rtl' ? rtlCache : undefined}
           // theme={{ ...theme, dir: direction }}
         >
