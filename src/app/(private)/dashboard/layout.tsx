@@ -1,7 +1,8 @@
 "use client";
 
 import { Button } from "@mantine/core";
-import { signIn, signOut } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
+import Link from "next/link";
 /* 
 
   this layout for the dashboard pages (pages that require authentication) 
@@ -10,11 +11,32 @@ import { signIn, signOut } from "next-auth/react";
 */
 
 export default function layout({ children }: { children: React.ReactNode }) {
+  function signouthandler(
+    event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+  ): void {
+    signOut({
+      redirect: false,
+    });
+  }
+
+  const { data: session, status } = useSession();
+  console.log(session);
+
   return (
     <>
-      <Button variant="danger" loaderProps={{ type: "dots" }}>
-        logout
-      </Button>
+      {session ? (
+        <Button
+          component={Link}
+          variant="danger"
+          loaderProps={{ type: "dots" }}
+          onClick={signouthandler}
+          href="/"
+        >
+          logout
+        </Button>
+      ) : (
+        ""
+      )}
       <div>{children}</div>
     </>
   );

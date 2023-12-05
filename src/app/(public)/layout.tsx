@@ -23,7 +23,7 @@ export default function layout({ children }: { children: React.ReactNode }) {
             <Link href="/contact">Contact</Link>
           </div>
           <div>
-            <Link href="/login">Login</Link>
+            <Link href="/auth/login">Login</Link>
           </div>
         </ul>
       </nav>

@@ -70,9 +70,13 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt"
   },
   secret: process.env.NEXT_SECRET,
+  pages: {
+    signIn: "/auth/login",
+  },
+
   providers: [
     CredentialsProvider({
-      name: "initallogin",
+      name: "credentials",
       credentials: {
         username: { label: "Username", type: "text", placeholder: "jsmith" },
         password: { label: "Password", type: "password" },
@@ -148,6 +152,8 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
 
 
+
+
     async jwt({ token, user, account, profile, isNewUser }) {
 
       // passing some user property into the token
@@ -181,6 +187,7 @@ export const authOptions: NextAuthOptions = {
     }
 
   },
+
 
 
 
