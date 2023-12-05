@@ -1,27 +1,45 @@
+import "server-only"
+
 import { type GetServerSidePropsContext } from "next";
 import {
   getServerSession,
   type NextAuthOptions,
   type DefaultSession,
+  DefaultUser,
+
 } from "next-auth";
-import { CredentialsProvider } from "next-auth/providers";
 import { PrismaAdapter } from '@auth/prisma-adapter'
-import { env } from "../env.mjs";
-import { prisma } from "./db";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { db } from "./db";
 import { Adapter } from "next-auth/adapters";
+import { hashPwd, verifyPwd } from "@utils/hashPwdHelper";
+import { JWT } from "next-auth/jwt";
+import { sendOtp } from "@utils/OtpHelper"
+
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
- *
+ * debug page http://localhost:3000/api/auth/signin
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
 declare module "next-auth" {
+
+
+
   interface Session extends DefaultSession {
     user: {
       id: string;
+      role: string;
+      username: string;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];
+  }
+
+  interface User extends DefaultUser {
+    id: string;
+    role: string;
+    username: string;
   }
 
   // interface User {
@@ -30,57 +48,150 @@ declare module "next-auth" {
   // }
 }
 
+declare module "next-auth/jwt" {
+  interface JWT {
+    id: string;
+    role: string;
+    username: string;
+  }
+}
+
+
+
+
 /**
  * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
  *
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as Adapter,
-  callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-      },
-    }),
+  adapter: PrismaAdapter(db) as Adapter,
+  session: {
+    strategy: "jwt"
   },
+  secret: process.env.NEXT_SECRET,
+  pages: {
+    signIn: "/auth/login",
+  },
+
   providers: [
-    //@ts-ignore
     CredentialsProvider({
-      name: "Credentials",
+      name: "credentials",
       credentials: {
         username: { label: "Username", type: "text", placeholder: "jsmith" },
         password: { label: "Password", type: "password" },
-      },
-      async authorize(credentials) {
-        const user = { id: "1", name: "J Smith", email: "jsmith@example.com" }
 
-        if (user) {
-          // Any object returned will be saved in `user` property of the JWT
+      },
+      async authorize({ username, password }) {
+        // const user = { username: "testuser", password: "password", name: "testuser", email: "test@example.com" }
+
+
+        const user = await db.user.findUnique({
+          where: {
+            username: username,
+          }
+        })
+
+
+
+        if (!user) return null
+
+
+        const isvalid = await verifyPwd(password, user.password)
+
+        console.log(isvalid);
+
+
+        if (isvalid && isvalid !== undefined) {
+          //Any object returned will be saved in `user` property of the JWT
           return user as any
         } else {
-          // If you return null then an error will be displayed advising the user to check their details.
+
+          //If you return null then an error will be displayed advising the user to check their details.
           return null
 
-          // You can also Reject this callback with an Error thus the user will be sent to the error page with the error message as a query parameter
         }
 
 
       }
 
+    }),
+    CredentialsProvider({
+      name: "2fa",
+      id: "2fa",
+      credentials: {
+
+        token: { label: "2FA Key" },
+      },
+      async authorize({ token }) {
+        ;
+        const session = getServerSession(authOptions)
+
+        if (session) {
+
+          const otp = await sendOtp((await session).user.username)
+          console.log(otp);
+
+        }
+
+
+        console.log((await session).user);
+        // const user = await db.user.findFirst({
+        //   where: {
+        //     username: username,
+        //   },
+        // })
+
+
+
+        return null
+
+      },
     })
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
   ],
+  callbacks: {
+
+
+
+
+    async jwt({ token, user, account, profile, isNewUser }) {
+
+      // passing some user property into the token
+
+      if (user) {
+        return {
+          ...token,
+          id: user.id,
+          role: user.role,
+          username: user.username
+        }
+      }
+
+      return token
+    },
+
+    async session({ session, token, user }) {
+
+      // passing some user property into the session from the token
+
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          role: token.role,
+          id: token.id,
+          username: token.username
+        }
+      }
+
+    }
+
+  },
+
+
+
+
+
 };
 
 /**

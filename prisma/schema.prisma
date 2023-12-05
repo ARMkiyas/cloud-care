@@ -1,6 +1,3 @@
-// This is your Prisma schema file, database schema definitions go here! 
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
     provider = "prisma-client-js"
 }
@@ -10,25 +7,18 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Example {
-    id        String   @id @default(cuid())
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-}
-
-// Necessary for Next auth
 model Account {
     id                String  @id @default(cuid())
     userId            String
     type              String
     provider          String
     providerAccountId String
-    refresh_token     String? // @db.Text
-    access_token      String? // @db.Text
+    refresh_token     String?
+    access_token      String?
     expires_at        Int?
     token_type        String?
     scope             String?
-    id_token          String? // @db.Text
+    id_token          String?
     session_state     String?
     user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -43,26 +33,183 @@ model Session {
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-enum Role {
-    USER
+enum UserRole {
+    ROOTUSER
     ADMIN
+    GUEST
+    DOCTOR
+    NURSE
+    STAFF
+}
+
+enum Permissions {
+    ALL
+    DASH
+    MANAGEUSERS_READ
+    MANAGEUSERS_WRITE
+    MANAGEUSERS_DELETE
+}
+
+model Permission {
+    id          Int         @id @default(autoincrement())
+    name        Permissions
+    description String?
+
+    users User[]
 }
 
 model User {
-    id            String    @id @default(cuid())
-    name          String?
-    email         String?   @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    role          Role      @default(USER)
+    id               String      @id @default(cuid())
+    name             String?
+    email            String?     @unique
+    username         String?     @unique
+    emailVerified    DateTime?
+    image            String?
+    password         String
+    twoFactorEnabled Boolean     @default(true)
+    twoFactorSecret  String?
+    roles            UserRole[]  @default([GUEST])
+    accounts         Account[]
+    Log              Log[]
+    sessions         Session[]
+    staff            Staff?
+    Permission       Permission? @relation(fields: [permissionId], references: [id])
+    permissionId     Int?
+}
+
+model Staff {
+    id         String  @id @default(cuid())
+    userId     String  @unique
+    title      String
+    department String
+    doctorId   String?
+    nurseId    String?
+    doctor     Doctor? @relation(fields: [doctorId], references: [id])
+    nurse      Nurse?  @relation(fields: [nurseId], references: [id])
+    user       User?   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
+    id         String   @id @default(cuid())
     identifier String
     token      String   @unique
     expires    DateTime
 
     @@unique([identifier, token])
+}
+
+model Patient {
+    id             Int             @id @default(autoincrement())
+    firstName      String
+    lastName       String
+    dateOfBirth    DateTime
+    gender         String
+    contactNumber  String
+    email          String
+    address        String
+    NIC            String?
+    Passport       String?
+    appointments   Appointment[]
+    medicalReports MedicalReport[]
+}
+
+model Appointment {
+    id        Int      @id @default(autoincrement())
+    dateTime  DateTime
+    status    String
+    patientId Int
+    doctorId  String
+    nurseId   String?
+    oPDId     Int?
+    doctor    Doctor   @relation(fields: [doctorId], references: [id])
+    Nurse     Nurse?   @relation(fields: [nurseId], references: [id])
+    OPD       OPD?     @relation(fields: [oPDId], references: [id])
+    patient   Patient  @relation(fields: [patientId], references: [id])
+}
+
+model Schedule {
+    id        Int      @id @default(autoincrement())
+    dayOfWeek String
+    startTime DateTime
+    endTime   DateTime
+    doctorId  String
+    doctor    Doctor   @relation(fields: [doctorId], references: [id])
+}
+
+model Doctor {
+    id             String          @id @default(cuid())
+    firstName      String
+    lastName       String
+    specialization String
+    contactNumber  String
+    email          String
+    appointments   Appointment[]
+    medicalReports MedicalReport[]
+    schedules      Schedule[]
+    Staff          Staff[]
+    departments    Department[]    @relation("DepartmentToDoctor")
+}
+
+model Nurse {
+    id            String        @id @default(cuid())
+    firstName     String
+    lastName      String
+    contactNumber String
+    email         String
+    appointments  Appointment[]
+    Staff         Staff[]
+}
+
+model Department {
+    id      Int      @id @default(autoincrement())
+    name    String
+    opds    OPD[]
+    doctors Doctor[] @relation("DepartmentToDoctor")
+}
+
+model Clinic {
+    id              Int            @id @default(autoincrement())
+    name            String
+    location        String
+    contactNumber   String
+    otherHospitalId Int?
+    OtherHospital   OtherHospital? @relation(fields: [otherHospitalId], references: [id])
+    opds            OPD[]
+}
+
+model OPD {
+    id           Int           @id @default(autoincrement())
+    name         String
+    description  String
+    departmentId Int
+    clinicId     Int
+    appointments Appointment[]
+    clinic       Clinic        @relation(fields: [clinicId], references: [id])
+    department   Department    @relation(fields: [departmentId], references: [id])
+}
+
+model OtherHospital {
+    id            Int      @id @default(autoincrement())
+    name          String
+    location      String
+    contactNumber String
+    clinics       Clinic[]
+}
+
+model MedicalReport {
+    id        Int      @id @default(autoincrement())
+    date      DateTime
+    content   String
+    doctorId  String
+    patientId Int
+    doctor    Doctor   @relation(fields: [doctorId], references: [id])
+    patient   Patient  @relation(fields: [patientId], references: [id])
+}
+
+model Log {
+    id        Int      @id @default(autoincrement())
+    action    String
+    timestamp DateTime
+    userId    String?
+    user      User?    @relation(fields: [userId], references: [id])
 }
