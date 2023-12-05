@@ -11,10 +11,10 @@ import Link from "next/link";
 */
 
 export default function layout({ children }: { children: React.ReactNode }) {
-  function signouthandler(
+  async function signouthandler(
     event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
-  ): void {
-    signOut({
+  ): Promise<void> {
+    const signout = await signOut({
       redirect: false,
     });
   }
@@ -30,7 +30,7 @@ export default function layout({ children }: { children: React.ReactNode }) {
           variant="danger"
           loaderProps={{ type: "dots" }}
           onClick={signouthandler}
-          href="/"
+          href={"/"}
         >
           logout
         </Button>
