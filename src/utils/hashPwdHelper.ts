@@ -15,10 +15,6 @@ export async function hashPwd(pwd: string): Promise<string> {
 
     const salt = await Buffer.from(crypto.getRandomValues(new Uint8Array(16)));
 
-    console.log(salt);
-
-
-    console.log(salt);
     const hashvalue = await hash(pwd, {
         ...config,
         salt: salt,

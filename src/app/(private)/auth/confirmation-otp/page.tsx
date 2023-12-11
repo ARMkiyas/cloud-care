@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -7,6 +7,12 @@ import btnIcon from "./assets/svg-margin.png";
 import myImage from "./assets/logo-inline.png";
 import userImage from "./assets/bonnie-greenpng.png";
 import { z } from "zod";
+import { signIn, signOut, useSession } from "next-auth/react";
+import PageLoader from "@/components/PageLoader";
+import { useRouter } from "next/navigation";
+import { Anchor, Button } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { apiclient } from "@/utils/trpc/Trpc";
 
 // Define the schema for OTP validation using Zod
 const OTPSchema = z.object({
@@ -17,54 +23,75 @@ const OTPSchema = z.object({
 });
 
 const Page = () => {
-  const email = "";
+  const session = useSession();
+  const router = useRouter();
+
+  console.log(session);
 
   const [otpValue, setOTPValue] = useState("");
   const [verificationError, setVerificationError] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-
-  const handleOTPVerification = (e) => {
+  const requst_2fa = apiclient.request2faotp.request.useMutation();
+  const handleOTPVerification = async (e) => {
     e.preventDefault();
 
-    const formData = {
-      otp: otpValue,
-    };
+    // Validate the OTP
+    const otpver = await signIn("2fa", { token: otpValue, redirect: false });
+    console.log(otpver);
 
-    try {
-      // Validate the OTP against the schema
-      OTPSchema.parse(formData);
-
-      const verificationResult = verifyOTP(formData.otp, email);
-
-      if (verificationResult) {
-        alert("OTP Verified Successfully!");
-      } else {
-        // Handle error if OTP verification fails
-        setVerificationError("Invalid OTP. Please try again.");
-      }
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        // Handle validation errors
-        setVerificationError(error.errors[0]?.message || "Invalid OTP format");
-      }
+    if (otpver === undefined || !otpver.ok) {
+      notifications.show({
+        title: "Error",
+        message: "Invalid OTP",
+        color: "red",
+      });
+      return;
     }
+
+    router.refresh();
   };
 
-  // Simulated function to verify OTP (replace with actual implementation)
-  const verifyOTP = (enteredOTP, userEmail) => {
-    const storedOTP = "123456";
+  if (session.status === "loading") return <PageLoader />;
 
-    return enteredOTP === storedOTP;
-  };
+  async function signouthandler(e) {
+    e.preventDefault();
 
-  const handleResendOTP = () => {
-    setOtpSent(true);
-    alert("New OTP has been sent to your email!");
-  };
+    await signOut({
+      redirect: false,
+    });
+    router.push("/");
+  }
+
+  async function resendopt(
+    event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
+  ): Promise<void> {
+    event.preventDefault();
+
+    if (session.data?.user === undefined) return;
+
+    const res = await requst_2fa.mutateAsync();
+
+    if (!res.ok) {
+      notifications.show({
+        title: "Error",
+        message: res.message,
+        color: "red",
+      });
+    }
+
+    notifications.show({
+      title: "OTP sent",
+      message: res.message,
+      color: "green",
+    });
+
+    console.log(res);
+  }
 
   return (
     <div className="flex flex-col">
       <div className="bg-[#111827] h-screen w-screen  mx-auto flex items-center justify-center">
+        <div></div>
         <div className="mt-5">
           <Image
             className="flex items-center w-1/2 h-12 mx-auto mb-8 xl:w-1/3 xl:h-20 xl:my-5 md:h-18 md:w-1/3 md:h-20 "
@@ -83,7 +110,7 @@ const Page = () => {
                     />
                   </div>
                   <div className="text-white xl:text-[30px] xl:leading-[36px] font-[700] text-[22px]">
-                    Dr.Bonnie Green
+                    {session?.data?.user?.name}
                   </div>
                 </div>
                 <div>
@@ -108,17 +135,25 @@ const Page = () => {
                   />
                   {verificationError && <span>{verificationError}</span>}
                 </div>
-                <div className="text-[#9CA3AF] text-[16px] leading-[24px] font-[400] mx-1">
+                <div className="text-[#9CA3AF] text-[16px] leading-[24px] font-[400] mx-1 ">
                   Didn&apos;t receive code?
-                  <Link
-                    href=""
-                    className="text-white "
-                    onClick={handleResendOTP}
+                  <Anchor
+                    href="#"
+                    className="ml-1 text-white"
+                    onClick={resendopt}
                   >
                     Resend OTP
-                  </Link>
+                  </Anchor>
                 </div>
-                <div className="flex justify-end">
+                <div className="flex items-center justify-end space-x-2">
+                  <Anchor
+                    href="/"
+                    underline="hover"
+                    component={Link}
+                    onClick={signouthandler}
+                  >
+                    signout
+                  </Anchor>
                   <button
                     className="flex xl:w-auto text-white  bg-green-600 hover:bg-green-500  hover:text-[17px] hover:w-auto px-4
               text-[16px] text-center leading-[26px] my-8 py-2 border border-slate-500 rounded-md text-sm   shadow-black/50 shadow-inner ...

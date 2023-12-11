@@ -1,7 +1,7 @@
 // make this as client component
 "use client";
 
-import { apiclient } from "@/utils/Trpc";
+import { apiclient } from "@/utils/trpc/Trpc";
 
 //this is test client componet for testing data fetching
 

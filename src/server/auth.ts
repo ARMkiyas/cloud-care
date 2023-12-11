@@ -14,7 +14,7 @@ import { db } from "./db";
 import { Adapter } from "next-auth/adapters";
 import { hashPwd, verifyPwd } from "@utils/hashPwdHelper";
 import { JWT } from "next-auth/jwt";
-import { sendOtp } from "@utils/OtpHelper"
+import { generateOTP, verifyOtp } from "@utils/OtpHelper"
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -31,6 +31,8 @@ declare module "next-auth" {
       id: string;
       role: string;
       username: string;
+      _2fa_valid: boolean;
+      twoFactorEnabled: boolean;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];
@@ -40,6 +42,8 @@ declare module "next-auth" {
     id: string;
     role: string;
     username: string;
+    _2fa_valid: boolean;
+    twoFactorEnabled: boolean;
   }
 
   // interface User {
@@ -53,10 +57,11 @@ declare module "next-auth/jwt" {
     id: string;
     role: string;
     username: string;
+    _2fa_valid: boolean;
+    twoFactorEnabled: boolean;
+
   }
 }
-
-
 
 
 /**
@@ -85,26 +90,35 @@ export const authOptions: NextAuthOptions = {
       async authorize({ username, password }) {
         // const user = { username: "testuser", password: "password", name: "testuser", email: "test@example.com" }
 
-
         const user = await db.user.findUnique({
           where: {
             username: username,
           }
         })
 
-
-
         if (!user) return null
-
 
         const isvalid = await verifyPwd(password, user.password)
 
-        console.log(isvalid);
-
-
         if (isvalid && isvalid !== undefined) {
+
           //Any object returned will be saved in `user` property of the JWT
-          return user as any
+
+          if (user.twoFactorEnabled) {
+
+            const otp = await generateOTP(user.twoFactorSecret)
+
+            console.log("2fa otp:", otp);
+
+          }
+
+
+          return {
+            ...user,
+            _2fa_valid: user.twoFactorEnabled ? false : true,
+          } as any
+
+
         } else {
 
           //If you return null then an error will be displayed advising the user to check their details.
@@ -124,34 +138,29 @@ export const authOptions: NextAuthOptions = {
         token: { label: "2FA Key" },
       },
       async authorize({ token }) {
-        ;
-        const session = getServerSession(authOptions)
+        const session = await getServerAuthSession()
+        console.log(session.user);
+        if (session.user) {
 
-        if (session) {
+          const verify = await verifyOtp(session.user.id, token)
 
-          const otp = await sendOtp((await session).user.username)
-          console.log(otp);
-
+          if (verify) {
+            return {
+              ...session.user,
+              _2fa_valid: true,
+            } as any
+          }
+          return null
         }
-
-
-        console.log((await session).user);
-        // const user = await db.user.findFirst({
-        //   where: {
-        //     username: username,
-        //   },
-        // })
-
-
-
         return null
+
+
+
 
       },
     })
   ],
   callbacks: {
-
-
 
 
     async jwt({ token, user, account, profile, isNewUser }) {
@@ -163,8 +172,11 @@ export const authOptions: NextAuthOptions = {
           ...token,
           id: user.id,
           role: user.role,
-          username: user.username
+          username: user.username,
+          _2fa_valid: user._2fa_valid,
+          twoFactorEnabled: user.twoFactorEnabled
         }
+
       }
 
       return token
@@ -172,18 +184,17 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token, user }) {
 
-      // passing some user property into the session from the token
-
       return {
         ...session,
         user: {
           ...session.user,
-          role: token.role,
-          id: token.id,
-          username: token.username
+          role: token?.role,
+          id: token?.id,
+          username: token?.username,
+          _2fa_valid: token?._2fa_valid,
+          twoFactorEnabled: token?.twoFactorEnabled
         }
       }
-
     }
 
   },
@@ -199,9 +210,4 @@ export const authOptions: NextAuthOptions = {
  *
  * @see https://next-auth.js.org/configuration/nextjs
  */
-export const getServerAuthSession = (ctx: {
-  req: GetServerSidePropsContext["req"];
-  res: GetServerSidePropsContext["res"];
-}) => {
-  return getServerSession(ctx.req, ctx.res, authOptions);
-};
+export const getServerAuthSession = () => getServerSession(authOptions);
