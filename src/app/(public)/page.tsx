@@ -1,13 +1,17 @@
 // this page is for home page
 
 import Testclient from "./Testclient";
-import { apiServer } from "@/utils/TrpcServer";
+import { apiServer } from "@/utils/trpc/TrpcServer";
 import "./_assets/css/styles.css";
+import { getServerAuthSession } from "@/server/auth";
 
 // This function is used to call the API server
 const callapi = async () => {
   // Call the API server's hello function, passing in the text "From Server"
-  const data = await apiServer.example.hello({ text: "From Server" });
+  const data = await apiServer.example.hello.query({
+    text: "From server",
+  });
+
   // Return the data that was returned from the server
   return data;
 };

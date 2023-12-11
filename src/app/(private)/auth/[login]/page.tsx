@@ -9,18 +9,26 @@ import myImage from "./assets/logo-inline-vhw.png";
 import logImage from "./assets/loginjpg.png";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import { notifications } from "@mantine/notifications";
 
 const loginSchema = z.object({
   email: z.string(),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
-export default function Page() {
+type Tpagepops = {
+  searchParams: {
+    callbackUrl: string;
+  };
+};
+
+export default function Page({ searchParams }: Tpagepops) {
+  const session = useSession();
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
-
-  const router = useRouter();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,10 +50,18 @@ export default function Page() {
         redirect: false,
       });
 
-      if (login.status === 401) {
+      if (!login.ok) {
         console.log("login failed");
+        notifications.show({
+          color: "red",
+          title: "Login Failed",
+          message:
+            "Check your Username/Email or PassWord, if you entered correct, somthing may wrong please contact the administrator",
+        });
       } else {
-        router.push("/dashboard");
+        searchParams.callbackUrl
+          ? router.push(searchParams.callbackUrl)
+          : router.push("/dashboard");
       }
 
       console.log(login);

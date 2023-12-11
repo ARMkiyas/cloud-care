@@ -6,21 +6,32 @@
 
 import { FetchCreateContextFnOptions, fetchRequestHandler } from '@trpc/server/adapters/fetch';
 import { appRouter } from '@/server/api/root';
+import { createTRPCContext } from '@/server/api/trpc';
+import { NextRequest } from 'next/server';
+
+
+
+const createContext = async (req: NextRequest) => {
+  return createTRPCContext({
+    headers: req.headers,
+  });
+};
 
 // Create a handler function that accepts a request
-const handler = (req: Request) =>
+const handler = (req: NextRequest) =>
   fetchRequestHandler({
-    // The endpoint that the handler will respond to
-    endpoint: '/api/trpc',
-    // Pass the request object to the handler
+    endpoint: "/api/trpc",
     req,
-    // Pass the router to the handler that we created earlier
     router: appRouter,
-    // Create a context object for the handler
-    createContext: function (opts: FetchCreateContextFnOptions): object | Promise<object> {
-        // empty context
-        return {}
-    }
+    createContext: () => createContext(req),
+    onError:
+      process.env.NODE_ENV === "development"
+        ? ({ path, error }) => {
+          console.error(
+            `❌ tRPC failed on ${path ?? "<no-path>"}: ${error.message}`
+          );
+        }
+        : undefined,
   });
 
 // Expose the handler function for both GET and POST requests

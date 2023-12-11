@@ -3,16 +3,18 @@
  *  do not change this file if you don't know what you are doing
  *
  */
-import "@/styles/globals.css";
 
 import "@mantine/core/styles.css";
+
+import "@/styles/globals.css";
+
 import "@mantine/notifications/styles.css";
 import theme from "@styles/Mglobaltheme";
 
 import { MantineProvider, ColorSchemeScript } from "@mantine/core";
 import { Inter } from "next/font/google";
-
-import { TrpcProvider } from "@/utils/TrpcProvider";
+import { cookies } from "next/headers";
+import { TrpcProvider } from "@/utils/trpc/TrpcProvider";
 import { Notifications } from "@mantine/notifications";
 import SsonProvider from "./_helpers/SsonProvider";
 
@@ -28,20 +30,20 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <TrpcProvider>
-      <html lang="en">
-        <head>
-          <ColorSchemeScript />
-        </head>
-        <body className="">
+    <html lang="en">
+      <head>
+        <ColorSchemeScript />
+      </head>
+      <body className="">
+        <TrpcProvider cookies={cookies().toString()}>
           <SsonProvider>
             <MantineProvider theme={theme}>
               <Notifications />
               {children}
             </MantineProvider>
           </SsonProvider>
-        </body>
-      </html>
-    </TrpcProvider>
+        </TrpcProvider>
+      </body>
+    </html>
   );
 }
