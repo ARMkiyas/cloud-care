@@ -10,10 +10,19 @@ import logImage from "./assets/loginjpg.png";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { notifications } from "@mantine/notifications";
+import { Button, Checkbox, PasswordInput, TextInput } from "@mantine/core";
 
 const loginSchema = z.object({
-  email: z.string(),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z
+    .string({
+      required_error: "Username/Email field is required",
+    })
+    .min(1, "Username/Email field is required"),
+  password: z
+    .string({
+      required_error: "Password field is required",
+    })
+    .min(6, "Password must be at least 6 characters"),
 });
 
 type Tpagepops = {
@@ -23,16 +32,17 @@ type Tpagepops = {
 };
 
 export default function Page({ searchParams }: Tpagepops) {
-  const session = useSession();
   const router = useRouter();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({});
+  const [loading, setloading] = useState<boolean>(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setloading(true);
     const formData = {
       email,
       password,
@@ -40,15 +50,29 @@ export default function Page({ searchParams }: Tpagepops) {
 
     try {
       // Validate the form data against the schema
-      loginSchema.parse(formData);
+
+      const isvalid = loginSchema.safeParse(formData);
       // If validation succeeds, you can perform further actions like API calls for authentication
-      console.log("Form is valid:", formData);
+
+      if (isvalid.success === false) {
+        const errormessage = isvalid.error.errors.map((err) => err.message);
+
+        notifications.show({
+          color: "red",
+          title: "Login Failed",
+          message: errormessage,
+        });
+        setloading(false);
+        return;
+      }
 
       const login = await signIn("credentials", {
         username: email,
         password: password,
         redirect: false,
       });
+
+      console.log("dsg");
 
       if (!login.ok) {
         console.log("login failed");
@@ -63,18 +87,13 @@ export default function Page({ searchParams }: Tpagepops) {
           ? router.push(searchParams.callbackUrl)
           : router.push("/dashboard");
       }
-
-      console.log(login);
+      setloading(false);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        // Handle validation errors
-        setErrors(
-          error.errors.reduce((acc, err) => {
-            acc[err.path[0]] = err.message;
-            return acc;
-          }, {}),
-        );
-      }
+      notifications.show({
+        color: "red",
+        title: "Login Failed",
+        message: "Somthen went wrong, please contact the administrator",
+      });
     }
   };
 
@@ -93,8 +112,8 @@ export default function Page({ searchParams }: Tpagepops) {
             />
             <div
               className="bg-[#1F2937] mx-auto grid-cols-5 w-auto
-      md:h-3/4 flex justify-center items-center
-       sm:grid rounded-lg h-1/2 md:w-4/5 lg:h-3/4 xl:w-3/5"
+                        md:h-3/4 flex justify-center items-center
+                              sm:grid rounded-lg h-1/4 md:w-4/5 lg:h-3/4 xl:w-8/12"
             >
               <div className="h-full col-span-2">
                 <Image
@@ -103,59 +122,77 @@ export default function Page({ searchParams }: Tpagepops) {
                   alt="cloudcare"
                 />
               </div>
-              <div className="col-span-3 mx-8 my-3">
-                <div className="text-white ms:text-[30px] ms:leading-[36px] py-5 font-bold text-[26px]">
+              <div className="col-span-3 mx-8 my-11 ">
+                <div className="text-white ms:text-[30px] ms:leading-[36px] mb-5 font-bold text-[26px]">
                   Sign in to platform
                 </div>
                 <form onSubmit={handleSubmit} action="">
                   <div>
                     <div>
-                      <div className="text-white">Your username/email</div>
-                      <input
+                      <TextInput
                         value={email}
+                        label="Your username/email"
+                        placeholder="hello@gmail.com"
+                        size="md"
+                        classNames={{
+                          input:
+                            "bg-slate-700 text-white p-3 py-2 w-full border-none   rounded-md text-sm hover:bg-gray-700 focus:bg-gray-700  hover:text-white ",
+                          label: "text-white",
+                          root: "mb-5 space-y-2",
+                        }}
                         onChange={(e) => setEmail(e.target.value)}
-                        type="text"
-                        className="bg-[#374151] text-[#9CA3AF] p-3 my-5 w-full border-none rounded-md text-sm
-                    hover:bg-[#3f4b61] hover:text-white hover:text-[16px]"
-                        placeholder="john wick/name@company.com"
                       />
+
                       {/*errors.email && <span style={{ color: 'red' }}>{errors.email}</span>*/}
                     </div>
                     <div>
-                      <div className="text-white">Your password</div>
-                      <input
-                        value={password}
+                      <PasswordInput
+                        label="Your password"
+                        placeholder="Your password"
+                        mt="md"
+                        size="md"
+                        classNames={{
+                          input:
+                            "bg-slate-700 text-white p-3 py-2 w-full border-none b focus:border-solid rounded-md text-sm hover:bg-gray-700 focus:bg-gray-700  hover:text-white ",
+                          label: "text-white",
+                          root: "space-y-2",
+                        }}
                         onChange={(e) => setPassword(e.target.value)}
-                        type="password"
-                        className="bg-[#374151] text-[#9CA3AF] p-3 my-5 w-full border-none rounded-md text-sm
-                hover:bg-[#3f4b61] hover:text-white hover:text-[16px]"
-                        placeholder="••••••••••••••••"
                       />
+
                       {/*errors.password && <span style={{ color: 'red' }}>{errors.password}</span>*/}
                     </div>
                   </div>
-                  <div className="grid justify-items-stretch ... ">
-                    <div className="flex flex-wrap">
-                      <input
-                        type="checkbox"
-                        className="box-content w-4 h-4 mr-2 "
-                      />
-                      <div className="leading-3 text-white ">Remember me</div>
-                    </div>
+                  <div className="grid justify-items-stretch ">
+                    <Checkbox
+                      label="Remember me"
+                      mt="xl"
+                      size="md"
+                      classNames={{
+                        input:
+                          "bg-slate-700 text-white p-3 py-2 w-full border-none  focus:border-gray-400 rounded-md  hover:bg-gray-700 focus:bg-gray-700  hover:text-white ",
+                        label: "text-white text-sm",
+                      }}
+                      checked={true}
+                    />
                     <Link
                       href="/auth/forgot-password"
-                      className="text-[#16A34A] justify-self-start md:justify-self-end"
+                      className="text-[#16A34A] justify-self-start md:justify-self-end "
                     >
                       Lost Password?
                     </Link>
                   </div>
-                  <button
+                  <Button
+                    fullWidth
+                    mt="xl"
+                    size="md"
                     type="submit"
-                    className="text-white bg-green-600 hover:bg-green-500 hover:text-[17px] 
-            text-[16px] text-center leading-[26px] my-8 py-2 w-full border border-slate-500 rounded-md text-sm   shadow-black/50 shadow-inner ..."
+                    color="green"
+                    loading={loading}
+                    loaderProps={{ type: "dots" }}
                   >
                     Login to your account
-                  </button>
+                  </Button>
                 </form>
               </div>
             </div>
