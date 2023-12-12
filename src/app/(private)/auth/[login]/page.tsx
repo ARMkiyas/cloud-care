@@ -132,7 +132,7 @@ export default function Page({ searchParams }: Tpagepops) {
                       <TextInput
                         value={email}
                         label="Your username/email"
-                        placeholder="hello@gmail.com"
+                        placeholder="example@gmail.com"
                         size="md"
                         classNames={{
                           input:
