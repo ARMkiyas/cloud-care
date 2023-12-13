@@ -29,29 +29,30 @@ export default function layout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <header className={classes.header}>
-      <div className={classes.inner}>
-        <Group>
-          <Image src={myImage} alt="cloudCare" className='w-[180px]  h-9 mx-2 mt-3'/>
-        </Group>
-      </div>    
-      {session ? (
-        <Button className={classes.button}
-          component={Link}
-          loaderProps={{ type: "dots" }}
-          onClick={signouthandler}
-          href={"/"}
-        >
-          
+    <div>
+        <header className={classes.header}>
+          <div className={classes.inner}>
+            <Group>
+              <Image src={myImage} alt="cloudCare" className='w-[180px]  h-9 mx-2 mt-3'/>
+           </Group>
+          </div>    
+        {session ? (
+           <Button className={classes.button}
+            component={Link}
+            loaderProps={{ type: "dots" }}
+            onClick={signouthandler}
+            href={"/"}
+          >
           logout
-        </Button>
+          </Button>
               ) : (
         ""
       )} </header> 
-      <div className="navBar">
-      <NavbarNested/>
-      </div>
+      <div className="flex">
+      <div className="navbar"><NavbarNested/></div>
       <div>{children}</div>
+      </div>
+      </div>
       
     </>
   );
