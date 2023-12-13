@@ -37,13 +37,14 @@ export const TrpcProvider: React.FC<{
   const [trpcClient] = useState(() =>
     apiclient.createClient({
       transformer,
+
       links: [
         loggerLink({
           enabled: (op) =>
             process.env.NODE_ENV === "development" ||
             (op.direction === "down" && op.result instanceof Error),
         }),
-        httpBatchLink({
+        unstable_httpBatchStreamLink({
           url: getUrl(),
           headers() {
             return {

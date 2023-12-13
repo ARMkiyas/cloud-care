@@ -6,6 +6,8 @@
 
 import { exampleRouter } from "./routers/example";
 import { request2faotp } from "./routers/helper_apis/request2faotp";
+import manageStaffRouter from "./routers/manageStaff";
+import manageUsersRouter from "./routers/manageUsers";
 import { createTRPCRouter } from "./trpc";
 
 
@@ -14,6 +16,8 @@ export const appRouter = createTRPCRouter({
     // End point for this is /api/trpc/example
     example: exampleRouter,
     request2faotp: request2faotp,
+    manageStaff: manageStaffRouter,
+    manageUsers: manageUsersRouter
 
 })
 
