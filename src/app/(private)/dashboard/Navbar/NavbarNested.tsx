@@ -52,7 +52,8 @@ export function NavbarNested() {
 
 
   return (
-    <nav className={`${classes.navbar} h-full`}>
+    <div style={{ height: '95vh', display: 'flex' }}>
+    <nav className={`${classes.navbar}`} style={{ flexGrow: 1 }}>
       <ScrollArea className={classes.links}>
         <div className={classes.linksInner}>{links}</div>
       </ScrollArea>
@@ -60,5 +61,6 @@ export function NavbarNested() {
         <UserButton />
       </div>
     </nav>
+    </div>
   );
 }
