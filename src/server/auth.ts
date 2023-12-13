@@ -105,8 +105,23 @@ export const authOptions: NextAuthOptions = {
           const user = await db.user.findUnique({
             where: {
               ...data
+            },
+            include: {
+              Permission: {
+                select: {
+                  name: true,
+                },
+
+              },
+              role: {
+                select: {
+                  role: true,
+                }
+              }
             }
           })
+
+
 
 
 
@@ -129,6 +144,7 @@ export const authOptions: NextAuthOptions = {
 
             return {
               ...user,
+              role: user.role.role,
               _2fa_valid: user.twoFactorEnabled ? false : true,
             } as any
 
@@ -190,7 +206,6 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, account, profile, isNewUser }) {
 
       // passing some user property into the token
-
       if (user) {
         return {
           ...token,
