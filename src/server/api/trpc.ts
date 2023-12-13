@@ -78,12 +78,14 @@ export const publicProcedure = t.procedure;
 
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
+const enforceUserIsAuthed = t.middleware(({ ctx, next, path }) => {
+    const allowedPathsWithout2FA = ["request2faotp.request"]
 
-    if (!ctx.session || !ctx.session.user) {
+    if (!ctx.session || !ctx.session.user || (ctx.session.user.twoFactorEnabled ? !ctx.session.user._2fa_valid : false) && !allowedPathsWithout2FA.includes(path)) {
 
         throw new TRPCError({ code: "UNAUTHORIZED" });
     }
+
     return next({
         ctx: {
             // infers the `session` as non-nullable
