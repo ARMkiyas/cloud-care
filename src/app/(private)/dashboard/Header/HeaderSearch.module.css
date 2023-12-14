@@ -5,6 +5,7 @@
   padding-left: var(--mantine-spacing-md);
   padding-right: var(--mantine-spacing-md);
   width:100vw;
+  margin:0;
 }
 
 .inner {
