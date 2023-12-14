@@ -42,6 +42,13 @@ const mockdata = [
    },
   { label: 'Staffs',
    icon: IconUsers, 
+   links:[
+    { label: 'Front Desk Staffs' ,link:'/'},
+    { label: 'Doctors' ,link:'/'},
+    { label: 'Specialists' ,link:'/'},
+    { label: 'Nurses' ,link:'/'},
+    { label: 'Administrators and Managers' ,link:'/'},
+   ],
   },
 ];
 
@@ -52,12 +59,12 @@ export function NavbarNested() {
 
 
   return (
-    <div style={{ height: '95vh', display: 'flex' }}>
-    <nav className={`${classes.navbar}`} style={{ flexGrow: 1 }}>
+    <div>
+    <nav className={`${classes.navbar}`}>
       <ScrollArea className={classes.links}>
         <div className={classes.linksInner}>{links}</div>
       </ScrollArea>
-      <div className={classes.footer}>
+      <div className={`${classes.footer}`}>
         <UserButton />
       </div>
     </nav>
