@@ -11,6 +11,13 @@ export default function Testclient() {
     text: "From Client",
   });
 
+  const stag = apiclient.manageStaff.getStaff.useQuery({
+    name: "kiyas",
+    email: "armkiyas99@gmail.con",
+  });
+
+  console.log(stag);
+
   return (
     <>
       <div className="">
