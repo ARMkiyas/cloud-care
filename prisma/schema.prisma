@@ -1,5 +1,6 @@
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
+    previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -81,7 +82,7 @@ model User {
     Log              Log[]
     sessions         Session[]
     staffid          String      @unique
-    staff            Staff       @relation(fields: [staffid], references: [id])
+    staff            Staff       @relation(fields: [staffid], references: [id], onDelete: Cascade)
     Permission       Permission? @relation(fields: [permissionId], references: [id])
     permissionId     Int?
 }
@@ -107,19 +108,17 @@ model Staff {
     lastName    String
     dateOfBirth DateTime
     gender      gender
+    image       String?
     email       String   @unique
     phone       String   @unique @map("phoneNumber")
     NIC         String?  @unique
     Passport    String?  @unique
     idNumber    String?  @unique
 
-    doctorId String?
-    nurseId  String?
-    adminId  String?
-    doctor   Doctor? @relation(fields: [doctorId], references: [id], onDelete: Cascade)
-    nurse    Nurse?  @relation(fields: [nurseId], references: [id], onDelete: Cascade)
-    user     User?
-    admin    Admin?  @relation(fields: [adminId], references: [id])
+    doctor Doctor?
+    nurse  Nurse?
+    user   User?
+    admin  Admin?
 }
 
 enum adminDepartment {
@@ -160,7 +159,7 @@ model Admin {
 
     department adminDepartment
     staffId    String          @unique
-    staff      Staff[]
+    staff      Staff           @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -252,7 +251,8 @@ model Doctor {
     appointments   Appointment[]
     medicalReports MedicalReport[]
     schedules      Schedule[]
-    Staff          Staff[]
+    staffId        String               @unique
+    staff          Staff                @relation(fields: [staffId], references: [id], onDelete: Cascade)
     departments    Department[]         @relation("DepartmentToDoctor")
 }
 
@@ -260,7 +260,8 @@ model Nurse {
     id String @id @default(cuid())
 
     appointments Appointment[]
-    Staff        Staff[]
+    staffId      String        @unique
+    staff        Staff         @relation(fields: [staffId], references: [id], onDelete: Cascade)
     departments  Department[]  @relation("DepartmentToNurse")
 }
 
