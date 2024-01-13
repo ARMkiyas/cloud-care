@@ -88,7 +88,7 @@ interface accesstokenpayload {
 
 }
 
-
+const primsa = new PrismaClient()
 
 const getaccesstoken = async (payload: accesstokenpayload) => {
 
@@ -121,7 +121,7 @@ const getaccesstoken = async (payload: accesstokenpayload) => {
  * @see https://next-auth.js.org/configuration/options
  */
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(db) as Adapter,
+  adapter: PrismaAdapter(primsa) as Adapter,
   session: {
     strategy: "jwt"
   },
