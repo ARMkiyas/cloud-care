@@ -35,14 +35,14 @@ export default async function RootLayout({
         <ColorSchemeScript />
       </head>
       <body className="">
-        <TrpcProvider cookies={cookies().toString()}>
-          <SsonProvider>
+        <SsonProvider>
+          <TrpcProvider cookies={cookies().toString()}>
             <MantineProvider theme={theme}>
               <Notifications />
               {children}
             </MantineProvider>
-          </SsonProvider>
-        </TrpcProvider>
+          </TrpcProvider>
+        </SsonProvider>
       </body>
     </html>
   );

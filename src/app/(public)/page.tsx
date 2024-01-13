@@ -5,6 +5,8 @@ import { apiServer } from "@/utils/trpc/TrpcServer";
 import "./_assets/css/styles.css";
 import { getServerAuthSession } from "@/server/auth";
 
+export const dynamic = "force-dynamic";
+
 // This function is used to call the API server
 const callapi = async () => {
   // Call the API server's hello function, passing in the text "From Server"

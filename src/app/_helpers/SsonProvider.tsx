@@ -7,5 +7,9 @@ export default function SsonProvider({
 }: {
   children: React.ReactNode;
 }) {
-  return <SessionProvider>{children}</SessionProvider>;
+  return (
+    <SessionProvider refetchInterval={2 * 60} refetchOnWindowFocus={true}>
+      {children}
+    </SessionProvider>
+  );
 }

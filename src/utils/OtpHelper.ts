@@ -28,6 +28,14 @@ export async function enableTwoFactorAuth(username) {
 }
 
 
+export function generate2FASecret() {
+    // Generate a TOTP secret key
+    const otpSecret = authenticator.generateSecret();
+
+    return otpSecret
+}
+
+
 // Helper function to send SMS OTP using Twilio
 export async function generateOTP(secret) {
 

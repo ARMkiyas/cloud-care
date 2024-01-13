@@ -3,7 +3,7 @@
  *
  * All routers added in /api/routers should be manually added here.
  */
-
+import "server-only"
 import { exampleRouter } from "./routers/example";
 import { request2faotp } from "./routers/helper_apis/request2faotp";
 import manageStaffRouter from "./routers/manageStaff";
