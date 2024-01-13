@@ -7,15 +7,19 @@ import {
   type DefaultSession,
   DefaultUser,
 
+
 } from "next-auth";
 import { PrismaAdapter } from '@auth/prisma-adapter'
 import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "./db";
 import { Adapter } from "next-auth/adapters";
 import { hashPwd, verifyPwd } from "@utils/hashPwdHelper";
-import { JWT } from "next-auth/jwt";
+
 import { generateOTP, verifyOtp } from "@utils/OtpHelper"
-import { z } from "zod";
+import { date, z } from "zod";
+import { PrismaClient } from "@prisma/client";
+import { JWT } from "next-auth/jwt";
+import { EncryptJWT, SignJWT, base64url, jwtVerify, jwtDecrypt } from "jose";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -23,6 +27,10 @@ import { z } from "zod";
  * debug page http://localhost:3000/api/auth/signin
  * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
  */
+const SECRET = new TextEncoder().encode(
+  process.env.ACCESS_TOKEN_SECRET,
+)
+
 declare module "next-auth" {
 
 
@@ -34,6 +42,8 @@ declare module "next-auth" {
       username: string;
       _2fa_valid: boolean;
       twoFactorEnabled: boolean;
+      iat: number;
+      access_token: string;
       // ...other properties
       // role: UserRole;
     } & DefaultSession["user"];
@@ -45,7 +55,10 @@ declare module "next-auth" {
     username: string;
     _2fa_valid: boolean;
     twoFactorEnabled: boolean;
+    access_token: string;
   }
+
+
 
   // interface User {
   //   // ...other properties
@@ -60,8 +73,45 @@ declare module "next-auth/jwt" {
     username: string;
     _2fa_valid: boolean;
     twoFactorEnabled: boolean;
+    iat: number;
+    access_token: string;
 
   }
+}
+
+
+interface accesstokenpayload {
+  usserid: string;
+  role: string;
+  username: string;
+  email: string;
+
+}
+
+
+
+const getaccesstoken = async (payload: accesstokenpayload) => {
+
+
+  // const secretjwe = base64url.decode('zH4NRP1HMALxxCFnRZABFA7GOJtzU_gIj02alfL1lvI')
+
+  const token = await new SignJWT({
+    ...payload
+  }).setProtectedHeader({ alg: 'HS256' }).setIssuedAt().setIssuer("CloudCare.Auth").setExpirationTime("2m").sign(SECRET)
+
+
+
+  // const jwt = await new EncryptJWT({ ...payload })
+  //   .setProtectedHeader({ alg: 'dir', enc: 'A128CBC-HS256' })
+  //   .setIssuedAt()
+  //   .setIssuer('cloudCare')
+  //   .setExpirationTime('15m')
+  //   .encrypt(secretjwe)
+
+  return token
+
+
+
 }
 
 
@@ -78,6 +128,7 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXT_SECRET,
   pages: {
     signIn: "/auth/login",
+    signOut: '/auth/signout',
   },
 
   providers: [
@@ -98,7 +149,6 @@ export const authOptions: NextAuthOptions = {
           } : {
             username: usertemp
           }
-
 
 
 
@@ -181,6 +231,7 @@ export const authOptions: NextAuthOptions = {
 
             const verify = await verifyOtp(session.user.id, token)
 
+
             if (verify) {
               return {
                 ...session.user,
@@ -202,26 +253,76 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
 
+    async signIn() {
+      console.log("sign in callback");
+      return true
+    },
 
     async jwt({ token, user, account, profile, isNewUser }) {
 
-      // passing some user property into the token
-      if (user) {
+
+
+
+      if (user && account) {
+        const access_token = account.provider === "2fa" && await getaccesstoken({
+          email: user.email,
+          role: user.role,
+          usserid: user.id,
+          username: user.username
+        })
+
+
+
         return {
           ...token,
           id: user.id,
           role: user.role,
           username: user.username,
           _2fa_valid: user._2fa_valid,
-          twoFactorEnabled: user.twoFactorEnabled
+          twoFactorEnabled: user.twoFactorEnabled,
+          ...account.provider === "2fa" && { access_token: access_token },
+
         }
 
       }
 
+
+
+
+      if (token.access_token) {
+        console.log("token", token);
+
+        const verify = await jwtVerify(token.access_token, SECRET).catch((e) => {
+          return e.name
+        })
+        console.log("verify", verify);
+
+        if (verify === "JWTExpired") {
+
+          const newaccess_token = await getaccesstoken({
+            email: token.email,
+            role: token.role,
+            usserid: token.id,
+            username: token.username
+          })
+
+          const newtoken = {
+            ...token,
+            access_token: newaccess_token,
+          }
+          console.log(newtoken);
+
+          return newtoken
+
+        }
+
+
+      }
       return token
     },
 
     async session({ session, token, user }) {
+
 
       return {
         ...session,
@@ -231,14 +332,16 @@ export const authOptions: NextAuthOptions = {
           id: token?.id,
           username: token?.username,
           _2fa_valid: token?._2fa_valid,
-          twoFactorEnabled: token?.twoFactorEnabled
+          twoFactorEnabled: token?.twoFactorEnabled,
+          access_token: token?.access_token,
+          iat: token.iat
         }
       }
+
+
     }
 
   },
-
-
 
 
 

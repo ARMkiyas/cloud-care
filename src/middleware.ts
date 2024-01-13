@@ -1,19 +1,25 @@
-
+import "server-only"
 
 import { withAuth, NextRequestWithAuth } from "next-auth/middleware"
 import { decode } from "next-auth/jwt"
 import { NextResponse } from "next/server"
-
-
-
+import { apiedge } from "@/utils/trpc/TrpcEdgeApi"
 
 
 export default withAuth(
 
 
     // `withAuth` augments your `Request` with the user's token.
-    function middleware(req: NextRequestWithAuth) {
-        console.log("middleware", req.nextauth.token)
+    async function middleware(req: NextRequestWithAuth) {
+
+
+
+        // const res = await apiedge.example.hello.fetch({
+        //     text: "hello",
+
+        // })
+
+
 
         if (!req.nextauth.token._2fa_valid && req.nextUrl.pathname !== "/auth/confirmation-otp") {
             // If the token is not valid, redirect to the 2FA page.
@@ -28,17 +34,17 @@ export default withAuth(
     },
     {
 
+
+
         callbacks: {
             authorized({ token, req }) {
-                // userid in db
-
-
-
                 return !!token
             }
+
         },
         pages: {
             signIn: "/auth/login",
+            signOut: '/auth/signout',
         }
     },
 
@@ -48,4 +54,4 @@ export default withAuth(
 
 
 
-export const config = { matcher: ["/(dashboard(?:\/.*)?$)/", "/auth/confirmation-otp"] }
+export const config = { matcher: ["/(dashboard(?:\/.*)?$)/", "/auth/confirmation-otp", "/api/trpc-playground"] }

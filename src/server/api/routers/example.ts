@@ -26,4 +26,18 @@ export const exampleRouter = createTRPCRouter({
       };
       return result;
     }),
+
+
+
+
+  // Add two numbers together.
+  add: protectedProcedure
+    .input(z.object({ a: z.number(), b: z.number() }))
+    .mutation(({ input }) => {
+      const result = {
+        sum: input.a + input.b,
+      };
+      return result;
+    }),
+
 });

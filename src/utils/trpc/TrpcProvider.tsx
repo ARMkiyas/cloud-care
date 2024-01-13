@@ -16,11 +16,14 @@ import { useState } from "react";
 import { apiclient } from "@/utils/trpc/Trpc";
 import SuperJSON from "superjson";
 import { getUrl, transformer } from "./shared";
+import { useSession } from "next-auth/react";
 
 export const TrpcProvider: React.FC<{
   children: React.ReactNode;
   cookies: string;
 }> = (props) => {
+  const { data: session } = useSession();
+
   // Create a new QueryClient
   const [queryClient] = useState(
     () =>
@@ -44,7 +47,7 @@ export const TrpcProvider: React.FC<{
             process.env.NODE_ENV === "development" ||
             (op.direction === "down" && op.result instanceof Error),
         }),
-        unstable_httpBatchStreamLink({
+        httpBatchLink({
           url: getUrl(),
           headers() {
             return {
