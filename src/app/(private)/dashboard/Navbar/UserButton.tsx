@@ -4,7 +4,7 @@ import classes from './UserButton.module.css';
 
 export function UserButton() {
   return (
-    <UnstyledButton className={classes.user}>
+    <UnstyledButton className={`${classes.user} w-full`}>
       <Group>
         <Avatar
           src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-8.png"

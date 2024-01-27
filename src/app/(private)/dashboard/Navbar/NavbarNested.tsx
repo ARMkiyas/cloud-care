@@ -60,11 +60,11 @@ export function NavbarNested() {
 
   return (
     <div>
-    <nav className={`${classes.navbar}`}>
+    <nav className={classes.navbar}>
       <ScrollArea className={classes.links}>
         <div className={classes.linksInner}>{links}</div>
       </ScrollArea>
-      <div className={`${classes.footer}`}>
+      <div className={classes.footer}>
         <UserButton />
       </div>
     </nav>
