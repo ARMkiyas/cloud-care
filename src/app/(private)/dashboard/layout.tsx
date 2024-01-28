@@ -45,7 +45,7 @@ export default function layout({ children }: { children: React.ReactNode }) {
       <AppShell.Header>
         <Group h="100%" px="md">
           <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-          <Image src={myImage} alt="cloudCare" className='w-[180px]  h-11 mx-2 my-3'/>
+          <Image src={myImage} alt="cloudCare" className='w-[180px]  h-12 '/>
           
         </Group>
         {session ? (
