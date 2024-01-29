@@ -6,9 +6,10 @@
 import "server-only"
 import { exampleRouter } from "./routers/example";
 import { request2faotp } from "./routers/helper_apis/request2faotp";
-import manageStaffRouter from "./routers/manageStaff";
-import manageUsersRouter from "./routers/manageUsers";
+
 import { createTRPCRouter } from "./trpc";
+import manageUsersRouter from "./routers/mangeUsers.ts/manageUsersRoot";
+import manageStaffRouter from "./routers/mangeStaffs/manageStaffRoot";
 
 
 // This is the primary router for server. All routers added in /api/trpc/[Routers] should be manually added here.
