@@ -4,13 +4,13 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { UserRoles, gender, Staff, title, adminDepartment, DoctorSpecialization, Prisma, } from "@prisma/client"
 import { ZodType, ZodTypeAny, date, z } from "zod";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { hashPwd } from "@/utils/hashPwdHelper";
 import { generate2FASecret } from "@/utils/OtpHelper"
 import { userImageUploader } from "@/utils/fileuploadhandler/userimageuploder";
 import { getAvatar } from "@/utils/getavatar";
 import { imageSchema } from "@/utils/ValidationSchemas/commonSc"
 import { createStaffSchema, deleteStaffSchema, getStaffschema, updatestaffSchema } from "@/utils/ValidationSchemas/manageStaffSc";
+import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 
 
 
@@ -91,43 +91,15 @@ const manageStaffRouter = createTRPCRouter({
 
                 return {
                     status: 200,
+                    error: null,
                     ok: true,
                     data: staff
                 }
 
 
             } catch (e) {
+                return ErrorHandler(e, "Staff")
 
-                if (e instanceof PrismaClientKnownRequestError) {
-
-
-                    if (e.code === "P2016") {
-                        return new TRPCError({
-                            code: "BAD_REQUEST",
-                            message: `Invalid ${e.meta.target}`,
-                            cause: e.message
-                        })
-                    }
-
-                    if (e.code === "P2025") {
-                        return new TRPCError({
-                            code: "BAD_REQUEST",
-                            message: `Invalid ${e.meta.target}`,
-                            cause: e.message
-                        })
-                    }
-
-
-                }
-
-
-                console.log(e);
-
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: "Error in fetching staff",
-                    cause: e.message
-                })
             } finally {
                 ctx.db.$disconnect();
             }
@@ -186,7 +158,7 @@ const manageStaffRouter = createTRPCRouter({
                     ...input.withUserAccount ? {
                         user: {
                             create: {
-                                name: `${input.title}${input.firstName} ${input.firstName}`,
+                                name: `${input.title}.${input.firstName} ${input.lastName}`,
                                 email: input.email,
                                 phone: input.phone,
                                 Log: {
@@ -241,51 +213,8 @@ const manageStaffRouter = createTRPCRouter({
             }
 
         } catch (e) {
+            return ErrorHandler(e, "Staff")
 
-            if (e instanceof PrismaClientKnownRequestError) {
-                if (e.code === "P2002") {
-                    return new TRPCError({
-                        code: "BAD_REQUEST",
-                        message: `Staff with ${e.meta.target} already exists`,
-                        cause: e.message
-                    })
-                }
-
-
-                if (e.code === "P2016") {
-                    return new TRPCError({
-                        code: "BAD_REQUEST",
-                        message: `Invalid ${e.meta.target}`,
-                        cause: e.message
-                    })
-                }
-
-
-                if (e.code === "P2025") {
-                    return new TRPCError({
-                        code: "BAD_REQUEST",
-                        message: `Invalid ${e.meta.target}`,
-                        cause: e.message
-                    })
-                }
-
-                if (e.code === "P2020") {
-                    return new TRPCError({
-                        code: "BAD_REQUEST",
-                        message: `Invalid ${e.meta.target}`,
-                        cause: e.message
-                    })
-                }
-
-            }
-
-
-
-            throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Error in creating staff",
-                cause: e.message
-            })
         } finally {
             ctx.db.$disconnect();
         }
@@ -316,7 +245,7 @@ const manageStaffRouter = createTRPCRouter({
             if (!staff) {
                 return new TRPCError({
                     code: "BAD_REQUEST",
-                    message: `Staff with ID ${input.staffID} does not exist`,
+                    message: `"Staff to delete does not exist"`,
                 })
             }
 
@@ -360,26 +289,7 @@ const manageStaffRouter = createTRPCRouter({
         catch (e) {
 
 
-            if (e instanceof PrismaClientKnownRequestError) {
-
-                console.log(e);
-                console.log(e.code);
-
-                if (e.code === "P2025") {
-                    return new TRPCError({
-                        code: "BAD_REQUEST",
-                        message: `Invalid ${e.meta.target}`,
-                        cause: e.message
-                    })
-                }
-
-
-            }
-            throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Error in deleting staff",
-                cause: e.message
-            })
+            return ErrorHandler(e, "Staff")
 
 
         } finally {
@@ -481,52 +391,7 @@ const manageStaffRouter = createTRPCRouter({
 
 
         } catch (e) {
-            console.log(e);
-
-            if (e instanceof PrismaClientKnownRequestError) {
-
-                if (e.code === "P2002") {
-                    return new TRPCError({
-                        code: "BAD_REQUEST",
-                        message: `Staff with ${e.meta.target} already exists`,
-                        cause: e.message
-                    })
-                }
-
-
-                if (e.code === "P2016") {
-                    return new TRPCError({
-                        code: "BAD_REQUEST",
-                        message: `Invalid ${e.meta.target}`,
-                        cause: e.message
-                    })
-                }
-
-
-                if (e.code === "P2025") {
-                    return new TRPCError({
-                        code: "BAD_REQUEST",
-                        message: `Invalid ${e.meta.target}`,
-                        cause: e.message
-                    })
-                }
-
-                if (e.code === "P2020") {
-                    return new TRPCError({
-                        code: "BAD_REQUEST",
-                        message: `Invalid ${e.meta.target}`,
-                        cause: e.message
-                    })
-                }
-
-
-            }
-
-            throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Error in updating staff",
-                cause: e.message
-            })
+            return ErrorHandler(e, "Staff")
 
         } finally {
             ctx.db.$disconnect();
