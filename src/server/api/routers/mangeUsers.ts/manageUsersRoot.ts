@@ -1,4 +1,4 @@
-import { z } from "zod";
+import "server-only";
 import { createTRPCRouter, protectedProcedure } from "../../trpc";
 import addUser from "./adduser";
 import getUsers from "./getUsers";

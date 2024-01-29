@@ -20,7 +20,6 @@ export const getStaffschema = z.object({
 })
 
 
-
 export const userAccSchema = z.object({
     username: z.string().min(2),
     password: z.string().min(6),
@@ -43,17 +42,11 @@ export const createStaffSchema = z.object({
     Passport: z.string().min(10).max(12).optional(),
     idNumber: z.string().optional(),
     image: imageSchema.optional(),
-
-
     staffType: z.enum(["doctor", "nurse", "admin"]),
     department: z.nativeEnum(adminDepartment).optional(),
     specialization: z.nativeEnum(DoctorSpecialization).optional(),
-
-
     // schema for create user account with staff
     withUserAccount: userAccSchema.optional(),
-
-
 
 }).superRefine((sch, ctx) => {
 
@@ -71,11 +64,7 @@ export const createStaffSchema = z.object({
         })
     }
 
-
-
-
 })
-
 
 
 export const deleteStaffSchema = z.object({

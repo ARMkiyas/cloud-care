@@ -1,3 +1,4 @@
+import "server-only";
 import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
@@ -8,19 +9,11 @@ import { imageSchema } from "@/utils/ValidationSchemas/commonSc";
 import { getAvatar } from "@/utils/getavatar";
 import { generate2FASecret } from "@/utils/OtpHelper";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
+import { adduserschema } from "@/utils/ValidationSchemas/manageUserSc";
 
-const adduserschema = z.object({
-    staffID: z.string(),
-    password: z.string(),
-    username: z.string(),
-    role: z.enum([UserRoles.ADMIN, UserRoles.ROOTUSER, UserRoles.STAFF, UserRoles.DOCTOR, UserRoles.NURSE, UserRoles.GUEST]),
-    twoFactorEnabled: z.boolean(),
-    image: imageSchema.optional(),
-});
 
 
 const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, input }) => {
-
 
     try {
 
@@ -97,6 +90,8 @@ const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, i
 
     } catch (err) {
         return ErrorHandler(err, "User")
+    } finally {
+        ctx.db.$disconnect();
     }
 
 

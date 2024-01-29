@@ -1,3 +1,4 @@
+import "server-only";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library"
 import { TRPCError } from "@trpc/server"
 

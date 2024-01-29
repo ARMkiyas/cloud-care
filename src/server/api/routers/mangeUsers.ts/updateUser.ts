@@ -1,20 +1,10 @@
+import "server-only";
 import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
 import { UserRoles } from "@prisma/client";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { TRPCError } from "@trpc/server";
-
-
-const updateUserSchema = z.object({
-    userid: z.string(),
-    username: z.string().optional(),
-    email: z.string().email().optional(),
-    phone: z.string().optional(),
-    role: z.enum([UserRoles.ADMIN, UserRoles.ROOTUSER, UserRoles.STAFF, UserRoles.DOCTOR, UserRoles.NURSE, UserRoles.GUEST]).optional(),
-    twoFactorEnabled: z.boolean().optional(),
-    image: z.string().optional(),
-    pwdreet: z.boolean().optional(),
-})
+import { updateUserSchema } from "@/utils/ValidationSchemas/manageUserSc";
 
 
 const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ ctx, input }) => {
@@ -78,6 +68,8 @@ const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ 
         return ErrorHandler(error, "User", "update")
 
 
+    } finally {
+        ctx.db.$disconnect();
     }
 
 

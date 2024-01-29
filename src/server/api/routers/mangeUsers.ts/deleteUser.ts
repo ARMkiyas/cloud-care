@@ -1,18 +1,14 @@
+import "server-only";
 import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
 import { Prisma } from "@prisma/client";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
+import { deleteUserSchema } from "@/utils/ValidationSchemas/manageUserSc";
 
-const deleteUserSchema = z.object({
-    userid: z.string(),
-    username: z.string().optional(),
-    email: z.string().email().optional(),
 
-});
 
 const deleteUser = protectedProcedure.input(deleteUserSchema).mutation(async ({ ctx, input }) => {
-
 
     try {
 
@@ -50,6 +46,8 @@ const deleteUser = protectedProcedure.input(deleteUserSchema).mutation(async ({ 
     } catch (error) {
 
         return ErrorHandler(error, "User", "delete")
+    } finally {
+        ctx.db.$disconnect();
     }
 
 
