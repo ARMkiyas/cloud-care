@@ -18,8 +18,6 @@ const getStaffProceture = protectedProcedure
                 })
             }
 
-
-
             const staff = await ctx.db.staff.findMany({
 
                 where: {
