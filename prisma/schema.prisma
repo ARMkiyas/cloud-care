@@ -172,7 +172,7 @@ model Admin {
 }
 
 model Patient {
-    id             Int             @id @default(autoincrement())
+    id             String          @id @default(cuid())
     title          title           @default(Mr)
     firstName      String
     lastName       String
@@ -196,26 +196,51 @@ enum Appointmentstatus {
 }
 
 model Appointment {
-    id        Int               @id @default(autoincrement())
-    dateTime  DateTime
-    status    Appointmentstatus @default(Pending)
-    patientId Int
-    doctorId  String
-    nurseId   String?
-    oPDId     Int?
-    doctor    Doctor            @relation(fields: [doctorId], references: [id])
-    Nurse     Nurse?            @relation(fields: [nurseId], references: [id])
-    OPD       OPD?              @relation(fields: [oPDId], references: [id])
-    patient   Patient           @relation(fields: [patientId], references: [id])
+    id         String            @id @default(cuid())
+    dateTime   DateTime          @default(now())
+    status     Appointmentstatus @default(Pending)
+    patientId  String
+    doctorId   String
+    nurseId    String?
+    oPDId      Int?
+    scheduleId String
+    doctor     Doctor            @relation(fields: [doctorId], references: [id])
+    Nurse      Nurse?            @relation(fields: [nurseId], references: [id])
+    OPD        OPD?              @relation(fields: [oPDId], references: [id])
+    patient    Patient           @relation(fields: [patientId], references: [id])
+    schedule   Schedule          @relation(fields: [scheduleId], references: [id])
+}
+
+enum RecurrencePattern {
+    ONCE
+    WEEKLY
+    MONTHLY
+    // Add other recurrence patterns as needed
+}
+
+enum DayOfWeek {
+    SUNDAY
+    MONDAY
+    TUESDAY
+    WEDNESDAY
+    THURSDAY
+    FRIDAY
+    SATURDAY
 }
 
 model Schedule {
-    id        Int      @id @default(autoincrement())
-    dayOfWeek String
-    startTime DateTime
-    endTime   DateTime
-    doctorId  String
-    doctor    Doctor   @relation(fields: [doctorId], references: [id])
+    id               String            @id @default(cuid())
+    dayOfWeek        DayOfWeek?
+    Date             DateTime?         @db.Date
+    recurrence       RecurrencePattern
+    recurringEvery   Int?              @default(1)
+    startTime        DateTime          @db.Time
+    endTime          DateTime          @db.Time
+    endDate          DateTime?         @db.Date
+    totalAppointment Int               @default(20)
+    doctorId         String
+    doctor           Doctor            @relation(fields: [doctorId], references: [id])
+    Appointment      Appointment[]
 }
 
 enum DoctorSpecialization {
@@ -308,7 +333,7 @@ model MedicalReport {
     date      DateTime
     content   String
     doctorId  String
-    patientId Int
+    patientId String
     doctor    Doctor   @relation(fields: [doctorId], references: [id])
     patient   Patient  @relation(fields: [patientId], references: [id])
 }
@@ -316,7 +341,7 @@ model MedicalReport {
 model Log {
     id        Int      @id @default(autoincrement())
     action    String
-    timestamp DateTime
+    timestamp DateTime @default(now())
     userId    String?
     user      User?    @relation(fields: [userId], references: [id])
 }
