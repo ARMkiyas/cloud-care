@@ -9,8 +9,8 @@ import OperationIcon from '@/components/icon/OperationIcon';
 const icons = {
   doctor: FaUserDoctor,
   operation: OperationIcon,
-  patient: PiFirstAidKitFill,
-  appointment: FaPersonCane,
+  appointment: PiFirstAidKitFill,
+  patient: FaPersonCane,
 };
 
 const data = [
