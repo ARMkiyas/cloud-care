@@ -196,19 +196,22 @@ enum Appointmentstatus {
 }
 
 model Appointment {
-    id         String            @id @default(cuid())
-    dateTime   DateTime          @default(now())
-    status     Appointmentstatus @default(Pending)
-    patientId  String
-    doctorId   String
-    nurseId    String?
-    oPDId      Int?
-    scheduleId String
-    doctor     Doctor            @relation(fields: [doctorId], references: [id])
-    Nurse      Nurse?            @relation(fields: [nurseId], references: [id])
-    OPD        OPD?              @relation(fields: [oPDId], references: [id])
-    patient    Patient           @relation(fields: [patientId], references: [id])
-    schedule   Schedule          @relation(fields: [scheduleId], references: [id])
+    id          String            @id @default(cuid())
+    createdDate DateTime          @default(now())
+    dateTime    DateTime          @map("Date")
+    status      Appointmentstatus @default(Pending)
+    patientId   String
+    doctorId    String
+    nurseId     String?
+    oPDId       Int?
+    scheduleId  String
+    doctor      Doctor            @relation(fields: [doctorId], references: [id])
+    Nurse       Nurse?            @relation(fields: [nurseId], references: [id])
+    OPD         OPD?              @relation(fields: [oPDId], references: [id])
+    patient     Patient           @relation(fields: [patientId], references: [id])
+    schedule    Schedule          @relation(fields: [scheduleId], references: [id])
+    slotId      String?
+    Slot        Slot?             @relation(fields: [slotId], references: [id])
 }
 
 enum RecurrencePattern {
@@ -231,16 +234,39 @@ enum DayOfWeek {
 model Schedule {
     id               String            @id @default(cuid())
     dayOfWeek        DayOfWeek?
+    createdDate      DateTime          @default(now())
     Date             DateTime?         @db.Date
     recurrence       RecurrencePattern
     recurringEvery   Int?              @default(1)
-    startTime        DateTime          @db.Time
-    endTime          DateTime          @db.Time
+    startTime        DateTime          @db.Time()
+    endTime          DateTime          @db.Time()
     endDate          DateTime?         @db.Date
     totalAppointment Int               @default(20)
     doctorId         String
-    doctor           Doctor            @relation(fields: [doctorId], references: [id])
+    doctor           Doctor            @relation(fields: [doctorId], references: [id], onDelete: Cascade)
     Appointment      Appointment[]
+    OptRoomsid       String?
+    OptRooms         OptRooms?         @relation(fields: [OptRoomsid], references: [id])
+    Slot             Slot[]
+}
+
+model Slot {
+    id                     String        @id @default(cuid())
+    ScheduleId             String
+    maxAppointmentsPerSlot Int
+    startTime              DateTime      @db.Time()
+    endTime                DateTime      @db.Timestamp()
+    availability           Schedule      @relation(fields: [ScheduleId], references: [id], onDelete: Cascade)
+    appointment            Appointment[]
+}
+
+model OptRooms {
+    id          String     @id @default(cuid())
+    roomNo      Int        @unique
+    name        String?
+    description String?
+    Schedule    Schedule[]
+    nurse       Nurse[]
 }
 
 enum DoctorSpecialization {
@@ -289,6 +315,8 @@ model Nurse {
     staffId      String        @unique
     staff        Staff         @relation(fields: [staffId], references: [id], onDelete: Cascade)
     departments  Department[]  @relation("DepartmentToNurse")
+    OptRoomsid   String?
+    OptRooms     OptRooms?     @relation(fields: [OptRoomsid], references: [id])
 }
 
 model Department {
