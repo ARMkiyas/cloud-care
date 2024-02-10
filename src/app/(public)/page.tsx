@@ -26,7 +26,7 @@ export default async function Home() {
       <div className="pt-3 text-4xl font-extrabold text-center text-emerald-500">
         cloud care Home
       </div>
-      <div className="absolute w-full text-lg font-semibold text-center top-1/2 bottom-1/2 ">
+      <div className="w-full text-lg font-semibold text-center ">
         <div className="">{data.greeting}</div>
         <Testclient />
       </div>

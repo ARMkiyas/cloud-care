@@ -177,11 +177,10 @@ function Header() {
           <Group gap={5} visibleFrom="sm" className="absolute right-0 h-full">
             {items}
             <Button<typeof Link>
-              className="flex items-center justify-center h-full px-5"
+              className="flex items-center justify-center h-full px-5 bg-blue-900"
               rightSection={<IconArrowRight size={20} />}
               size="compact-md"
               variant="filled"
-              color="blue"
               href={"/appointment/book"}
               onClick={(e) => {
                 e.preventDefault();
