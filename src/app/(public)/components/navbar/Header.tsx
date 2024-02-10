@@ -65,9 +65,10 @@ function Header() {
         onClick={() => {
           setActive(item.link);
         }}
+        key={item.link}
       >
         <Box>
-          <Menu.Item key={item.link}>
+          <Menu.Item>
             <div
               className={classes.sublink}
               data-active={active === item.link || undefined}
@@ -87,6 +88,7 @@ function Header() {
         onClick={() => {
           setActive(item.link);
         }}
+        key={item.link}
       >
         <div
           className={classes.link}
@@ -99,7 +101,7 @@ function Header() {
 
     if (menuItems) {
       return (
-        <Box>
+        <Box key={link.label}>
           <Box visibleFrom="sm">
             <Menu
               key={link.label}
