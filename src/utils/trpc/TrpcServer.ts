@@ -4,6 +4,7 @@ import { appRouter, type AppRouterType } from "@/server/api/root";
 
 import {
     createTRPCProxyClient,
+    httpBatchLink,
     loggerLink,
     TRPCClientError,
 } from "@trpc/client";
@@ -14,6 +15,7 @@ import { cookies } from "next/headers";
 import { cache } from "react";
 import { createTRPCContext } from "@/server/api/trpc";
 import { transformer } from "./shared";
+
 
 
 
@@ -67,3 +69,5 @@ export const apiServer = createTRPCProxyClient<AppRouterType>({
                 }),
     ],
 });
+
+

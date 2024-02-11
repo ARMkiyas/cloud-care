@@ -12,19 +12,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Use Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
+          node-version: "20.x"
       - name: install dependacies
         run: npm install
       - name: Build
         run: npm run build
-      - name: zip artifact
-        run: zip -r cloudCare-app.zip . # path to the build folder
-      - name: upload artifact
-        uses: actions/upload-artifact@v2
-        with:
-          name: cloudCare-app
-          path: cloudCare-app.zip # path to the build folder
+    
+  #   - name: zip artifact
+  #     run: zip -r cloudCare-app.zip . # path to the build folder
+  #   - name: upload artifact
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: cloudCare-app
+  #       path: cloudCare-app.zip # path to the build folder

@@ -1,5 +1,6 @@
 generator client {
-    provider = "prisma-client-js"
+    provider        = "prisma-client-js"
+    previewFeatures = ["fullTextSearch"]
 }
 
 datasource db {
@@ -13,14 +14,15 @@ model Account {
     type              String
     provider          String
     providerAccountId String
-    refresh_token     String?
-    access_token      String?
+    refresh_token     String? @db.Text
+    access_token      String? @db.Text
     expires_at        Int?
     token_type        String?
     scope             String?
-    id_token          String?
+    id_token          String? @db.Text
     session_state     String?
-    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
     @@unique([provider, providerAccountId])
 }
@@ -31,6 +33,14 @@ model Session {
     userId       String
     expires      DateTime
     user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
 }
 
 enum UserRoles {
@@ -81,7 +91,7 @@ model User {
     Log              Log[]
     sessions         Session[]
     staffid          String      @unique
-    staff            Staff       @relation(fields: [staffid], references: [id])
+    staff            Staff       @relation(fields: [staffid], references: [id], onDelete: Cascade)
     Permission       Permission? @relation(fields: [permissionId], references: [id])
     permissionId     Int?
 }
@@ -105,21 +115,19 @@ model Staff {
     title       title    @default(Mr)
     firstName   String
     lastName    String
-    dateOfBirth DateTime
+    dateOfBirth DateTime @db.Date
     gender      gender
+    image       String?
     email       String   @unique
     phone       String   @unique @map("phoneNumber")
     NIC         String?  @unique
     Passport    String?  @unique
     idNumber    String?  @unique
 
-    doctorId String?
-    nurseId  String?
-    adminId  String?
-    doctor   Doctor? @relation(fields: [doctorId], references: [id], onDelete: Cascade)
-    nurse    Nurse?  @relation(fields: [nurseId], references: [id], onDelete: Cascade)
-    user     User?
-    admin    Admin?  @relation(fields: [adminId], references: [id])
+    doctor Doctor?
+    nurse  Nurse?
+    user   User?
+    admin  Admin?
 }
 
 enum adminDepartment {
@@ -160,19 +168,11 @@ model Admin {
 
     department adminDepartment
     staffId    String          @unique
-    staff      Staff[]
-}
-
-model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
-
-    @@unique([identifier, token])
+    staff      Staff           @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 model Patient {
-    id             Int             @id @default(autoincrement())
+    id             String          @id @default(cuid())
     title          title           @default(Mr)
     firstName      String
     lastName       String
@@ -196,26 +196,51 @@ enum Appointmentstatus {
 }
 
 model Appointment {
-    id        Int               @id @default(autoincrement())
-    dateTime  DateTime
-    status    Appointmentstatus @default(Pending)
-    patientId Int
-    doctorId  String
-    nurseId   String?
-    oPDId     Int?
-    doctor    Doctor            @relation(fields: [doctorId], references: [id])
-    Nurse     Nurse?            @relation(fields: [nurseId], references: [id])
-    OPD       OPD?              @relation(fields: [oPDId], references: [id])
-    patient   Patient           @relation(fields: [patientId], references: [id])
+    id         String            @id @default(cuid())
+    dateTime   DateTime          @default(now())
+    status     Appointmentstatus @default(Pending)
+    patientId  String
+    doctorId   String
+    nurseId    String?
+    oPDId      Int?
+    scheduleId String
+    doctor     Doctor            @relation(fields: [doctorId], references: [id])
+    Nurse      Nurse?            @relation(fields: [nurseId], references: [id])
+    OPD        OPD?              @relation(fields: [oPDId], references: [id])
+    patient    Patient           @relation(fields: [patientId], references: [id])
+    schedule   Schedule          @relation(fields: [scheduleId], references: [id])
+}
+
+enum RecurrencePattern {
+    ONCE
+    WEEKLY
+    MONTHLY
+    // Add other recurrence patterns as needed
+}
+
+enum DayOfWeek {
+    SUNDAY
+    MONDAY
+    TUESDAY
+    WEDNESDAY
+    THURSDAY
+    FRIDAY
+    SATURDAY
 }
 
 model Schedule {
-    id        Int      @id @default(autoincrement())
-    dayOfWeek String
-    startTime DateTime
-    endTime   DateTime
-    doctorId  String
-    doctor    Doctor   @relation(fields: [doctorId], references: [id])
+    id               String            @id @default(cuid())
+    dayOfWeek        DayOfWeek?
+    Date             DateTime?         @db.Date
+    recurrence       RecurrencePattern
+    recurringEvery   Int?              @default(1)
+    startTime        DateTime          @db.Time
+    endTime          DateTime          @db.Time
+    endDate          DateTime?         @db.Date
+    totalAppointment Int               @default(20)
+    doctorId         String
+    doctor           Doctor            @relation(fields: [doctorId], references: [id])
+    Appointment      Appointment[]
 }
 
 enum DoctorSpecialization {
@@ -252,7 +277,8 @@ model Doctor {
     appointments   Appointment[]
     medicalReports MedicalReport[]
     schedules      Schedule[]
-    Staff          Staff[]
+    staffId        String               @unique
+    staff          Staff                @relation(fields: [staffId], references: [id], onDelete: Cascade)
     departments    Department[]         @relation("DepartmentToDoctor")
 }
 
@@ -260,7 +286,8 @@ model Nurse {
     id String @id @default(cuid())
 
     appointments Appointment[]
-    Staff        Staff[]
+    staffId      String        @unique
+    staff        Staff         @relation(fields: [staffId], references: [id], onDelete: Cascade)
     departments  Department[]  @relation("DepartmentToNurse")
 }
 
@@ -306,7 +333,7 @@ model MedicalReport {
     date      DateTime
     content   String
     doctorId  String
-    patientId Int
+    patientId String
     doctor    Doctor   @relation(fields: [doctorId], references: [id])
     patient   Patient  @relation(fields: [patientId], references: [id])
 }
@@ -314,7 +341,7 @@ model MedicalReport {
 model Log {
     id        Int      @id @default(autoincrement())
     action    String
-    timestamp DateTime
+    timestamp DateTime @default(now())
     userId    String?
     user      User?    @relation(fields: [userId], references: [id])
 }
