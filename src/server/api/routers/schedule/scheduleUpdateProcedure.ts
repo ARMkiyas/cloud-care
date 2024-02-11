@@ -8,6 +8,8 @@ const scheduleUpdateProcedureSchema = z.object({
 
 
 
+
+
 })
 
 const scheduleUpdateProcedure = protectedProcedure.input(scheduleUpdateProcedureSchema).mutation(({ input, ctx }) => {

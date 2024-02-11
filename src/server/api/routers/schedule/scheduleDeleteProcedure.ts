@@ -6,9 +6,6 @@ import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 
 const scheduleDeleteProcedureSchema = z.object({
 
-
-
-
     scheduleId: z.string(),
 
 

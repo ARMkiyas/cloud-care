@@ -1,3 +1,5 @@
+import "server-only";
+
 import { UserRoles } from "@prisma/client";
 import { z } from "zod";
 import { imageSchema } from "./commonSc";

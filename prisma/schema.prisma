@@ -255,7 +255,7 @@ model Slot {
     ScheduleId             String
     maxAppointmentsPerSlot Int
     startTime              DateTime      @db.Time()
-    endTime                DateTime      @db.Timestamp()
+    endTime                DateTime      @db.Time()
     availability           Schedule      @relation(fields: [ScheduleId], references: [id], onDelete: Cascade)
     appointment            Appointment[]
 }
