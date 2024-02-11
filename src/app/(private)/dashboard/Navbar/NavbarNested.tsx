@@ -1,55 +1,50 @@
 import { Group, Code, ScrollArea, rem } from '@mantine/core';
 import {
-  IconUser,
   IconStethoscope,
   IconDisabled,
-  IconUsers,
   IconGauge,
-  IconPresentationAnalytics,
  } from '@tabler/icons-react';
+ import { BiLogInCircle } from "react-icons/bi";
+ import { GrSchedule } from "react-icons/gr";
+ import { GrUserManager } from "react-icons/gr";
+ import { FaUserDoctor } from "react-icons/fa6";
 import { UserButton } from './UserButton';
 import { LinksGroup } from './NavbarLinksGroup';
 import classes from './NavbarNested.module.css';
 import { useState, useEffect } from 'react';
-import Dashboard from '../page';
 
 const mockdata = [
-  { label: 'Dashboard', icon: IconGauge },
+  { label: 'Dashboard', icon: IconGauge, rootLink:"/dashboard" },
   {
     label: 'Appointments',
     icon: IconStethoscope,
+    rootLink:"/dashboard/appointments",
+    
     /*initiallyOpened: false,*/
 
   },
   {
-    label: 'Doctors',
-    icon: IconUser,
-   /* links: [
-      { label: 'Available Doctors', link: '/' },
-      { label: 'Doctor Schedule', link: '/' },
-    ],*/
-  },
-  { label: 'Departments', icon: IconPresentationAnalytics },
-  { label: 'Patients',
-   icon: IconDisabled,
-   /*links: [
-    { label: 'Appointed Patients', link: '/' },
-    { label: 'Emergency Patients', link: '/' },
-    { label: 'Clinic Patients', link: '/' },
-    { label: 'OPD Patients', link: '/' },
-    { label: 'Ward Patients', link: '/' },
-  ],*/
+    label: 'Shedule',
+    icon: GrSchedule,
+    rootLink:"/dashboard/shedule"
    },
+   { label: 'Patients',
+   icon: IconDisabled,
+   rootLink:"/dashboard/patients"
+
+   },
+      { label: 'User Management', icon: GrUserManager , rootLink:"/dashboard/user-management"},
   { label: 'Staffs',
-   icon: IconUsers, 
+   icon: FaUserDoctor, 
    links:[
-    { label: 'Front Desk Staffs' ,link:'/'},
-    { label: 'Doctors' ,link:'/'},
-    { label: 'Specialists' ,link:'/'},
-    { label: 'Nurses' ,link:'/'},
-    { label: 'Administrators and Managers' ,link:'/'},
+    { label: 'All Staff' ,link:'/dashboard/staffs/all-staff'},
+    { label: 'Doctors' ,link:'/dashboard/staffs/doctors'},
+    { label: 'Specialists' ,link:'/dashboard/staffs/specialists'},
+    { label: 'Nurses' ,link:'/dashboard/staffs/nurses'},
+    { label: 'Administrators and Managers' ,link:'/dashboard/staffs/administrators-managers'},
    ],
   },
+  { label: 'System Logs', icon: BiLogInCircle , rootLink:"/dashboard/system-logs"},
 ];
 
 

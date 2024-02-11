@@ -76,33 +76,6 @@ export default function layout({ children }: { children: React.ReactNode }) {
       </AppShell.Navbar>
       <AppShell.Main>{children}</AppShell.Main>
     </AppShell>
-    {/*<div >
-        <header className={classes.header}>
-          <div className={classes.inner}>
-            <Group>
-              <Image src={myImage} alt="cloudCare" className='w-[180px]  h-11 mx-2 my-3'/>
-           </Group>
-          </div>    
-        {session ? (
-           <Button className={classes.button}
-            component={Link}
-            loaderProps={{ type: "dots" }}
-            onClick={signouthandler}
-            href={"/"}
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-logout" 
-            width="22" height="22" viewBox="0 0 22 22" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
-            <path d="M9 12h12l-3 -3" /><path d="M18 15l3 -3" /></svg>
-          </Button>
-              ) : (
-        ""
-      )} </header> 
-      <div className="flex">
-      <div className="navbar"><NavbarNested/></div>
-      <div className="p-6 flex-1 overflow-x-auto">{children}</div>
-      </div>
-              </div>*/}
       
     </>
   );
