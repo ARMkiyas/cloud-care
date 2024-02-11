@@ -7,31 +7,15 @@
 
 import Link from "next/link";
 import React from "react";
+import Header from "./components/navbar/Header";
+import Footer from "./components/footer/Footer";
 
 export default function layout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <nav>
-        <ul className="flex space-x-3">
-          <div className="">
-            <Link href="/">Home</Link>
-          </div>
-          <div>
-            <Link href="/about">About</Link>
-          </div>
-          <div>
-            <Link href="/contact">Contact</Link>
-          </div>
-          <div>
-            <Link href="/auth/login">Login</Link>
-          </div>
-        </ul>
-      </nav>
+      <Header />
       <div className="">{children}</div>
-
-      <footer className="absolute bottom-0 w-full bg-slate-500">
-        <div>footer</div>
-      </footer>
+      <Footer />
     </>
   );
 }
