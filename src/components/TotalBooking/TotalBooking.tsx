@@ -10,10 +10,10 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import dynamic from 'next/dynamic';
-import { DataTable } from 'mantine-datatable';
+//import { DataTable } from 'mantine-datatable';
 import { IconDotsVertical } from '@tabler/icons-react';
 import { ErrorAlert, Surface } from '@/components';
-import { useFetchData } from '@/hooks';
+//import { useFetchData } from '@/hooks';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 
@@ -22,57 +22,59 @@ type TotalBookProps = PaperProps;
 const TotalBook = ({ ...others }: TotalBookProps) => {
   const theme = useMantineTheme();
   const { colorScheme } = useMantineColorScheme();
-  const series = [44, 55, 41, 17, 15];
-  const {
+  const series=[
+    {
+      name:'Urgent',
+      data:44
+    },{
+      name:'no urgent',
+      data:55
+    },{
+      name:'resuscitation',
+      data:41,
+    },{
+      name:'emergency',
+      data:15
+    }
+  ];
+
+  /*const {
     data: salesData,
     error: salesError,
     loading: salesLoading,
-  } = useFetchData('/mocks/Sales.json');
+  } = useFetchData('/mocks/Sales.json');*/
 
   const options: any = {
     chart: { type: 'donut', fontFamily: 'Open Sans, sans-serif' },
-    legend: { show: false },
+    legend: { show: true,
+    position:'bottom',
+    fontSize:'12px',
+    labels: {
+      colors: colorScheme === 'dark' ? theme.white : theme.colors.dark[6],
+    } 
+  
+  },
+
     dataLabels: { enabled: false },
     tooltip: { enabled: false },
     states: {
       hover: { filter: { type: 'lighten', value: 0.5 } },
       active: { filter: { type: 'none', value: 0 } },
     },
+    
     stroke: { width: 0 },
     plotOptions: {
       pie: {
         expandOnClick: false,
         donut: {
-          size: '75%',
+          size: '50%',
+          thickness:'50',
           labels: {
             show: true,
             name: {
               show: true,
               fontSize: '12px',
               fontWeight: '400',
-              color:
-                colorScheme === 'dark' ? theme.white : theme.colors.dark[6],
-            },
-            value: {
-              show: true,
-              fontSize: '22px',
-              fontWeight: '600',
-              color:
-                colorScheme === 'dark' ? theme.white : theme.colors.dark[6],
-            },
-            total: {
-              show: true,
-              showAlways: true,
-              formatter: function (w: any) {
-                const totals = w.globals.seriesTotals;
-
-                const result = totals.reduce(
-                  (a: number, b: number) => a + b,
-                  0,
-                );
-
-                return (result / 1000).toFixed(3);
-              },
               color:
                 colorScheme === 'dark' ? theme.white : theme.colors.dark[6],
             },
@@ -86,9 +88,15 @@ const TotalBook = ({ ...others }: TotalBookProps) => {
       theme.colors.blue[3],
       theme.colors.pink[2]
     ],
+
+    labels: series.map(item => item.name)
+
   };
+  const chartSeries = series.map(item => item.data);
+
 
   return (
+    <>
     <Surface component={Paper} {...others}>
       <Group justify="space-between" mb="md">
         <Text size="lg" fw={600}>
@@ -101,12 +109,16 @@ const TotalBook = ({ ...others }: TotalBookProps) => {
       {/*@ts-ignore*/}
       <Chart
         options={options}
-        series={series}
+        series={chartSeries}
         type="donut"
-        height={200}
+        height={250}
         width={'100%'}
+        
+        
       />
     </Surface>
+
+    </>
   );
 };
 

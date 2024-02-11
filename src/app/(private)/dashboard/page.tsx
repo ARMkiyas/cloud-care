@@ -19,7 +19,6 @@ import {
 } from '@/components'
 import Link from 'next/link';
 import { PATH_TASKS } from '@/routes';
-import { useFetchData } from '@/hooks';
 import { TableScrollArea } from '@/lib/TableScrollArea/TableScrollArea';
 
 const PAPER_PROPS: PaperProps = {
@@ -30,7 +29,7 @@ const PAPER_PROPS: PaperProps = {
 };
 
 function Page() {
-  const {
+  /*const {
     data: projectsData,
     error: projectsError,
     loading: projectsLoading,
@@ -39,7 +38,7 @@ function Page() {
     data: statsData,
     error: statsError,
     loading: statsLoading,
-  } = useFetchData('/mocks/StatsGrid.json');
+  } = useFetchData('/mocks/StatsGrid.json');*/
 
   return (
     <>

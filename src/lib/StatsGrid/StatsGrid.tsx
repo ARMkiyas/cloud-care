@@ -27,19 +27,17 @@ export default function StatsGrid() {
 
     return (
       <Paper withBorder p="md" radius="md" key={stat.title}>
-        <Group justify="space-between">
+              <div className="flex flex-col items-center justify-center h-full">
+          <div className="flex justify-center items-center">
         <Icon className={classes.icon} size="3.5rem" />
-          <Text size="md" className={classes.title}>
+        <Text size="md" className={classes.title}>
             {stat.title}
           </Text>
-        </Group>
+          </div>
+         <Text className={classes.value}>{stat.value}</Text>
+         </div>
+    </Paper>
 
-        <Group className="flex justify-end ..." gap="xs">
-          <Text className={classes.value}>{stat.value}</Text>
-
-        </Group>
-
-      </Paper>
     );
   });
   return (

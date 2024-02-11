@@ -33,7 +33,7 @@ const mockdata = [
    rootLink:"/dashboard/patients"
 
    },
-   { label: 'System Logs', icon: BiLogInCircle , rootLink:"/dashboard/system-logs"},
+      { label: 'User Management', icon: GrUserManager , rootLink:"/dashboard/user-management"},
   { label: 'Staffs',
    icon: FaUserDoctor, 
    links:[
@@ -44,7 +44,7 @@ const mockdata = [
     { label: 'Administrators and Managers' ,link:'/dashboard/staffs/administrators-managers'},
    ],
   },
-  { label: 'User Management', icon: GrUserManager , rootLink:"/dashboard/user-management"},
+  { label: 'System Logs', icon: BiLogInCircle , rootLink:"/dashboard/system-logs"},
 ];
 
 

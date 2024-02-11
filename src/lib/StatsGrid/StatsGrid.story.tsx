@@ -26,7 +26,7 @@ export const Default: Story = {
 };*/
 
 import attributes from './attributes.json';
-import { StoryWrapper } from '@/components/StoryWrapper/StoryWrapper';
+import { StoryWrapper } from '../../components/StoryWrapper/StoryWrapper';
 import { StatsGrid } from './StatsGrid';
 
 export default { title: 'StatsGrid' };
