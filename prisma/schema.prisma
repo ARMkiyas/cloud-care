@@ -178,7 +178,6 @@ model Patient {
     lastName       String
     dateOfBirth    DateTime
     gender         gender
-    contactNumber  String
     email          String          @unique
     phone          String?         @map("phoneNumber")
     address        String?
@@ -198,7 +197,6 @@ enum Appointmentstatus {
 model Appointment {
     id          String            @id @default(cuid())
     createdDate DateTime          @default(now())
-    dateTime    DateTime          @map("Date")
     status      Appointmentstatus @default(Pending)
     patientId   String
     doctorId    String

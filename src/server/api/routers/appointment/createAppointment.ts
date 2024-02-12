@@ -8,6 +8,10 @@ const createAppointmentSchema = z.object({
 
 const createAppointment = publicProcedure.input(createAppointmentSchema).mutation(({ input }) => {
 
+
+
+
+
 })
 
 

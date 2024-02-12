@@ -47,14 +47,9 @@ const scheduleDeleteProcedure = protectedProcedure.input(scheduleDeleteProcedure
 
 
         return ErrorHandler(error, "Schedule")
+    } finally {
+        ctx.db.$disconnect()
     }
-
-
-
-
-
-
-
 
 
 
