@@ -145,6 +145,7 @@ export const scheduleGetProcedureSchema = z.object({
     date: z.date().optional(),
     getRecurrence: z.nativeEnum(RecurrencePattern).optional(),
     DayOfWeek: z.nativeEnum(DayOfWeek).optional(),
+    doctorname: z.string().optional(),
 
 })
 

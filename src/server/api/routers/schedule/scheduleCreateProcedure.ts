@@ -147,6 +147,8 @@ const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedure
         return ErrorHandler(error, "Schedule")
 
 
+    } finally {
+        ctx.db.$disconnect()
     }
 
 
