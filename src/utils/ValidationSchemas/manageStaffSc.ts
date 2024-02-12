@@ -1,3 +1,5 @@
+import "server-only"
+
 import { DoctorSpecialization, UserRoles, adminDepartment, gender, title } from "@prisma/client"
 import { z } from "zod"
 import { imageSchema } from "./commonSc"
