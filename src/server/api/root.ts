@@ -11,6 +11,7 @@ import { createTRPCRouter } from "./trpc";
 import manageUsersRouter from "./routers/mangeUsers.ts/manageUsersRoot";
 import manageStaffRouter from "./routers/mangeStaffs/manageStaffRoot";
 import appointmentRouter from "./routers/appointment/appointmentRoot";
+import scheduleRouter from "./routers/schedule/scheduleRouter";
 
 
 // This is the primary router for server. All routers added in /api/trpc/[Routers] should be manually added here.
@@ -20,6 +21,7 @@ export const appRouter = createTRPCRouter({
     request2faotp: request2faotp,
     manageStaff: manageStaffRouter,
     manageUsers: manageUsersRouter,
+    schedule: scheduleRouter,
     appointment: appointmentRouter,
 
 })
