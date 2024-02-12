@@ -3,14 +3,7 @@ import { protectedProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
 import { UserRoles } from "@prisma/client";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
-
-const scheduleDeleteProcedureSchema = z.object({
-
-    scheduleId: z.string(),
-
-
-})
-
+import { scheduleDeleteProcedureSchema } from "./validation/schema";
 
 
 const scheduleDeleteProcedure = protectedProcedure.input(scheduleDeleteProcedureSchema).mutation(async ({ input, ctx }) => {
@@ -26,11 +19,20 @@ const scheduleDeleteProcedure = protectedProcedure.input(scheduleDeleteProcedure
 
 
 
-        const schedule = await ctx.db.schedule.delete({
+        const schedule = await ctx.db.schedule.deleteMany({
             where: {
-                id: input.scheduleId
+                id: {
+                    in: input.scheduleId ? [input.scheduleId] : input.deleteMany.map((item) => item.id)
+                }
             }
         })
+
+        if (!schedule.count || schedule.count === 0) {
+            return new TRPCError({
+                code: "UNPROCESSABLE_CONTENT",
+                message: "Schedule not found"
+            })
+        }
 
 
         return {

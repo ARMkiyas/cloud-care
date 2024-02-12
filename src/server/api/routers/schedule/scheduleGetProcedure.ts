@@ -1,18 +1,8 @@
 import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
-import { RecurrencePattern, UserRoles } from "@prisma/client";
-
-const scheduleGetProcedureSchema = z.object({
-
-    doctorId: z.string().nonempty().optional(),
-    scheduleId: z.string().nonempty().optional(),
-    date: z.date().optional(),
-    getRecurrence: z.nativeEnum(RecurrencePattern).optional()
-
-
-})
-
+import { DayOfWeek, RecurrencePattern, UserRoles } from "@prisma/client";
+import { scheduleGetProcedureSchema } from "./validation/schema";
 
 const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema).mutation(async ({ input, ctx }) => {
 
@@ -24,6 +14,7 @@ const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema
     }
 
 
+    // allow only doctor to get his schedule
     ctx.session.user.role === UserRoles.DOCTOR ? input.doctorId = ctx.session.user.id : null
 
 
@@ -40,6 +31,9 @@ const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema
             },
             recurrence: {
                 equals: input.getRecurrence
+            },
+            dayOfWeek: {
+                equals: input.DayOfWeek
             }
         },
         include: {
@@ -49,9 +43,9 @@ const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema
             _count: {
                 select: {
                     Appointment: true,
-                    Slot: true
-
+                    Slot: true,
                 }
+
             },
         },
     })

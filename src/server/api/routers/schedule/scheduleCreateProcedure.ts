@@ -5,6 +5,7 @@ import { DayOfWeek, RecurrencePattern, UserRoles } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { scheduleCreateProcedureSchema } from "./validation/schema";
+import { ValidateDB } from "./validation/ValidateDB";
 
 
 const DEFAULTmaxAppointments = 20
@@ -55,7 +56,7 @@ const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedure
 
         }
 
-        // check is the doctor already have a schedule for the given date and time if the recurrence is once and it's a new schedule
+
 
 
         // const date = new Date(RecurrencePattern.ONCE ? input.once.date : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.startDate : input.monthly.date).getDay()
@@ -66,66 +67,26 @@ const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedure
         //     })
         // }
 
-        const timeSc = [
-            {
-                startTime: {
-                    lte: input.recurrence === RecurrencePattern.ONCE ? input.once.startTime : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.startTime : input.monthly.startTime,
 
-                },
-                endTime: {
-                    gte: input.recurrence === RecurrencePattern.ONCE ? input.once.endTime : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.endTime : input.monthly.endTime
-                }
+        // check is the doctor already have a schedule for the given date and time if the recurrence is once and it's a new schedule
 
-            },
-            // check if the start time is between the given time
-            {
-                startTime: {
-                    lte: input.recurrence === RecurrencePattern.ONCE ? input.once.startTime : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.startTime : input.monthly.startTime,
 
-                },
-                endTime: {
-                    gte: input.recurrence === RecurrencePattern.ONCE ? input.once.endTime : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.endTime : input.monthly.endTime
-                }
-            },
-            // check if the start time and end time is included in the given time
-            {
-                startTime: {
-                    gte: input.recurrence === RecurrencePattern.ONCE ? input.once.startTime : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.startTime : input.monthly.startTime,
-                },
-                endTime: {
-                    lte: input.recurrence === RecurrencePattern.ONCE ? input.once.endTime : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.endTime : input.monthly.endTime
-                }
-            },
-        ]
+        const starttime = input.recurrence === RecurrencePattern.ONCE ? input.once.startTime : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.startTime : input.monthly.startTime;
+        const endtime = input.recurrence === RecurrencePattern.ONCE ? input.once.endTime : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.endTime : input.monthly.endTime
+        const date = input.recurrence === RecurrencePattern.ONCE ? input.once.date : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.startDate : input.monthly.date
+        const dayofweek = input.recurrence === RecurrencePattern.ONCE ? Object.values(DayOfWeek)[new Date(input.once.date).getDay()] : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.day : Object.values(DayOfWeek)[new Date(input.monthly.date).getDay()]
 
-        const schedule = await ctx.db.schedule.findFirst({
-            where: {
-                doctorId: input.doctorId,
-                OR: [
-                    // check if the start time and end time is between the given time
-                    {
-                        Date: input.recurrence === RecurrencePattern.ONCE ? input.once.date : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.startDate : input.monthly.date,
-                        OR: timeSc
-
-                    },
-
-                    {
-                        dayOfWeek: input.recurrence === RecurrencePattern.ONCE ? Object.values(DayOfWeek)[new Date(input.once.date).getDay()] : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.day : Object.values(DayOfWeek)[new Date(input.monthly.date).getDay()],
-                        OR: timeSc
-                    }
-                    // check if the end time is between the given time
-
-                ]
-            }
-        })
-
-        // check if weekly recurrence is provided for the given date and time
+        const validate = await ValidateDB(
+            input.doctorId,
+            date,
+            starttime,
+            endtime,
+            dayofweek
+        )
 
 
 
-
-
-        if (schedule) {
+        if (!validate) {
             return new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "Doctor already have a schedule for the given date and time"
@@ -150,7 +111,7 @@ const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedure
                 Slot: {
                     createMany: {
                         data: Array.from({ length: input.noOfSlots }, (_, i) => ({
-                            maxAppointmentsPerSlot: input.maxAppointments / input.noOfSlots,
+                            maxAppointmentsPerSlot: Math.floor(input.maxAppointments / input.noOfSlots),
                             startTime: new Date(new Date(input.weekly?.startTime || input.monthly?.startTime || input.once?.startTime).getTime() + (i * 2700000)).toISOString(),
                             endTime: new Date(new Date(input.weekly?.endTime || input.monthly?.endTime || input.once?.endTime).getTime() + ((i + 1) * 2700000)).toISOString(),
 
@@ -182,7 +143,7 @@ const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedure
 
     } catch (error) {
 
-
+        console.log(error);
         return ErrorHandler(error, "Schedule")
 
 

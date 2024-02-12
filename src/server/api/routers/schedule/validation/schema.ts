@@ -10,7 +10,7 @@ export const scheduleCreateProcedureSchema = z.object({
 
     doctorId: z.string().nonempty(),
     recurrence: z.nativeEnum(RecurrencePattern),
-    maxAppointments: z.number().int().min(1).optional().default(DEFAULTmaxAppointments),
+    maxAppointments: z.number().int().min(4).optional().default(DEFAULTmaxAppointments),
     opdRoomid: z.string().optional(),
     noOfSlots: z.number().int().min(1).optional().default(DEFAULTnoOfSlots),
     once: z.object({
@@ -116,7 +116,145 @@ export const scheduleCreateProcedureSchema = z.object({
         })
     }
 
+    if (val.noOfSlots > val.maxAppointments / 5) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Number of slots should be less than or equal to max appointments divided by 5"
+        })
+    }
+
+    if (val.noOfSlots < DEFAULTnoOfSlots) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Number of slots should be less than or equal to 4"
+        })
+
+    }
+
+
+})
 
 
 
+
+
+export const scheduleGetProcedureSchema = z.object({
+
+    doctorId: z.string().nonempty().optional(),
+    scheduleId: z.string().nonempty().optional(),
+    date: z.date().optional(),
+    getRecurrence: z.nativeEnum(RecurrencePattern).optional(),
+    DayOfWeek: z.nativeEnum(DayOfWeek).optional(),
+
+})
+
+
+
+
+
+
+export const scheduleUpdateProcedureSchema = z.object({
+
+
+    scheduleId: z.string(),
+    date: z.date().optional(),
+    startTime: z.string().datetime().optional(),
+    endTime: z.string().datetime().optional(),
+    DayOfWeek: z.nativeEnum(DayOfWeek).optional(),
+    maxAppointments: z.number().int().min(20).optional(),
+    noOfSlots: z.number().int().min(4).optional(),
+    opdRoomid: z.string().optional(),
+
+
+
+}).superRefine((val, ctx) => {
+    if (val.endTime && val.startTime) {
+        if (new Date(val.endTime).getTime() <=
+            new Date(val.startTime).getTime() + 2700000) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "End time should be greater than start time for at least 45 minutes"
+            })
+        }
+    }
+
+    if (val.startTime && val.endTime) {
+        if (val.startTime > val.endTime) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "End time should be greater than start time"
+            })
+        }
+
+    }
+
+    if (val.date) {
+        if (val.date < new Date()) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Date should be greater than today"
+            })
+        }
+    }
+
+    if (val.maxAppointments < 20) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Max Appointments should be greater than 20"
+        })
+
+    }
+
+    if (val.date && val.DayOfWeek) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "cannot update both date and day of week"
+        })
+    }
+
+    if (!val.date && !val.DayOfWeek && !val.startTime && !val.endTime && !val.maxAppointments && !val.noOfSlots && !val.opdRoomid) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "cannot update schedule with empty fields, at least one field is required to update schedule"
+        })
+    }
+
+    if (val.noOfSlots > val.maxAppointments / 5) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Number of slots should be less than or equal to max appointments divided by 5"
+        })
+    }
+
+    if (val.noOfSlots < 4) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Number of slots should be less than or equal to 4"
+        })
+
+    }
+
+
+
+
+})
+
+
+
+
+
+
+export const scheduleDeleteProcedureSchema = z.object({
+    scheduleId: z.string(),
+
+    deleteMany: z.array(z.object({
+        id: z.string()
+    })).optional()
+}).superRefine((val, ctx) => {
+    if (!val.scheduleId && !val.deleteMany) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Either scheduleId or deleteMany is required"
+        })
+    }
 })
