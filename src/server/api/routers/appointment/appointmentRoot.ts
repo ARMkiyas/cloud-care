@@ -1,3 +1,5 @@
+import "server-only"
+
 import { createTRPCRouter } from "../../trpc";
 import createAppointment from "./createAppointment";
 

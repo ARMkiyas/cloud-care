@@ -133,6 +133,8 @@ const scheduleUpdateProcedure = protectedProcedure.input(scheduleUpdateProcedure
 
         return ErrorHandler(e, "Schedule")
 
+    } finally {
+        ctx.db.$disconnect()
     }
 
 
