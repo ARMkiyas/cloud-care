@@ -9,7 +9,8 @@ import { imageSchema } from "@/utils/ValidationSchemas/commonSc";
 import { getAvatar } from "@/utils/getavatar";
 import { generate2FASecret } from "@/utils/OtpHelper";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
-import { adduserschema } from "@/utils/ValidationSchemas/manageUserSc";
+import { adduserschema } from "./validation/schema";
+
 
 
 

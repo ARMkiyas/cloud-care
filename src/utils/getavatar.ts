@@ -18,7 +18,7 @@ type avatarType = "doctor" | "nurse" | "person"
 
 export const getAvatar = (type: avatarType, gender: gender) => {
 
-    console.log("get avatar", avatarList[`${type}_${gender}`]);
+
 
     return avatarList[`${type}_${gender}`]
 

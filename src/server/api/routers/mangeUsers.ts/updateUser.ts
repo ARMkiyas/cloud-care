@@ -4,7 +4,8 @@ import { protectedProcedure } from "../../trpc";
 import { UserRoles } from "@prisma/client";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { TRPCError } from "@trpc/server";
-import { updateUserSchema } from "@/utils/ValidationSchemas/manageUserSc";
+import { updateUserSchema } from "./validation/schema";
+
 
 
 const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ ctx, input }) => {

@@ -8,9 +8,6 @@ import { scheduleCreateProcedureSchema } from "./validation/schema";
 import { ValidateDB } from "./validation/ValidateDB";
 
 
-const DEFAULTmaxAppointments = 20
-const DEFAULTnoOfSlots = 4
-
 
 const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedureSchema).mutation(async ({ input, ctx }) => {
     try {
@@ -93,6 +90,8 @@ const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedure
             })
         }
 
+        const timeduration = new Date(endtime).getTime() - new Date(starttime).getTime()
+
 
         const newSchedule = await ctx.db.schedule.create({
             data: {
@@ -112,8 +111,8 @@ const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedure
                     createMany: {
                         data: Array.from({ length: input.noOfSlots }, (_, i) => ({
                             maxAppointmentsPerSlot: Math.floor(input.maxAppointments / input.noOfSlots),
-                            startTime: new Date(new Date(input.weekly?.startTime || input.monthly?.startTime || input.once?.startTime).getTime() + (i * 2700000)).toISOString(),
-                            endTime: new Date(new Date(input.weekly?.endTime || input.monthly?.endTime || input.once?.endTime).getTime() + ((i + 1) * 2700000)).toISOString(),
+                            startTime: new Date(new Date(input.weekly?.startTime || input.monthly?.startTime || input.once?.startTime).getTime() + (i * timeduration / input.noOfSlots)).toISOString(),
+                            endTime: new Date(new Date(input.weekly?.startTime || input.monthly?.startTime || input.once?.startTime).getTime() + ((i + 1) * timeduration / input.noOfSlots)).toISOString(),
 
                         }))
                     }

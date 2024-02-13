@@ -20,7 +20,6 @@ export async function hashPwd(pwd: string): Promise<string> {
         salt: salt,
     });
 
-    console.log(hashvalue);
 
     return hashvalue;
 }

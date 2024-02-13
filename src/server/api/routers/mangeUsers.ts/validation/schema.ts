@@ -2,7 +2,8 @@ import "server-only";
 
 import { UserRoles } from "@prisma/client";
 import { z } from "zod";
-import { imageSchema } from "./commonSc";
+import { imageSchema } from "@/utils/ValidationSchemas/commonSc";
+
 
 export const adduserschema = z.object({
     staffID: z.string(),

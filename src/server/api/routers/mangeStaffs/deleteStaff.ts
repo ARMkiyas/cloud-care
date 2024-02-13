@@ -1,8 +1,10 @@
+import "server-only";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error"
 import { UserRoles } from "@prisma/client"
 import { TRPCError } from "@trpc/server"
 import { protectedProcedure } from "../../trpc"
-import { deleteStaffSchema } from "@/utils/ValidationSchemas/manageStaffSc"
+import { deleteStaffSchema } from "./validation/schema"
+
 
 
 const deleteStaffProceture = protectedProcedure.input(deleteStaffSchema).mutation(async ({ ctx, input }) => {

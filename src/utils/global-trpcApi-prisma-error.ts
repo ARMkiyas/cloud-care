@@ -14,8 +14,6 @@ const ErrorHandler: globalTrpcApiPrismaErrorHandlerType = (error, ctx, action, m
 
     if (error instanceof PrismaClientKnownRequestError) {
 
-        console.log(error);
-
         switch (error.code) {
             case "P2002":
                 return new TRPCError({
@@ -62,7 +60,6 @@ const ErrorHandler: globalTrpcApiPrismaErrorHandlerType = (error, ctx, action, m
         }
 
 
-        console.log(error);
 
     }
 
