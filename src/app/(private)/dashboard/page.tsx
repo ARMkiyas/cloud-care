@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  Button,
+  //Button,
   Container,
   Grid,
   Group,
@@ -10,15 +10,14 @@ import {
   Stack,
   Text,
 } from '@mantine/core';
-import { IconChevronRight } from '@tabler/icons-react';
+//import { IconChevronRight } from '@tabler/icons-react';
 import {
   DieasesSummary,
   RevenueChart,
   StatsGrid,
   TotalBooking,
 } from '@/components'
-import Link from 'next/link';
-import { PATH_TASKS } from '@/routes';
+//import Link from 'next/link';
 import { TableScrollArea } from '@/lib/TableScrollArea/TableScrollArea';
 
 const PAPER_PROPS: PaperProps = {

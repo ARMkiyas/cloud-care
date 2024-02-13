@@ -2,6 +2,7 @@ import { UnstyledButton, Group, Avatar, Text, rem } from '@mantine/core';
 import { IconChevronRight } from '@tabler/icons-react';
 import classes from './UserButton.module.css';
 import { useSession } from "next-auth/react";
+import Link from 'next/link';
 
 export function UserButton() {
 
@@ -18,6 +19,7 @@ export function UserButton() {
 
 
   return (
+    <Link href='/dashboard/user-Profile'>
     <UnstyledButton className={`${classes.user} w-full` }>
       <Group>
         <Avatar
@@ -38,5 +40,6 @@ export function UserButton() {
         <IconChevronRight style={{ width: rem(14), height: rem(14) }} stroke={1.5} />
       </Group>
     </UnstyledButton>
+    </Link>
   );
 }

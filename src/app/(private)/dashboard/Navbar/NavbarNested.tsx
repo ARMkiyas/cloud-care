@@ -1,4 +1,4 @@
-import { Group, Code, ScrollArea, rem } from '@mantine/core';
+import { ScrollArea } from '@mantine/core';
 import {
   IconStethoscope,
   IconDisabled,
@@ -11,7 +11,7 @@ import {
 import { UserButton } from './UserButton';
 import { LinksGroup } from './NavbarLinksGroup';
 import classes from './NavbarNested.module.css';
-import { useState, useEffect } from 'react';
+//import { useState, useEffect } from 'react';
 
 const mockdata = [
   { label: 'Dashboard', icon: IconGauge, rootLink:"/dashboard" },

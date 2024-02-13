@@ -13,7 +13,7 @@ import dynamic from 'next/dynamic';
 //import { DataTable } from 'mantine-datatable';
 import { IconDotsVertical } from '@tabler/icons-react';
 import { ErrorAlert, Surface } from '@/components';
-//import { useFetchData } from '@/hooks';
+
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 

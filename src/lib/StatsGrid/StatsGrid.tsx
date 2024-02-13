@@ -26,15 +26,16 @@ export default function StatsGrid() {
 
 
     return (
-      <Paper withBorder p="md" radius="md" key={stat.title}>
-              <div className="flex flex-col items-center justify-center h-full">
-          <div className="flex justify-center items-center">
-        <Icon className={classes.icon} size="3.5rem" />
+      <Paper withBorder p="md" radius="md" key={stat.title} shadow="xs">
+              <div className="flex h-full">
+          <div className="flex flex-row justify-center items-center">
+        <Icon className={classes.icon} size="3.5rem" /></div>
+        <div className="flex flex-col">
         <Text size="md" className={classes.title}>
             {stat.title}
           </Text>
-          </div>
          <Text className={classes.value}>{stat.value}</Text>
+         </div>
          </div>
     </Paper>
 
@@ -42,7 +43,8 @@ export default function StatsGrid() {
   });
   return (
     <div className={classes.root}>
-      <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }}>{stats}</SimpleGrid>
+      <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }}
+      className={classes.grid} >{stats}</SimpleGrid>
     </div>
   );
 }
