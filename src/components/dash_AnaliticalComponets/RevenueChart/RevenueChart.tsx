@@ -11,7 +11,7 @@ import {
 } from '@mantine/core';
 import dynamic from 'next/dynamic';
 import { IconDotsVertical } from '@tabler/icons-react';
-import { Surface } from '@/components';
+import { Surface } from '@/components/dash_AnaliticalComponets';
 
 const Chart = dynamic(() => import('react-apexcharts'), { ssr: false });
 

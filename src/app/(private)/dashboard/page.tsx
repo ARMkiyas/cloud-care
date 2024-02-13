@@ -16,9 +16,9 @@ import {
   RevenueChart,
   StatsGrid,
   TotalBooking,
-} from '@/components'
+} from '@/components/dash_AnaliticalComponets'
 //import Link from 'next/link';
-import { TableScrollArea } from '@/lib/TableScrollArea/TableScrollArea';
+import { TableScrollArea } from '@/utils/lib/TableScrollArea/TableScrollArea';
 
 const PAPER_PROPS: PaperProps = {
   p: 'md',

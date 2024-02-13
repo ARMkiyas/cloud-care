@@ -1,6 +1,6 @@
 import attributes from './attributes.json';
-import { StoryWrapper } from '../../components/StoryWrapper/StoryWrapper';
-import { StatsGrid } from './StatsGrid';
+import { StoryWrapper } from '../../../components/dash_AnaliticalComponets/StoryWrapper/StoryWrapper';
+import StatsGrid  from './StatsGrid';
 
 export default { title: 'StatsGrid' };
 

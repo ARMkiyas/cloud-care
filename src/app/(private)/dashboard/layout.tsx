@@ -5,10 +5,10 @@ import { Button ,AppShell, Burger, Group, Skeleton} from "@mantine/core";
 //import { IconLogout } from '@tabler/icons-react';
 import { signIn, signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import {NavbarNested} from './Navbar/NavbarNested';
-import myImage from "./Header/assets/logo-inline-qRb.png";
+import {NavbarNested} from '../componets/Navbar/NavbarNested';
+import myImage from "../componets/Header/assets/logo-inline-qRb.png";
 //import {IconBellRinging2Filled} from '@tabler/icons-react';
-import classes from './Header/HeaderSearch.module.css';
+import classes from '../componets/Header/HeaderSearch.module.css';
 import { useDisclosure } from '@mantine/hooks';
 /* 
 

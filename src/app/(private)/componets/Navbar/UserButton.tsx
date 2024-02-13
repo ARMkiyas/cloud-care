@@ -19,8 +19,8 @@ export function UserButton() {
 
 
   return (
-    <Link href='/dashboard/user-Profile'>
-    <UnstyledButton className={`${classes.user} w-full` }>
+
+    <UnstyledButton<typeof Link> href='/dashboard/user-Profile' className={`${classes.user} w-full` } component={Link}>
       <Group>
         <Avatar
            src={session?.user?.image || "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-8.png"}
@@ -40,6 +40,6 @@ export function UserButton() {
         <IconChevronRight style={{ width: rem(14), height: rem(14) }} stroke={1.5} />
       </Group>
     </UnstyledButton>
-    </Link>
+
   );
 }
