@@ -3,13 +3,7 @@ import { publicProcedure } from "../../trpc";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { TRPCError } from "@trpc/server";
 import { createAppointmentSchema } from "./validation/schema";
-
-
-function generateUniqueReferenceId(prefix: string = 'cloudcare'): string {
-    const timestamp = Date.now().toString(36); // Base 36 for compactness
-    const randomSuffix = Math.random().toString(36).substring(2, 6); // First 2 chars are redundant
-    return `${prefix}-${timestamp}-${randomSuffix}`;
-}
+import generateUniqueReferenceId from "@/utils/lib/UniqueReferenceIdGenerator";
 
 
 const createAppointment = publicProcedure.input(createAppointmentSchema).mutation(async ({ input, ctx }) => {
