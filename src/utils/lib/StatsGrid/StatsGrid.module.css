@@ -1,0 +1,32 @@
+ .root{
+  padding-top: 10px;
+ }
+  .value {
+    font-size: rem(24px);
+    font-weight: 700;
+    line-height: 1;
+    color:#40C057;
+    align-items:center;
+  }
+  
+  .icon {
+    color:#40C057;
+    margin-right: 0.7rem;
+
+  }
+  
+  .title {
+    font-weight: 700;
+   
+ 
+  }
+  .grid {
+    display: grid;
+    gap: 50px;
+
+    @media (max-width: $mantine-breakpoint-xl) {
+      gap: 10px;
+    }
+
+
+  }

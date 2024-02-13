@@ -27,7 +27,7 @@ import {
   IconUser,
 } from "@tabler/icons-react";
 import classes from "./HeaderMenu.module.css";
-import { Logo } from "@/components/Logo";
+import { Logo } from "@/components/dash_AnaliticalComponets/Logo";
 import NavTopBar, { StaffLogBtn } from "./NavTopBar";
 import Link from "next/link";
 import { useState } from "react";
