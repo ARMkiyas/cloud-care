@@ -1,9 +1,11 @@
+import "server-only";
 import { TRPCError } from "@trpc/server"
 import { protectedProcedure } from "../../trpc"
-import { updatestaffSchema } from "@/utils/ValidationSchemas/manageStaffSc"
+
 import { Prisma, UserRoles } from "@prisma/client"
 import { userImageUploader } from "@/utils/fileuploadhandler/userimageuploder"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error"
+import { updatestaffSchema } from "./validation/schema"
 
 const updatestaffProceture = protectedProcedure.input(updatestaffSchema).mutation(async ({ ctx, input }) => {
 

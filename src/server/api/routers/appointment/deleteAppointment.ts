@@ -1,13 +1,13 @@
-import "server-only";
 
 import { protectedProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
 import { UserRoles } from "@prisma/client";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
-import { scheduleDeleteProcedureSchema } from "./validation/schema";
+import { deleteAppointmentProcedureSchema } from "./validation/schema";
 
 
-const scheduleDeleteProcedure = protectedProcedure.input(scheduleDeleteProcedureSchema).mutation(async ({ input, ctx }) => {
+
+const deleteAppointmentProcedure = protectedProcedure.input(deleteAppointmentProcedureSchema).mutation(async ({ input, ctx }) => {
 
 
     try {
@@ -20,24 +20,24 @@ const scheduleDeleteProcedure = protectedProcedure.input(scheduleDeleteProcedure
 
 
 
-        const schedule = await ctx.db.schedule.deleteMany({
+        const appointment = await ctx.db.appointment.deleteMany({
             where: {
                 id: {
-                    in: input.scheduleId ? [input.scheduleId] : input.deleteMany.map((item) => item.id)
+                    in: input.appointmentId.trim() ? [input.appointmentId.trim()] : input.deleteMany.map((item) => item.id.trim())
                 }
             }
         })
 
-        if (!schedule.count || schedule.count === 0) {
+        if (!appointment.count || appointment.count === 0) {
             return new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
-                message: "Schedule not found"
+                message: "appointment not found"
             })
         }
 
 
         return {
-            data: schedule,
+            data: appointment,
             status: 200,
             error: null,
             ok: true,
@@ -47,7 +47,7 @@ const scheduleDeleteProcedure = protectedProcedure.input(scheduleDeleteProcedure
     } catch (error) {
 
 
-        return ErrorHandler(error, "Schedule")
+        return ErrorHandler(error, "deleteAppointment", "An error occurred while trying to delete appointment")
     } finally {
         ctx.db.$disconnect()
     }
@@ -58,4 +58,4 @@ const scheduleDeleteProcedure = protectedProcedure.input(scheduleDeleteProcedure
 })
 
 
-export default scheduleDeleteProcedure
+export default deleteAppointmentProcedure

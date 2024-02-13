@@ -1,11 +1,12 @@
-import { z } from "zod";
+import "server-only";
+
 import { protectedProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
-import { DayOfWeek, RecurrencePattern, UserRoles } from "@prisma/client";
+import { UserRoles } from "@prisma/client";
 import { scheduleGetProcedureSchema } from "./validation/schema";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 
-const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema).mutation(async ({ input, ctx }) => {
+const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema).query(async ({ input, ctx }) => {
 
     try {
 

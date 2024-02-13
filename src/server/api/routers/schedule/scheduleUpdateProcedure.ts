@@ -1,6 +1,8 @@
-import { z } from "zod";
+import "server-only";
+
+
 import { protectedProcedure } from "../../trpc";
-import { DayOfWeek, UserRoles } from "@prisma/client";
+import { UserRoles } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { ValidateDB } from "./validation/ValidateDB";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";

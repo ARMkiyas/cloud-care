@@ -1,8 +1,10 @@
-import { getStaffschema } from "@/utils/ValidationSchemas/manageStaffSc"
+
+import "server-only";
 import { protectedProcedure } from "../../trpc"
 import { TRPCError } from "@trpc/server"
 import { UserRoles } from "@prisma/client"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error"
+import { getStaffschema } from "./validation/schema"
 
 
 

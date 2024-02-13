@@ -3,7 +3,8 @@ import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
 import { User, UserRoles } from "@prisma/client"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
-import { getUserschema } from "@/utils/ValidationSchemas/manageUserSc";
+import { getUserschema } from "./validation/schema";
+
 
 
 

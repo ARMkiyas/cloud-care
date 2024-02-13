@@ -1,7 +1,7 @@
 
 import "server-only"
 import { db } from "@/server/db"
-import { DayOfWeek, RecurrencePattern } from "@prisma/client"
+import { DayOfWeek } from "@prisma/client"
 
 type validateDB = (doctorId: string, date: Date, startTime: string | Date, endTime: string | Date, dayofweek: DayOfWeek, update?: boolean, scheduleid?: string) => Promise<boolean>
 

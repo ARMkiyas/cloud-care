@@ -1,4 +1,4 @@
-
+import "server-only";
 import { createTRPCRouter } from "../../trpc";
 import schedulePUBProcedure from "./publicProcedures/schedulePUBProcedure";
 import scheduleCreateProcedure from "./scheduleCreateProcedure";

@@ -176,9 +176,9 @@ model Patient {
     title          title           @default(Mr)
     firstName      String
     lastName       String
-    dateOfBirth    DateTime
+    dateOfBirth    DateTime        @db.Date
     gender         gender
-    email          String          @unique
+    email          String
     phone          String?         @map("phoneNumber")
     address        String?
     NIC            String?         @unique
@@ -195,21 +195,26 @@ enum Appointmentstatus {
 }
 
 model Appointment {
-    id          String            @id @default(cuid())
-    createdDate DateTime          @default(now())
-    status      Appointmentstatus @default(Pending)
-    patientId   String
-    doctorId    String
-    nurseId     String?
-    oPDId       Int?
-    scheduleId  String
-    doctor      Doctor            @relation(fields: [doctorId], references: [id])
-    Nurse       Nurse?            @relation(fields: [nurseId], references: [id])
-    OPD         OPD?              @relation(fields: [oPDId], references: [id])
-    patient     Patient           @relation(fields: [patientId], references: [id])
-    schedule    Schedule          @relation(fields: [scheduleId], references: [id])
-    slotId      String?
-    Slot        Slot?             @relation(fields: [slotId], references: [id])
+    id                String            @id @default(cuid())
+    referenceid       String            @unique
+    appointmentNumber Int
+    appointmentstart  DateTime          @db.Time()
+    appointmentEnd    DateTime          @db.Time()
+    createdat         DateTime          @default(now())
+    updatedat         DateTime          @updatedAt
+    status            Appointmentstatus @default(Pending)
+    patientId         String
+    doctorId          String
+    nurseId           String?
+    oPDId             Int?
+    scheduleId        String
+    doctor            Doctor            @relation(fields: [doctorId], references: [id])
+    Nurse             Nurse?            @relation(fields: [nurseId], references: [id])
+    OPD               OPD?              @relation(fields: [oPDId], references: [id])
+    patient           Patient           @relation(fields: [patientId], references: [id])
+    schedule          Schedule          @relation(fields: [scheduleId], references: [id])
+    slotId            String
+    Slot              Slot              @relation(fields: [slotId], references: [id])
 }
 
 enum RecurrencePattern {

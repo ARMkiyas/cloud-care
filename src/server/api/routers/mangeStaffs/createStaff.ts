@@ -1,4 +1,4 @@
-import { createStaffSchema } from "@/utils/ValidationSchemas/manageStaffSc"
+import "server-only";
 import { protectedProcedure } from "../../trpc"
 import { UserRoles } from "@prisma/client"
 import { TRPCError } from "@trpc/server"
@@ -7,6 +7,7 @@ import { getAvatar } from "@/utils/getavatar"
 import { hashPwd } from "@/utils/hashPwdHelper"
 import { generate2FASecret } from "@/utils/OtpHelper"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error"
+import { createStaffSchema } from "./validation/schema"
 
 
 
