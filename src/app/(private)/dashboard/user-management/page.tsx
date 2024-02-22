@@ -1,8 +1,9 @@
 import React from 'react'
+import {TableSort} from '@/utils/lib/TableSort/TableSort'
 
 export default function page() {
   return (
-    <div>User Mangement page</div>
+    <div><TableSort/></div>
   )
 }
 

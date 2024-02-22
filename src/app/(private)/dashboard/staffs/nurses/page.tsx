@@ -1,8 +1,8 @@
 import React from 'react'
 
-export default function page() {
+export default function page({params}:{params:{nurses:string}}) {
   return (
-    <div>nurse page</div>
+    <div>nurse page{params.nurses}</div>
   )
 }
 
