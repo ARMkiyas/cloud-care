@@ -13,7 +13,7 @@ import {
   unstable_httpBatchStreamLink,
 } from "@trpc/client";
 import { useState } from "react";
-import { apiclient } from "@/utils/trpc/Trpc";
+import { useApiClient } from "@/utils/trpc/Trpc";
 import SuperJSON from "superjson";
 import { getUrl, transformer } from "./shared";
 import { useSession } from "next-auth/react";
@@ -38,7 +38,7 @@ export const TrpcProvider: React.FC<{
   );
 
   const [trpcClient] = useState(() =>
-    apiclient.createClient({
+    useApiClient.createClient({
       transformer,
 
       links: [
@@ -61,7 +61,7 @@ export const TrpcProvider: React.FC<{
   );
   //   // Create a new trpcClient
   //   const [trpcClient] = useState(() =>
-  //     apiclient.createClient({
+  //     useApiClient.createClient({
   //       links: [
   //         httpBatchLink({
   //           url: `${process.env.NEXT_PUBLIC_API_URL}/api/trpc`,
@@ -72,11 +72,11 @@ export const TrpcProvider: React.FC<{
   //   );
 
   return (
-    // Wrap the trpcClient in the apiclient.Provider
+    // Wrap the trpcClient in the useApiClient.Provider
     <QueryClientProvider client={queryClient}>
-      <apiclient.Provider client={trpcClient} queryClient={queryClient}>
+      <useApiClient.Provider client={trpcClient} queryClient={queryClient}>
         {props.children}
-      </apiclient.Provider>
+      </useApiClient.Provider>
     </QueryClientProvider>
   );
 };
