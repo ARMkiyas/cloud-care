@@ -65,6 +65,7 @@ async function verifyPasswordResetToken(token) {
 
     return payload;
 
+
 }
 
 
@@ -79,12 +80,14 @@ const requestPWDResetSchema = z.object({
         ctx.addIssue({
             code: "custom",
             message: "Please provide either email or phone number"
+
         })
     }
+
     if (!val.email && !val.phone) {
         ctx.addIssue({
             code: "custom",
-            message: "Please provide either email or phone number"
+            message: "Please provide either email or phone number",
         })
     }
 
@@ -96,8 +99,8 @@ const requestPWDResetSchema = z.object({
 
 
 const resetPWDSchema = z.object({
-    ResetToken: z.string().nonempty(),
-    newpassword: z.string().nonempty().min(8, "Password must be at least 8 characters long"),
+    ResetToken: z.string().min(1, "Reset token is required"),
+    newpassword: z.string().nonempty("Please provide your new password").min(6, "Password must be at least 6 characters long"),
 
 })
 
@@ -163,7 +166,11 @@ const PasswordResetRouter = createTRPCRouter({
 
 
         } catch (error) {
-            return ErrorHandler(error, "PasswordReset", "Request", "somthing went wrong, please contact the administrator")
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Something went wrong",
+                cause: error.message
+            })
         } finally {
             ctx.db.$disconnect();
         }
@@ -185,7 +192,7 @@ const PasswordResetRouter = createTRPCRouter({
             })
 
             if (!verify) {
-                return new TRPCError({
+                throw new TRPCError({
                     code: "UNPROCESSABLE_CONTENT",
                     message: "Your token is invalid or has expired, please request a new one.",
                 })
@@ -220,7 +227,14 @@ const PasswordResetRouter = createTRPCRouter({
 
         } catch (error) {
 
-            return ErrorHandler(error, "PasswordReset", "Reset", "somthing went wrong, please contact the administrator")
+            throw new TRPCError({
+                code: "INTERNAL_SERVER_ERROR",
+                message: "Something went wrong",
+                cause: error.message
+            })
+
+
+
         } finally {
             ctx.db.$disconnect();
         }

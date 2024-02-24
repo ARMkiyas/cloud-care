@@ -8,6 +8,8 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
+  TRPCClientError,
+  TRPCClientErrorLike,
   httpBatchLink,
   loggerLink,
   unstable_httpBatchStreamLink,
@@ -17,6 +19,7 @@ import { useApiClient } from "@/utils/trpc/Trpc";
 import SuperJSON from "superjson";
 import { getUrl, transformer } from "./shared";
 import { useSession } from "next-auth/react";
+import { AppRouterType } from "@/server/api/root";
 
 export const TrpcProvider: React.FC<{
   children: React.ReactNode;
@@ -73,10 +76,10 @@ export const TrpcProvider: React.FC<{
 
   return (
     // Wrap the trpcClient in the useApiClient.Provider
-    <QueryClientProvider client={queryClient}>
-      <useApiClient.Provider client={trpcClient} queryClient={queryClient}>
+    <useApiClient.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
         {props.children}
-      </useApiClient.Provider>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </useApiClient.Provider>
   );
 };

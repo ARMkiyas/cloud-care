@@ -4,12 +4,14 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import myImage from "./assets/logo-inline-qRb.png";
-import { z } from "zod";
+import { date, z } from "zod";
 import { Button, Input, SegmentedControl } from "@mantine/core";
 import { IconAt } from "@tabler/icons-react";
 import { phoneRegex } from "@/utils/ValidationSchemas/commonSc";
 import { useForm, zodResolver } from "@mantine/form";
 import { useApiClient } from "@/utils/trpc/Trpc";
+import { useRouter } from "next/navigation";
+import { notifications } from "@mantine/notifications";
 
 //
 
@@ -29,7 +31,9 @@ const forgotPasswordEmailSchema = z.object({
 const Page = () => {
   const [showEmail, setShowEmail] = useState(true);
 
-  const { mutateAsync, isLoading, error, isSuccess, isError, status } =
+  const router = useRouter();
+
+  const { mutateAsync, isLoading, error, isError, isSuccess } =
     useApiClient.pwdreset.requestPWDReset.useMutation();
 
   const handleChange = () => {
@@ -48,7 +52,8 @@ const Page = () => {
 
   type formsubmithandlerT = {
     requsetmode: "email" | "phone";
-    value: String;
+    email?: string;
+    phone?: string;
   };
 
   /// Define the form submit handler
@@ -60,14 +65,21 @@ const Page = () => {
         ...values,
       });
 
-      if (error) {
-        return;
+      if (isSuccess || data) {
+        console.log(data);
+        notifications.show({
+          autoClose: 5000,
+          onClose: () => {
+            router.push("/auth/login");
+          },
+          title: "password reset Instructions Sent",
+          message: `if your account avilable, you will receive an Instructions, Please check your ${
+            showEmail ? "Email" : "phone"
+          } for the password reset Instructions`,
+          color: "green",
+        });
       }
-
-      data;
-    } catch (e) {
-      console.log(e);
-    }
+    } catch (e) {}
   };
 
   return (
@@ -107,7 +119,9 @@ const Page = () => {
                   (values: { email: string; phone: string }) => {
                     return formsubmithandler({
                       requsetmode: showEmail ? "email" : "phone",
-                      value: showEmail ? values.email : values.phone,
+                      ...(showEmail
+                        ? { email: values.email }
+                        : { phone: values.phone }),
                     });
                   },
                 )}

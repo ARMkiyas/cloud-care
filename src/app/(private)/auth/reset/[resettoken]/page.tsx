@@ -7,6 +7,10 @@ import myImage from "../../forgot-password/assets/logo-inline-qRb.png";
 import { z } from "zod";
 import { Button, PasswordInput } from "@mantine/core";
 import { useForm, zodResolver } from "@mantine/form";
+import { useApiClient } from "@/utils/trpc/Trpc";
+import { notifications } from "@mantine/notifications";
+import { useRouter } from "next/navigation";
+import { Rokkitt } from "next/font/google";
 
 // Define the schema for password validation using Zod
 const passwordSchema = z
@@ -29,6 +33,20 @@ interface paramsT {
 }
 
 export default function page({ params }: paramsT) {
+  const { mutateAsync, isLoading, isSuccess, isError } =
+    useApiClient.pwdreset.resetPWD.useMutation({
+      onError(error, variables, context) {
+        notifications.show({
+          onClose: () => {},
+          title: "Error",
+          message: error.message,
+          color: "red",
+        });
+      },
+    });
+
+  const router = useRouter();
+
   const form = useForm({
     initialValues: {
       newPassword: "",
@@ -39,10 +57,23 @@ export default function page({ params }: paramsT) {
   });
 
   const resethandler = async (values: z.infer<typeof passwordSchema>) => {
-    console.log({
-      ...values,
-      ResetToken: params.resettoken,
-    });
+    try {
+      const res = await mutateAsync({
+        newpassword: values.newPassword,
+        ResetToken: params.resettoken,
+      });
+
+      if (isSuccess || res) {
+        notifications.show({
+          onClose: () => {
+            router.push("/auth/login");
+          },
+          title: "Success",
+          message: "Password reset successfully",
+          color: "green",
+        });
+      }
+    } catch (error) {}
   };
 
   return (
@@ -100,6 +131,7 @@ export default function page({ params }: paramsT) {
                     mt="xl"
                     size="md"
                     type="submit"
+                    loading={isLoading}
                     color="green"
                     loaderProps={{ type: "dots" }}
                   >
