@@ -10,6 +10,7 @@ import { db } from "@/server/db";
 import { TRPCError } from "@trpc/server";
 import { hashPwd } from "@/utils/hashPwdHelper";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
+import { generatePasswordResetToken, verifyPasswordResetToken } from "@/utils/lib/auth/pwdResetHelpers";
 
 const crypto = require('crypto');
 
@@ -18,55 +19,6 @@ const SECRET = new TextEncoder().encode(
     process.env.RESET_PASSWORD_TOKEN_SECRET
 )
 const ALGORITHM = "HS256";
-
-
-
-
-async function generatePasswordResetToken(userId) {
-    const jti = crypto.randomBytes(64).toString('hex');
-    const payload = {
-        userId,
-        jti, // Set expiration time in seconds
-    };
-    const jwt = await new SignJWT(payload).setProtectedHeader({ alg: ALGORITHM })
-        .setIssuedAt()
-        .setIssuer('CloudCare.Auth')
-        .setAudience('http://localhost:3000')
-        .setExpirationTime('24h')
-        .setSubject('password-reset')
-        .sign(SECRET);
-
-
-    await db.user.update({
-        where: {
-            id: userId
-        },
-        data: {
-            PasswordResetToken: {
-                create: {
-                    token: jti,
-                }
-            }
-        }
-    })
-
-    return jwt;
-
-
-}
-
-async function verifyPasswordResetToken(token) {
-
-    const { payload } = await jwtVerify(token, SECRET, {
-        issuer: 'CloudCare.Auth',
-        audience: 'http://localhost:3000',
-        algorithms: [ALGORITHM]
-    });
-
-    return payload;
-
-
-}
 
 
 
@@ -91,10 +43,6 @@ const requestPWDResetSchema = z.object({
         })
     }
 
-    // 
-
-
-
 })
 
 
@@ -103,7 +51,6 @@ const resetPWDSchema = z.object({
     newpassword: z.string().nonempty("Please provide your new password").min(6, "Password must be at least 6 characters long"),
 
 })
-
 
 
 
