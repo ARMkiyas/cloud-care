@@ -20,6 +20,24 @@ import SuperJSON from "superjson";
 import { getUrl, transformer } from "./shared";
 import { useSession } from "next-auth/react";
 import { AppRouterType } from "@/server/api/root";
+import { notifications } from "@mantine/notifications";
+
+const errorHander = (error) => {
+  if (error instanceof TRPCClientError) {
+    console.log(error.data.code);
+    notifications.show({
+      title: error.data.code || "Error",
+      message: error.message,
+      color: "red",
+    });
+  } else {
+    notifications.show({
+      title: "Error",
+      message: "Something went wrong, please try again or contact support",
+      color: "red",
+    });
+  }
+};
 
 export const TrpcProvider: React.FC<{
   children: React.ReactNode;
@@ -35,6 +53,10 @@ export const TrpcProvider: React.FC<{
           queries: {
             refetchOnMount: false,
             refetchOnWindowFocus: false,
+            onError: errorHander,
+          },
+          mutations: {
+            onError: errorHander,
           },
         },
       }),
