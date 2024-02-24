@@ -16,7 +16,7 @@ const GetAppointmentsProcedure = protectedProcedure.input(scheduleGetProcedureSc
     try {
 
         if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER) && (ctx.session.user.role !== UserRoles.DOCTOR)) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
             })

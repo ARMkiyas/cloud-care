@@ -161,7 +161,7 @@ const PasswordResetRouter = createTRPCRouter({
                 status: 200,
                 error: null,
                 ok: true,
-                data: reseturl
+                data: []
             }
 
 
@@ -222,17 +222,12 @@ const PasswordResetRouter = createTRPCRouter({
                 status: 200,
                 error: null,
                 ok: true,
-                data: data
+                data: []
             }
 
         } catch (error) {
 
-            throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Something went wrong",
-                cause: error.message
-            })
-
+            return ErrorHandler(error, "Password Reset", "Error occurred while trying to reset password")
 
 
         } finally {
