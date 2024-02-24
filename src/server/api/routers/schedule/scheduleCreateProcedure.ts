@@ -12,7 +12,7 @@ import { ValidateDB } from "./validation/ValidateDB";
 const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedureSchema).mutation(async ({ input, ctx }) => {
     try {
         if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
             })
@@ -28,7 +28,7 @@ const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedure
         })
 
         if (!doctor) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "Invalid doctor id"
             })
@@ -45,7 +45,7 @@ const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedure
             })
 
             if (!opdRoom) {
-                return new TRPCError({
+                throw new TRPCError({
                     code: "UNPROCESSABLE_CONTENT",
                     message: "Invalid opd room id"
                 })
@@ -58,7 +58,7 @@ const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedure
 
         // const date = new Date(RecurrencePattern.ONCE ? input.once.date : input.recurrence === RecurrencePattern.WEEKLY ? input.weekly.startDate : input.monthly.date).getDay()
         // if (date === 0 || date === 6 || input.weekly.day === DayOfWeek.SATURDAY || input.weekly.day === DayOfWeek.SUNDAY || input.monthly.date.getDay() === 0 || input.monthly.date.getDay() === 6){
-        //     return new TRPCError({
+        //     throw new TRPCError({
         //         code: "UNPROCESSABLE_CONTENT",
         //         message: "Doctor can't have a schedule on Sunday or Saturday"
         //     })
@@ -84,7 +84,7 @@ const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedure
 
 
         if (!validate) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "Doctor already have a schedule for the given date and time"
             })

@@ -19,7 +19,7 @@ const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, i
     try {
 
         if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
             })
@@ -35,7 +35,7 @@ const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, i
         })
 
         if (!staff) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "NOT_FOUND",
                 message: "Staff not found",
             })
