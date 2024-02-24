@@ -12,7 +12,7 @@ const deleteAppointmentProcedure = protectedProcedure.input(deleteAppointmentPro
 
     try {
         if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
             })
@@ -29,7 +29,7 @@ const deleteAppointmentProcedure = protectedProcedure.input(deleteAppointmentPro
         })
 
         if (!appointment.count || appointment.count === 0) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "appointment not found"
             })

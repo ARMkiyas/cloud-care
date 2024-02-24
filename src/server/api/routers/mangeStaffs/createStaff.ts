@@ -15,7 +15,7 @@ const createStaffProceture = protectedProcedure.input(createStaffSchema).mutatio
 
     try {
         if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
             })

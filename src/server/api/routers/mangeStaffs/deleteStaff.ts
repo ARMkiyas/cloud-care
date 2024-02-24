@@ -12,7 +12,7 @@ const deleteStaffProceture = protectedProcedure.input(deleteStaffSchema).mutatio
 
     try {
         if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
             })
@@ -29,14 +29,14 @@ const deleteStaffProceture = protectedProcedure.input(deleteStaffSchema).mutatio
         })
 
         if (!staff) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "BAD_REQUEST",
                 message: `"Staff to delete does not exist"`,
             })
         }
 
         if (staff.user && staff.user.id === ctx.session.user.id) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "BAD_REQUEST",
                 message: `You cannot delete your own staff profile`,
             })

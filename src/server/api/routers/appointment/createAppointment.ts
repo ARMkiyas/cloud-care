@@ -28,7 +28,7 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
 
 
         if (!slot) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "The slot is not available",
             })
@@ -59,7 +59,7 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
         })
 
         if (isPetiontHasAppointment) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "You already have an appointment for this slot",
             })
@@ -67,7 +67,7 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
 
 
         if (slot.maxAppointmentsPerSlot <= slot._count.appointment) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "the slot is full. Please select another slot.",
             })

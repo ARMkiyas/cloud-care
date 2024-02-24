@@ -12,7 +12,7 @@ const scheduleDeleteProcedure = protectedProcedure.input(scheduleDeleteProcedure
 
     try {
         if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
             })
@@ -29,7 +29,7 @@ const scheduleDeleteProcedure = protectedProcedure.input(scheduleDeleteProcedure
         })
 
         if (!schedule.count || schedule.count === 0) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "Schedule not found"
             })
