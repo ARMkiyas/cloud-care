@@ -12,7 +12,7 @@ import PageLoader from "@/components/PageLoader";
 import { useRouter } from "next/navigation";
 import { Anchor, Button } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { apiclient } from "@/utils/trpc/Trpc";
+import { useApiClient } from "@/utils/trpc/Trpc";
 
 // Define the schema for OTP validation using Zod
 const OTPSchema = z.object({
@@ -31,7 +31,15 @@ const Page = () => {
   const [otpValue, setOTPValue] = useState("");
   const [verificationError, setVerificationError] = useState("");
   const [otpSent, setOtpSent] = useState(false);
-  const requst_2fa = apiclient.request2faotp.request.useMutation();
+  const requst_2fa = useApiClient.request2faotp.request.useMutation({
+    onError: (error) => {
+      notifications.show({
+        title: "Error",
+        message: error.message,
+        color: "red",
+      });
+    },
+  });
   const handleOTPVerification = async (e) => {
     e.preventDefault();
 
