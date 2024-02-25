@@ -1,4 +1,34 @@
-import React from 'react'
+"use client";
+import React from "react";
+import { useState } from 'react';
+import {
+  Table,
+  ScrollArea,
+  UnstyledButton,
+  Group,
+  Text,
+  Center,
+  TextInput,
+  rem,
+  keys,
+  Button,
+  Modal
+} from '@mantine/core';
+import { IconSelector, IconChevronDown, IconChevronUp, IconSearch } from '@tabler/icons-react';
+import classes from './TableSort.module.css';
+import {  IconPencil, IconTrash } from '@tabler/icons-react';
+interface RowData {
+  name: string;
+  email: string;
+  company: string;
+}
+
+interface ThProps {
+  children: React.ReactNode;
+  reversed: boolean;
+  sorted: boolean;
+  onSort(): void;
+}
 
 function Th({ children, reversed, sorted, onSort }: ThProps) {
   const Icon = sorted ? (reversed ? IconChevronDown : IconChevronDown) : IconSelector;
