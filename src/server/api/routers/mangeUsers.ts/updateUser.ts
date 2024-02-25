@@ -4,7 +4,8 @@ import { protectedProcedure } from "../../trpc";
 import { UserRoles } from "@prisma/client";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { TRPCError } from "@trpc/server";
-import { updateUserSchema } from "@/utils/ValidationSchemas/manageUserSc";
+import { updateUserSchema } from "./validation/schema";
+
 
 
 const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ ctx, input }) => {
@@ -12,7 +13,7 @@ const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ 
     try {
 
         if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
             })
@@ -20,7 +21,7 @@ const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ 
 
 
         if (ctx.session.user.id === input.userid.trim()) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "BAD_REQUEST",
                 message: "You cannot update your own account here, if you want to update your account go to profile settings and update your account",
             })

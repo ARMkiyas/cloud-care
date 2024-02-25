@@ -14,32 +14,30 @@ const ErrorHandler: globalTrpcApiPrismaErrorHandlerType = (error, ctx, action, m
 
     if (error instanceof PrismaClientKnownRequestError) {
 
-        console.log(error);
-
         switch (error.code) {
             case "P2002":
-                return new TRPCError({
+                throw new TRPCError({
                     code: "BAD_REQUEST",
                     message: message ? message : `${ctx} with ${error.meta.target} already exists`,
                     cause: error.message
                 })
 
             case "P2025":
-                return new TRPCError({
+                throw new TRPCError({
                     code: "BAD_REQUEST",
                     message: message ? message : `${ctx} to ${action} does not exist.`,
                     cause: error.message
                 })
 
             case "P2014":
-                return new TRPCError({
+                throw new TRPCError({
                     code: "BAD_REQUEST",
                     message: message ? message : `${ctx} already has an record`,
                     cause: error.message
                 })
 
             case "P2025":
-                return new TRPCError({
+                throw new TRPCError({
                     code: "BAD_REQUEST",
                     message: message ? message : `Invalid ${error.meta.target}, required record does not exist or is not connected`,
                     cause: error.message
@@ -47,14 +45,14 @@ const ErrorHandler: globalTrpcApiPrismaErrorHandlerType = (error, ctx, action, m
 
 
             case "P2016":
-                return new TRPCError({
+                throw new TRPCError({
                     code: "BAD_REQUEST",
                     message: message ? message : `Invalid ${error.meta.target},Query interpretation error.`,
                     cause: error.message
                 })
 
             case "P2020":
-                return new TRPCError({
+                throw new TRPCError({
                     code: "BAD_REQUEST",
                     message: message ? message : `Invalid ${error.meta.target}`,
                     cause: error.message
@@ -62,13 +60,15 @@ const ErrorHandler: globalTrpcApiPrismaErrorHandlerType = (error, ctx, action, m
         }
 
 
-        console.log(error);
 
     }
 
-    return new TRPCError({
+    console.log(error);
+
+    throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Something went wrong",
+        cause: error
     })
 
 }

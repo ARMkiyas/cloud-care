@@ -15,8 +15,6 @@ export const checkuseraccountexist = (userid: string) => {
         }
     })
 
-    console.log(user);
-
     return !!user
 
 }

@@ -1,9 +1,11 @@
+import "server-only";
 import { TRPCError } from "@trpc/server"
 import { protectedProcedure } from "../../trpc"
-import { updatestaffSchema } from "@/utils/ValidationSchemas/manageStaffSc"
+
 import { Prisma, UserRoles } from "@prisma/client"
 import { userImageUploader } from "@/utils/fileuploadhandler/userimageuploder"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error"
+import { updatestaffSchema } from "./validation/schema"
 
 const updatestaffProceture = protectedProcedure.input(updatestaffSchema).mutation(async ({ ctx, input }) => {
 
@@ -11,13 +13,13 @@ const updatestaffProceture = protectedProcedure.input(updatestaffSchema).mutatio
     try {
 
         if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
             })
         }
         // if (ctx.session.user.id === input.staffID) {
-        //     return new TRPCError({
+        //     throw new TRPCError({
         //         code: "BAD_REQUEST",
         //         message: "You cannot update your own staff profile",
         //     })

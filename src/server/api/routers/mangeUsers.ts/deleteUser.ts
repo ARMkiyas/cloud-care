@@ -4,7 +4,8 @@ import { protectedProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
 import { Prisma } from "@prisma/client";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
-import { deleteUserSchema } from "@/utils/ValidationSchemas/manageUserSc";
+import { deleteUserSchema } from "./validation/schema";
+
 
 
 
@@ -13,7 +14,7 @@ const deleteUser = protectedProcedure.input(deleteUserSchema).mutation(async ({ 
     try {
 
         if (ctx.session.user.id === input.userid.trim()) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "BAD_REQUEST",
                 message: "You cannot delete your own account here, if you want to delete your account go to profile settings and delete your account",
             })

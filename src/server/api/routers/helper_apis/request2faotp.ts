@@ -1,4 +1,4 @@
-import { z } from "zod";
+import "server-only";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../../trpc";
 import { generateOTP } from "@utils/OtpHelper"
 
