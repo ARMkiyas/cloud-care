@@ -7,19 +7,19 @@ import "./BookPageStyles.css";
 export default function page() {
   return (
     <div>
-      <div className="flex-col items-center overflow-hidden self-stretch relative flex min-h-[309px] w-full justify-center px-16 py-12 max-md:max-w-full max-md:px-5">
-        <img
-          loading="lazy"
+      <div className="mainContainer1">
+        {/* <img
+          loading="lazy"               
           srcSet="..."
           className="absolute h-full w-full object-cover object-center inset-0"
-        />
-        <div className="relative max-w-[1320px] flex w-full flex-col pl-3 pr-20 py-12 items-start max-md:max-w-full max-md:pr-5">
-          <div className="max-w-[625px] text-white text-6xl font-black leading-[76.8px] max-md:max-w-full max-md:text-4xl">
+        /> */}
+        <div className="containerMiddle">
+          <div className="containerText1">
             Book an Appointment
           </div>
-          <div className="flex items-stretch gap-0 mt-4">
+          <div className="containerText2dev">
             <div className="text-white text-base leading-6 uppercase">Home</div>
-            <div className="items-stretch flex justify-between gap-2 pl-2">
+            <div className="items-stretch flex justify-between gap-2 ">
               <div className="text-blue-50 text-base leading-6 uppercase">
                 /
               </div>
@@ -33,7 +33,7 @@ export default function page() {
             </div>
           </div>
         </div>
-      </div>
+      </div> 
       <div className="mainContainer">
         <div className="gap-5 flex max-md:flex-col max-md:items-stretch max-md:gap-0">
           <div className="flex flex-col items-stretch w-6/12 max-md:w-full max-md:ml-0">
