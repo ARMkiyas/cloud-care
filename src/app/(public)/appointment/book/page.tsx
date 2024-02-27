@@ -5,7 +5,7 @@ import { IconPhoneFilled, IconMailOpenedFilled } from "@tabler/icons-react";
 import "./BookPageStyles.css";
 import AppointmentContactCard from "../../components/AppointmentContactCard";
 import PubPageTopContainer from "../../components/PubPageTopContainer";
-import AppointmentBookingForm from "@/components/AppointmentBookingForm";
+import AppointmentBookingForm from "@/components/Appointment/AppointmentBookingForm";
 
 export default function page() {
   return (

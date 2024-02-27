@@ -1,6 +1,5 @@
 "use client";
 import {
-  StylesApiProps,
   TextInput,
   ClassNames,
   TextInputFactory,
@@ -8,14 +7,7 @@ import {
   InputBase,
   Textarea,
   Button,
-  Autocomplete,
   AutocompleteFactory,
-  AutocompleteProps,
-  Group,
-  Avatar,
-  Text,
-  OptionsFilter,
-  ComboboxItem,
   NativeSelectFactory,
   Select,
   SelectFactory,
@@ -24,11 +16,12 @@ import { DateInput, DateInputFactory } from "@mantine/dates";
 import { IconCalendarPlus } from "@tabler/icons-react";
 import React, { useState } from "react";
 import { IMaskInput } from "react-imask";
-import InputMask from "react-input-mask";
 import DoctorSelectAsync from "./DoctorSelect";
 import dayjs from "dayjs";
-import { useForm } from "@mantine/form";
+import { useForm, zodResolver } from "@mantine/form";
 import { z } from "zod";
+import { BookAppointmentSchema } from "@/utils/ValidationSchemas/FrontendValidation";
+import { FormValues } from "./Types";
 
 const sampleData = [
   {
@@ -99,8 +92,8 @@ const sampleData = [
   },
 ];
 
-const title = ["Mr", "Mrs", "Ms", "Miss", "Dr", "Prof"];
-const gender = ["Male", "Female"];
+const title = ["Mr", "Mrs", "Ms", "Miss", "Dr", "Prof"] as const;
+const gender = ["Male", "Female"] as const;
 
 const TextInputClasses: ClassNames<
   | TextInputFactory
@@ -114,46 +107,28 @@ const TextInputClasses: ClassNames<
   root: "w-full",
 };
 
-export type FormValues = {
-  patientTitle: "Mr" | "Mrs" | "Ms" | "Miss" | "Dr" | "Prof" | null;
-  patientFirstName: string;
-  patientLastName: string;
-  idType: "NIC" | "Passport" | null;
-  idNumber: string;
-  patientGender: "Male" | "Female" | null;
-  patientDob: Date | null;
-  patientAddress: string;
-  patientMobile: string;
-  patientEmail: string;
-  patientProblem: string;
-  AppointmentDate: Date | null;
-  slotId: string;
-};
-
 export default function AppointmentBookingForm() {
-  //   const [appointmentDate, setAppointmentDate] = useState<Date | null>(null);
-
   const [data, setData] = useState(sampleData);
 
   const form = useForm<FormValues>({
     initialValues: {
       patientTitle: "Mr",
-      patientFirstName: "",
-      patientLastName: "",
+      patientFirstName: undefined,
+      patientLastName: undefined,
       idType: "NIC",
-      idNumber: "",
+      idNumber: undefined,
       patientGender: "Male",
-      patientDob: null,
-      patientAddress: "",
-      patientMobile: "",
-      patientEmail: "",
-      patientProblem: "",
-      AppointmentDate: null,
-      slotId: "",
+      patientDob: undefined,
+      patientAddress: undefined,
+      patientMobile: undefined,
+      patientEmail: undefined,
+      patientProblem: undefined,
+      AppointmentDate: undefined,
+      slotId: undefined,
+      docid: undefined,
     },
+    validate: zodResolver(BookAppointmentSchema),
   });
-
-  const [docid, setDocid] = useState<string | null>(null);
 
   const isAppointmentDate = (date) => {
     const key = dayjs(date).format("YYYY-MM-DD");
@@ -208,10 +183,10 @@ export default function AppointmentBookingForm() {
   };
 
   const getId = () => {
-    // (G1) GET THE KEY OF THE SELECTED DATE
+    //  GET THE KEY OF THE SELECTED DATE
     const key = dayjs(form.values.AppointmentDate).format("YYYY-MM-DD");
 
-    // (G2) FIND THE ITEM THAT MATCHES THE KEY
+    // FIND THE ITEM THAT MATCHES THE KEY
     const item = data.filter((item) => {
       if (item.Date && dayjs(item.Date).format("YYYY-MM-DD") === key) {
         console.log("once");
@@ -240,19 +215,17 @@ export default function AppointmentBookingForm() {
 
     console.log(item);
 
-    // (G3) RETURN THE ID OF THE ITEM
+    // RETURN  THE ITEM
     return item ? item : null;
   };
 
-  // (C) FUNCTION TO EXCLUDE NON-APPOINTMENT DATES
+  //  FUNCTION TO EXCLUDE NON-APPOINTMENT DATES
   const excludeDate = (date) => {
     return !isAppointmentDate(date);
   };
 
   const formsubmitHanlder = () => {
     const id = getId();
-
-    console.log("docid", docid);
 
     console.log(form.values);
     console.log(id);
@@ -349,7 +322,9 @@ export default function AppointmentBookingForm() {
             size="md"
             placeholder="Your Phone Number (optional)"
             classNames={TextInputClasses}
-            {...form.getInputProps("patientMobile")}
+            {...form.getInputProps("patientMobile", {
+              type: "input",
+            })}
           />
         </div>
         <div className="flex items-stretch justify-between gap-4 mt-5 max-md:max-w-full max-md:flex-wrap">
@@ -361,17 +336,14 @@ export default function AppointmentBookingForm() {
           />
         </div>
         <div className="flex items-stretch justify-between gap-4 mt-5 max-md:max-w-full max-md:flex-wrap">
-          <DoctorSelectAsync setDocid={setDocid} />
+          <DoctorSelectAsync form={form} />
         </div>
         <div className="flex items-stretch justify-between gap-4 mt-5 max-md:max-w-full max-md:flex-wrap">
           <DateInput
+            minDate={new Date()}
             size="md"
-            // pass the excludeDate function
             excludeDate={excludeDate}
-            // you can also pass any other props that you need
-            // for example, you can change the label, the placeholder, the value format, etc.
-            // see the documentation for more details
-            disabled={!docid}
+            disabled={!form.values.docid}
             classNames={TextInputClasses}
             placeholder="Pick an appointment date"
             valueFormat="DD MMM YYYY"
@@ -387,7 +359,7 @@ export default function AppointmentBookingForm() {
                 value: "clskwnyuq000kt56gf8a2n5lb",
               },
             ]}
-            disabled={!docid || !form.values.AppointmentDate}
+            disabled={!form.values.docid || !form.values.AppointmentDate}
             {...form.getInputProps("slotId")}
           />
         </div>

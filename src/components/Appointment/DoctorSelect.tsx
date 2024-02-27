@@ -1,4 +1,4 @@
-import { Dispatch, useState } from "react";
+import { useState } from "react";
 import {
   Avatar,
   Combobox,
@@ -10,8 +10,9 @@ import {
   Text,
   useCombobox,
 } from "@mantine/core";
-import { useForm, UseFormReturnType } from "@mantine/form";
-import { FormValues } from "./AppointmentBookingForm";
+import { UseFormReturnType } from "@mantine/form";
+import { FormValues } from "./Types";
+
 interface Item {
   emoji: string;
   value: string;
@@ -111,12 +112,10 @@ function getAsyncData() {
 }
 
 interface DoctorSelectAsyncProps {
-  setDocid: Dispatch<React.SetStateAction<string | null>>;
+  form?: UseFormReturnType<FormValues>;
 }
 
-export default function DoctorSelectAsync({
-  setDocid,
-}: DoctorSelectAsyncProps) {
+export default function DoctorSelectAsync({ form }: DoctorSelectAsyncProps) {
   const [data, setData] = useState<Doctor[]>([]);
 
   const combobox = useCombobox({
@@ -155,7 +154,7 @@ export default function DoctorSelectAsync({
       withinPortal={false}
       onOptionSubmit={(val) => {
         setValue(val);
-        setDocid(val);
+        form.setFieldValue("docid", val);
         combobox.closeDropdown();
       }}
     >
@@ -175,6 +174,7 @@ export default function DoctorSelectAsync({
             root: "w-full",
             wrapper: "w-full",
           }}
+          error={form.errors.docid}
         >
           {selectedOption ? (
             <SelectOption {...selectedOption} />
