@@ -38,8 +38,8 @@ export default function page() {
               <AppointmentContactCard />
             </div>
           </div>
-          <div className="flex flex-col items-stretch w-6/12 ml-5 max-md:w-full max-md:ml-0">
-            <div className="flex flex-col items-stretch self-stretch w-full px-12 py-10 rounded-lg bg-blue-50 grow max-md:max-w-full max-md:mt-10 max-md:px-5">
+          <div className="flex flex-col items-stretch w-6/12 ml-5 max-md:w-full max-md:ml-0 mr-7">
+            <div className="flex flex-col items-stretch self-stretch w-full px-6 rounded-lg py-7 bg-blue-50 grow max-md:max-w-full max-md:mt-10 max-md:px-5">
               <AppointmentBookingForm />
             </div>
           </div>
