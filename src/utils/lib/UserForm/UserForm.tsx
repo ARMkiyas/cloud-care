@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { IconAt, IconLock,IconChevronDown } from '@tabler/icons-react';
+"use client";
+
+import React, { useState} from 'react';
+import { IconLock,IconChevronDown } from '@tabler/icons-react';
 import {
   Button,
   Group,
@@ -8,9 +10,10 @@ import {
   PasswordInput,
   Text,
   TextInput,
-  Input
+  Input,FileButton,Select
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { useApiClient } from '@/utils/trpc/Trpc';
 
 export interface AuthenticationFormProps {
   noShadow?: boolean;
@@ -28,28 +31,106 @@ export function UserForm({
   const [formType, setFormType] = useState<'register' | 'login'>('register');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [users,setUsers]=useState<any[]>([]);
+  const [staffMembers, setStaffMembers] = useState<any[]>([]);
+  const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+
+  const form = useForm({
+    initialValues: {
+      staffID: '',
+      username: '',
+      password: '',
+      role:'',
+      confirmPassword: '',
+      image:'',
+      
+    },
+  });
+  
+  const{
+    mutateAsync,
+    isError:addUsererror,
+    isSuccess:addUsersuccess,
+  }=useApiClient.manageUsers.addUser.useMutation();
+
+  const{
+    data:staffdata,
+    isError,
+    isLoading,
+  }=useApiClient.manageStaff.getStaff.useQuery({});
+  console.log("staffdata",staffdata);
+
+  
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+
+      if (!form.values.role) {
+        throw new Error('Role field is required');
+    }
+    if (formType === 'register' && form.values.password !== form.values.confirmPassword) {
+      throw new Error('Passwords do not match');
+    }
+    if (!selectedStaffId) {
+      throw new Error('A staff member must be selected');
+    }
+
+      // Call the API to add the user
+     const response= await mutateAsync(
+      {
+        staffID: selectedStaffId,
+        password: form.values.password,
+        username: form.values.username,
+        //@ts-ignore
+        role: form.values.role,
+        twoFactorEnabled: false,
+        //@ts-ignore
+        image: files[0] || undefined,
+      }
+     );
+     
+
+      // Reset form and loading state
+      form.reset();
+      setFiles([]);
+      setLoading(false);
+      setUsers((prevUsers) => [...prevUsers, response]);
+    } catch (error) {
+      // Handle errors from API call
+      setError('Failed to save user data. Please try again.');
+      
+      setLoading(false);
+    }
+    
+  };
+  console.log("add user error",addUsererror)
+
 
   const toggleFormType = () => {
     setFormType((current) => (current === 'register' ? 'login' : 'register'));
     setError(null);
   };
 
-  const form = useForm({
-    initialValues: {
-      firstName: '',
-      lastName: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
-      termsOfService: true,
-    },
-  });
+ 
+  const updateStaffMembers = (staffdata) => {
+  if ((staffdata)) {
+    const updatedStaffMembers = staffdata.data.map((staff) => ({
+      value: staff.id,
+      label: `${staff.firstName} ${staff.lastName}`
+    }));
+    console.log("updated StaffMember",updatedStaffMembers);
+    return updatedStaffMembers;
+  } else {
+    return [];
+  }
+};
 
-  const handleSubmit = () => {
-    setLoading(true);
-    setError(null);
-    
-  };
+const staffMembersselect = updateStaffMembers(staffdata);
+
+  console.log('staffMembers:', updateStaffMembers(staffdata));
 
   return (
     <Paper
@@ -62,65 +143,63 @@ export function UserForm({
       }}
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
+
+      <Group justify="center">
+        <FileButton onChange={setFiles} accept="image/png,image/jpeg" multiple>
+          {(props) => <Button {...props}>Upload Profile</Button>}
+        </FileButton>
+      </Group>
+
+      {files.length > 0 && (
+        <Text size="sm" mt="sm">
+          Picked files:
+        </Text>
+      )}
+
+      <ul>
+        {files.map((file, index) => (
+          <li key={index}>{file.name}</li>
+        ))}
+      </ul>
+
         <LoadingOverlay visible={loading} />
           <Group grow>
             <TextInput
               data-autofocus
               required
-              placeholder="Your first name"
-              label="First name"
-              {...form.getInputProps('firstName')}
+              placeholder="User name"
+              label="User Name"
+            
+              {...form.getInputProps('username')}
             />
+            <Select
+              label="Select Staff Member"
+              placeholder="Select Staff Member"
+              value={selectedStaffId}
+              onChange={(value) => setSelectedStaffId(value)}
+              data={staffMembersselect}
+             />
 
-            <TextInput
-              required
-              placeholder="Your last name"
-              label="Last name"
-              {...form.getInputProps('lastName')}
-            />
-          </Group>
+        </Group>
         
 
-        <TextInput
-          mt="md"
-          required
-          placeholder="Your email"
-          label="Email"
-          leftSection={<IconAt size={16} stroke={1.5} />}
-          {...form.getInputProps('email')}
-        />
-
       <Group grow>
-        <Input.Wrapper label="Gender" className='mt-5' required>
-        <Input
-        component="select"
-        rightSection={<IconChevronDown size={14} stroke={1.5} />}
-        pointer
-        mt="md"
-      >
-        <option value="1">Male</option>
-        <option value="2">Female</option>
-      </Input></Input.Wrapper>
+  
       <Input.Wrapper label="Role" className='mt-5' required>
         <Input
         component="select"
         rightSection={<IconChevronDown size={14} stroke={1.5} />}
         pointer
         mt="md"
+        {...form.getInputProps('role')}
       >
-        <option value="1">doctor</option>
-        <option value="2">nurse</option>
-        <option value="3">other staff</option>
-      </Input></Input.Wrapper>
-      <Input.Wrapper label="Status" className='mt-5' required>
-        <Input
-        component="select"
-        rightSection={<IconChevronDown size={14} stroke={1.5} />}
-        pointer
-        mt="md"
-      >
-        <option value="1">Active</option>
-        <option value="2">Disable</option>
+        <option value="GUEST">Select Role</option>
+        <option value="ADMIN">Admin</option>
+        <option value="ROOTUSER">Root User</option>
+        <option value="STAFF">Staff</option>
+        <option value="DOCTOR">Doctor</option>
+        <option value="NURSE">Nurse</option>
+        <option value="GUEST">Guest</option>
       </Input></Input.Wrapper>
       </Group>
 
@@ -144,13 +223,6 @@ export function UserForm({
           />
         )}
 
-        {/*formType === 'register' && (
-          <Checkbox
-            mt="xl"
-            label="I agree to sell my soul and privacy to this corporation"
-            {...form.getInputProps('termsOfService', { type: 'checkbox' })}
-          />
-        )*/}
 
         {error && (
           <Text c="red" size="sm" mt="sm">
@@ -164,6 +236,7 @@ export function UserForm({
               Save
             </Button>
           </Group>
+
         
       </form>
     </Paper>
