@@ -6,6 +6,7 @@ import { z } from "zod"
 export const createAppointmentSchema = z.object({
 
     slotId: z.string(),
+    AppointmentDate: z.date(),
     patientTitle: z.nativeEnum(title).optional(),
     patientFirstName: z.string().min(2),
     patientLastName: z.string().min(2),
@@ -16,7 +17,7 @@ export const createAppointmentSchema = z.object({
     patientAddress: z.string().min(5).optional(),
     patientMobile: z.string().min(9).max(14).optional(),
     patientEmail: z.string().email(),
-
+    patientNote: z.string().optional()
 
 }).superRefine((val, ctx) => {
 

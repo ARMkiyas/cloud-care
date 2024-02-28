@@ -82,6 +82,8 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
         const slotTimePerAppointment = (new Date(slot.endTime).getTime() - new Date(slot.startTime).getTime()) / slot.maxAppointmentsPerSlot
 
         const appointment = await ctx.db.appointment.create({
+
+
             data: {
                 doctor: {
                     connect: {
@@ -119,6 +121,8 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
                         },
                     }
                 },
+                appointmentDate: input.AppointmentDate,
+                patientNote: input.patientNote,
                 referenceid: uniqueId,
                 appointmentNumber: slot._count.appointment + 1,
                 appointmentstart: new Date(new Date(slot.startTime).getTime() + (slotTimePerAppointment * (slot._count.appointment))).toISOString(),

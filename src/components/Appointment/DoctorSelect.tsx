@@ -12,6 +12,7 @@ import {
 } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { FormValues } from "./Types";
+import { useApiClient } from "@/utils/trpc/Trpc";
 
 interface Item {
   emoji: string;
@@ -117,6 +118,9 @@ interface DoctorSelectAsyncProps {
 
 export default function DoctorSelectAsync({ form }: DoctorSelectAsyncProps) {
   const [data, setData] = useState<Doctor[]>([]);
+
+  const { data: doctors, isLoading } =
+    useApiClient.schedule.getScheduledDocs.useMutation({});
 
   const combobox = useCombobox({
     scrollBehavior: "smooth",

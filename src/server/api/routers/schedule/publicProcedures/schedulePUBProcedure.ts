@@ -3,14 +3,15 @@ import "server-only";
 import { z } from "zod";
 
 import { TRPCError } from "@trpc/server";
-import { DayOfWeek, RecurrencePattern, UserRoles } from "@prisma/client";
+import { DayOfWeek, DoctorSpecialization, RecurrencePattern, UserRoles } from "@prisma/client";
 
 const scheduleGetProcedureSchema = z.object({
 
     doctorId: z.string().nonempty(),
     doctorname: z.string().nonempty().optional(),
     date: z.date().optional(),
-    order: z.enum(["asc", "desc"]).default("asc").optional()
+    order: z.enum(["asc", "desc"]).default("asc").optional(),
+    specialty: z.nativeEnum(DoctorSpecialization).optional(),
 
 })
 
@@ -31,6 +32,9 @@ const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).m
                     equals: input.date
                 },
                 doctor: {
+                    specialization: {
+                        equals: input.specialty
+                    },
                     staff: {
                         lastName: {
                             search: input.doctorname
@@ -38,6 +42,7 @@ const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).m
                         firstName: {
                             search: input.doctorname
                         }
+
                     }
                 }
 
@@ -47,11 +52,13 @@ const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).m
                 doctor: {
                     select: {
                         id: true,
+                        specialization: true,
                         staff: {
                             select: {
                                 title: true,
                                 firstName: true,
-                                lastName: true
+                                lastName: true,
+                                image: true
                             }
                         }
                     }

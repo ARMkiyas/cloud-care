@@ -11,6 +11,7 @@ import {
   NativeSelectFactory,
   Select,
   SelectFactory,
+  Loader,
 } from "@mantine/core";
 import { DateInput, DateInputFactory } from "@mantine/dates";
 import { IconCalendarPlus } from "@tabler/icons-react";
@@ -122,7 +123,7 @@ export default function AppointmentBookingForm() {
       patientAddress: undefined,
       patientMobile: undefined,
       patientEmail: undefined,
-      patientProblem: undefined,
+      patientNote: undefined,
       AppointmentDate: undefined,
       slotId: undefined,
       docid: undefined,
@@ -348,6 +349,7 @@ export default function AppointmentBookingForm() {
             placeholder="Pick an appointment date"
             valueFormat="DD MMM YYYY"
             {...form.getInputProps("AppointmentDate")}
+            // rightSection={<Loader size={18} />}
           />
           <Select
             size="md"
@@ -374,7 +376,7 @@ export default function AppointmentBookingForm() {
             }}
             minRows={5}
             maxRows={6}
-            {...form.getInputProps("patientProblem")}
+            {...form.getInputProps("patientNote")}
           />
         </div>
         <div className="mt-8">
