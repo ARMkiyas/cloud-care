@@ -14,9 +14,12 @@ const GetScheduledDocsProcedureSchema = z.object({
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { publicProcedure } from "@/server/api/trpc";
 
-const GetScheduledDocs = publicProcedure.input(GetScheduledDocsProcedureSchema).mutation(async ({ input, ctx }) => {
+const GetScheduledDocs = publicProcedure.input(GetScheduledDocsProcedureSchema).query(async ({ input, ctx }) => {
 
     try {
+
+
+
         const doctors = await ctx.db.doctor.findMany({
             where: {
 
@@ -65,7 +68,7 @@ const GetScheduledDocs = publicProcedure.input(GetScheduledDocsProcedureSchema).
 
 
 
-        return ErrorHandler(error, "schedule", "Error getting schedule")
+        throw ErrorHandler(error, "schedule", "Error getting schedule")
     } finally {
         ctx.db.$disconnect()
     }
