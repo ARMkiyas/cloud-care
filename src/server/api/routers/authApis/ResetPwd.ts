@@ -113,11 +113,7 @@ const PasswordResetRouter = createTRPCRouter({
 
 
         } catch (error) {
-            throw new TRPCError({
-                code: "INTERNAL_SERVER_ERROR",
-                message: "Something went wrong",
-                cause: error.message
-            })
+            throw ErrorHandler(error, "Password Reset", "Error occurred while trying to reset password")
         } finally {
             ctx.db.$disconnect();
         }
@@ -174,7 +170,7 @@ const PasswordResetRouter = createTRPCRouter({
 
         } catch (error) {
 
-            return ErrorHandler(error, "Password Reset", "Error occurred while trying to reset password")
+            throw ErrorHandler(error, "Password Reset", "Error occurred while trying to reset password")
 
 
         } finally {

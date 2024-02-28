@@ -47,7 +47,7 @@ const deleteAppointmentProcedure = protectedProcedure.input(deleteAppointmentPro
     } catch (error) {
 
 
-        return ErrorHandler(error, "deleteAppointment", "An error occurred while trying to delete appointment")
+        throw ErrorHandler(error, "deleteAppointment", "An error occurred while trying to delete appointment")
     } finally {
         ctx.db.$disconnect()
     }

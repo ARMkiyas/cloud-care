@@ -7,7 +7,7 @@ type globalTrpcApiPrismaErrorHandlerType = (
     ctx: string,
     message?: string,
     action?: string
-) => void
+) => TRPCError
 
 
 const ErrorHandler: globalTrpcApiPrismaErrorHandlerType = (error, ctx, action, message) => {
