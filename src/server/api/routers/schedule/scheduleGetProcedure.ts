@@ -75,7 +75,7 @@ const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema
     } catch (error) {
 
 
-        return ErrorHandler(error, "schedule", "Error getting schedule")
+        throw ErrorHandler(error, "schedule", "Error getting schedule")
     } finally {
         ctx.db.$disconnect()
     }
