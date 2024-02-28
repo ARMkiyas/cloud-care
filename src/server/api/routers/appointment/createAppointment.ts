@@ -156,9 +156,7 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
 
     } catch (error) {
 
-        console.log(error);
-
-        return ErrorHandler(error, "createAppointment", "An error occured while creating an appointment. Please try again later.")
+        throw ErrorHandler(error, "createAppointment", "An error occured while creating an appointment. Please try again later.")
 
 
     }

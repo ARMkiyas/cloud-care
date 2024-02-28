@@ -75,7 +75,7 @@ const deleteStaffProceture = protectedProcedure.input(deleteStaffSchema).mutatio
     catch (e) {
 
 
-        return ErrorHandler(e, "Staff")
+        throw ErrorHandler(e, "Staff")
 
 
     } finally {

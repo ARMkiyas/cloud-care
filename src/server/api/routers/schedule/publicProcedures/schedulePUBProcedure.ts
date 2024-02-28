@@ -107,7 +107,7 @@ const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).m
 
 
 
-        return ErrorHandler(error, "schedule", "Error getting schedule")
+        throw ErrorHandler(error, "schedule", "Error getting schedule")
     } finally {
         ctx.db.$disconnect()
     }

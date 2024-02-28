@@ -143,7 +143,7 @@ const scheduleCreateProcedure = protectedProcedure.input(scheduleCreateProcedure
     } catch (error) {
 
         console.log(error);
-        return ErrorHandler(error, "Schedule")
+        throw ErrorHandler(error, "Schedule")
 
 
     } finally {

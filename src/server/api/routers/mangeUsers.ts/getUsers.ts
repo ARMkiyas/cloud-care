@@ -71,7 +71,7 @@ const getUsers = protectedProcedure.input(getUserschema).query(async ({ ctx, inp
 
     } catch (error) {
 
-        return ErrorHandler(error, "User")
+        throw ErrorHandler(error, "User")
     } finally {
         ctx.db.$disconnect();
     }
