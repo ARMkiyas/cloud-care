@@ -43,7 +43,7 @@ const CheckAppointmentProcedure = publicProcedure.input(CheckAppointmentProcedur
 
 
     } catch (error) {
-        return ErrorHandler(error, "GetAppointments", "An error occurred while trying to get appointments")
+        throw ErrorHandler(error, "GetAppointments", "An error occurred while trying to get appointments")
     } finally {
         ctx.db.$disconnect()
     }
