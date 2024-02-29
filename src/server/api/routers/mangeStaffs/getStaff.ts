@@ -83,7 +83,7 @@ const getStaffProceture = protectedProcedure
 
 
         } catch (e) {
-            return ErrorHandler(e, "Staff")
+            throw ErrorHandler(e, "Staff")
 
         } finally {
             ctx.db.$disconnect();

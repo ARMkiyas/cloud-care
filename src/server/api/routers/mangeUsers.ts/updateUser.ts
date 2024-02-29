@@ -66,7 +66,7 @@ const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ 
 
     } catch (error) {
 
-        return ErrorHandler(error, "User", "update")
+        throw ErrorHandler(error, "User", "update")
 
 
     } finally {
