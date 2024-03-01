@@ -19,7 +19,7 @@ const scheduleGetProcedureSchema = z.object({
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { publicProcedure } from "@/server/api/trpc";
 
-const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).mutation(async ({ input, ctx }) => {
+const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).query(async ({ input, ctx }) => {
 
     try {
 
@@ -74,15 +74,7 @@ const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).m
                         ScheduleId: true,
                     }
                 },
-                Appointment: {
-                    select: {
-                        Slot: {
-                            select: {
-                                _count: true
-                            }
-                        }
-                    }
-                },
+
                 _count: {
                     select: {
                         Appointment: true,

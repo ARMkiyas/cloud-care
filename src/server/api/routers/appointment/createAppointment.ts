@@ -4,6 +4,7 @@ import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { TRPCError } from "@trpc/server";
 import { createAppointmentSchema } from "./validation/schema";
 import generateUniqueReferenceId from "@/utils/lib/UniqueReferenceIdGenerator";
+import dayjs from "dayjs";
 
 
 const createAppointment = publicProcedure.input(createAppointmentSchema).mutation(async ({ input, ctx }) => {
@@ -113,7 +114,7 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
                             lastName: input.patientLastName,
                             NIC: input.patientNIC && input.patientNIC.trim(),
                             Passport: input.patientPassport && input.patientPassport.trim(),
-                            dateOfBirth: input.patientDob,
+                            dateOfBirth: new Date(dayjs(input.patientDob).format("YYYY-MM-DD")).toISOString(),
                             email: input.patientEmail,
                             gender: input.patientGender,
                             address: input.patientAddress,
@@ -121,7 +122,7 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
                         },
                     }
                 },
-                appointmentDate: input.AppointmentDate,
+                appointmentDate: new Date(dayjs(input.AppointmentDate).format("YYYY-MM-DD")).toISOString(),
                 patientNote: input.patientNote,
                 referenceid: uniqueId,
                 appointmentNumber: slot._count.appointment + 1,
@@ -131,6 +132,9 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
 
             }
         })
+
+        console.log("input", dayjs(input.AppointmentDate).format('YYYY-MM-DD'));
+        console.log("output", dayjs(appointment.appointmentDate).format('YYYY-MM-DD'));
 
 
 

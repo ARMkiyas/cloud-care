@@ -25,6 +25,7 @@ import { notifications } from "@mantine/notifications";
 const errorHander = (error) => {
   if (error instanceof TRPCClientError) {
     console.log(error.data.code);
+    console.log(error);
     notifications.show({
       title: error.data.code || "Error",
       message: error.message,

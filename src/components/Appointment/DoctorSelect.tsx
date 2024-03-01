@@ -49,6 +49,7 @@ function SelectOption({
 
 interface DoctorSelectAsyncProps {
   form?: UseFormReturnType<FormValues>;
+  reset?: boolean;
 }
 
 export default function DoctorSelectAsync({ form }: DoctorSelectAsyncProps) {
@@ -108,7 +109,12 @@ export default function DoctorSelectAsync({ form }: DoctorSelectAsyncProps) {
       withinPortal={false}
       onOptionSubmit={(val) => {
         setValue(val);
-        form.setFieldValue("docid", val);
+        form.setValues({
+          docid: val,
+          AppointmentDate: null,
+          slotId: null,
+        });
+
         combobox.closeDropdown();
       }}
     >
