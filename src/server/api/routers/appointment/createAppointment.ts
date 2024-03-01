@@ -38,6 +38,7 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
 
         const isPetiontHasAppointment = await ctx.db.appointment.findFirst({
             where: {
+                appointmentDate: new Date(dayjs(input.AppointmentDate).format("YYYY-MM-DD")).toISOString(),
                 Slot: {
                     id: input.slotId.trim()
                 },
@@ -62,7 +63,7 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
         if (isPetiontHasAppointment) {
             throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
-                message: "You already have an appointment for this slot",
+                message: "You already have an appointment in this date. Please select another date",
             })
         }
 
@@ -75,16 +76,11 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
         }
 
 
-
-
-
         const uniqueId = generateUniqueReferenceId('cloudcare'); // Generate a unique reference id for the appointment
 
         const slotTimePerAppointment = (new Date(slot.endTime).getTime() - new Date(slot.startTime).getTime()) / slot.maxAppointmentsPerSlot
 
         const appointment = await ctx.db.appointment.create({
-
-
             data: {
                 doctor: {
                     connect: {
@@ -133,14 +129,6 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
             }
         })
 
-        console.log("input", dayjs(input.AppointmentDate).format('YYYY-MM-DD'));
-        console.log("output", dayjs(appointment.appointmentDate).format('YYYY-MM-DD'));
-
-
-
-
-
-
         return {
             data: appointment,
             status: 200,
@@ -148,14 +136,6 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
             ok: true,
 
         }
-
-
-
-
-
-
-
-
 
 
     } catch (error) {

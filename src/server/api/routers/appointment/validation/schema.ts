@@ -37,6 +37,22 @@ export const createAppointmentSchema = z.object({
         })
     }
 
+    if (val.patientDob > new Date()) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Date of birth cannot be in the future"
+        })
+    }
+
+    if (val.AppointmentDate < new Date()) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Appointment date cannot be in the past"
+        })
+    }
+
+
+
 
 
 })
