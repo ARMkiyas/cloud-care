@@ -160,7 +160,6 @@ export default function AppointmentBookingForm() {
         dayjs(item.Date).isAfter(dayjs()) &&
         dayjs(item.Date).format("YYYY-MM-DD") === key
       ) {
-        console.log("once");
         return true;
       }
       if (
@@ -183,7 +182,6 @@ export default function AppointmentBookingForm() {
       return false;
     });
 
-    console.log(item);
     type Slottype = (typeof item)[0]["Slot"][0];
 
     let slotsNoSorted: Slottype[] = [];

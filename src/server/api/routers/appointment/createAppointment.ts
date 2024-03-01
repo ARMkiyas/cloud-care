@@ -143,6 +143,9 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
         throw ErrorHandler(error, "createAppointment", "An error occured while creating an appointment. Please try again later.")
 
 
+    } finally {
+
+        ctx.db.$disconnect()
     }
 
 

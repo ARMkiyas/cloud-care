@@ -61,7 +61,6 @@ export default function DoctorSelectAsync({ form }: DoctorSelectAsyncProps) {
     isError,
   } = useApiClient.schedule.getScheduledDocs.useQuery({});
 
-  console.log(isFetching);
   const combobox = useCombobox({
     scrollBehavior: "smooth",
     onDropdownClose: () => combobox.resetSelectedOption(),
