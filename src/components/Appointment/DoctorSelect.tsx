@@ -12,6 +12,7 @@ import {
 } from "@mantine/core";
 import { UseFormReturnType } from "@mantine/form";
 import { FormValues } from "./Types";
+import { useApiClient } from "@/utils/trpc/Trpc";
 
 interface Item {
   emoji: string;
@@ -25,128 +26,82 @@ interface Doctor {
   speciality: string;
 }
 
-const usersData: Doctor[] = [
-  {
-    id: "gdfgf",
-    name: "Dr.Emily Johnson",
-    image:
-      "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-7.png",
-    speciality: "General Practitioner",
-  },
-  {
-    id: "cls3inf740fdgdfg00ffbmgyjtk4lxr",
-    name: "Dr.Ava Rodriguez",
-    image:
-      "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-8.png",
-    speciality: "General Practitioner",
-  },
-  {
-    id: "cls3inf74000dfgffbmgyjtk4lxr",
-    name: "Dr.Olivia Chen",
-    image:
-      "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-4.png",
-    speciality: "General Practitioner",
-  },
-  {
-    id: "cls3inf74000fdgdfffbmgyjtk4lxr",
-    name: "Dr.Ethan Barnes",
-    image:
-      "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png",
-    speciality: "General Practitioner",
-  },
-  {
-    id: "cls3inf74000ffdgdfbmgyjtk4lxr",
-    name: "Dr.Mason Taylor",
-    image:
-      "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png",
-    speciality: "General Practitioner",
-  },
-  {
-    id: "cls3inf74000fdgffbmgyjtk4lxr",
-    name: "Dr.Ava Rodriguez",
-    image:
-      "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-8.png",
-    speciality: "General Practitioner",
-  },
-  {
-    id: "cls3inf74000ffdfgbmgyjtk4lxr",
-    name: "Dr.Olivia Chen",
-    image:
-      "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-4.png",
-    speciality: "General Practitioner",
-  },
-  {
-    id: "cls3inf74000ffbmdfgdgyjtk4lxr",
-    name: "Dr.Ethan Barnes",
-    image:
-      "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png",
-    speciality: "General Practitioner",
-  },
-  {
-    id: "cls3inf74000ffbfdgdmgyjtk4lxr",
-    name: "Dr.Mason Taylor",
-    image:
-      "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-2.png",
-    speciality: "orthopedic surgeon",
-  },
-];
-
-function SelectOption({ name, speciality, image }: Doctor) {
+function SelectOption({
+  id,
+  title,
+  firstName,
+  lastName,
+  image,
+  specialization,
+}) {
   return (
     <Group>
       <Avatar src={image} size={36} radius="xl" />
       <div>
-        <Text size="sm">{name}</Text>
+        <Text size="sm">{`${title}.${firstName} ${lastName}`}</Text>
         <Text size="xs" opacity={0.5}>
-          {speciality}
+          {(specialization as string).split("_").join(" ")}
         </Text>
       </div>
     </Group>
   );
 }
 
-function getAsyncData() {
-  return new Promise<Doctor[]>((resolve) => {
-    setTimeout(() => resolve(usersData), 2000);
-  });
-}
-
 interface DoctorSelectAsyncProps {
   form?: UseFormReturnType<FormValues>;
+  reset?: boolean;
 }
 
 export default function DoctorSelectAsync({ form }: DoctorSelectAsyncProps) {
-  const [data, setData] = useState<Doctor[]>([]);
+  const {
+    data: doctors,
+    isLoading,
+    refetch,
+    isFetching,
+    isError,
+  } = useApiClient.schedule.getScheduledDocs.useQuery({});
 
+  console.log(isFetching);
   const combobox = useCombobox({
     scrollBehavior: "smooth",
     onDropdownClose: () => combobox.resetSelectedOption(),
     onDropdownOpen: () => {
-      if (data.length === 0 && !loading) {
-        setLoading(true);
-        getAsyncData().then((response) => {
-          setData(response);
-          setLoading(false);
-          combobox.resetSelectedOption();
-        });
+      if (!doctors && !isFetching) {
+        refetch();
       }
     },
   });
 
   const [search, setSearch] = useState("");
   const [value, setValue] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const selectedOption = usersData.find((item) => item.id === value);
 
-  const options = data
-    .filter((item) => {
-      return item.name.toLowerCase().includes(search.toLowerCase().trim());
-    })
-    .map((item) => (
-      <Combobox.Option value={item.id} key={item.id} id={item.id}>
-        <SelectOption {...item} />
-      </Combobox.Option>
-    ));
+  const selectedOption =
+    !isFetching && !isError
+      ? doctors.data.find((item) => item.id === value)
+      : "";
+
+  const options =
+    !isFetching && !isError
+      ? doctors.data
+          .filter((item) => {
+            return (
+              item.firstName
+                .toLowerCase()
+                .includes(search.toLowerCase().trim()) ||
+              item.lastName
+                .toLowerCase()
+                .includes(search.toLowerCase().trim()) ||
+              item.specialization
+                .toLowerCase()
+                .includes(search.toLowerCase().trim())
+            );
+          })
+          .map((item) => (
+            <Combobox.Option value={item.id} key={item.id} id={item.id}>
+              <SelectOption {...item} />
+            </Combobox.Option>
+          ))
+      : "";
 
   return (
     <Combobox
@@ -154,7 +109,12 @@ export default function DoctorSelectAsync({ form }: DoctorSelectAsyncProps) {
       withinPortal={false}
       onOptionSubmit={(val) => {
         setValue(val);
-        form.setFieldValue("docid", val);
+        form.setValues({
+          docid: val,
+          AppointmentDate: null,
+          slotId: null,
+        });
+
         combobox.closeDropdown();
       }}
     >
@@ -164,7 +124,9 @@ export default function DoctorSelectAsync({ form }: DoctorSelectAsyncProps) {
           component="button"
           type="button"
           pointer
-          rightSection={loading ? <Loader size={18} /> : <Combobox.Chevron />}
+          rightSection={
+            isFetching ? <Loader size={18} /> : <Combobox.Chevron />
+          }
           onClick={() => combobox.toggleDropdown()}
           rightSectionPointerEvents="none"
           multiline
@@ -192,7 +154,11 @@ export default function DoctorSelectAsync({ form }: DoctorSelectAsyncProps) {
         />
         <Combobox.Options>
           <ScrollArea.Autosize type="scroll" mah={200}>
-            {loading ? <Combobox.Empty>Loading....</Combobox.Empty> : options}
+            {isFetching && !isError ? (
+              <Combobox.Empty>Loading....</Combobox.Empty>
+            ) : (
+              options
+            )}
           </ScrollArea.Autosize>
         </Combobox.Options>
       </Combobox.Dropdown>

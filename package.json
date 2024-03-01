@@ -53,6 +53,7 @@
     "sharp": "^0.33.2",
     "storybook": "^7.6.12",
     "superjson": "^1.12.3",
+    "tailwindcss-animated": "^1.0.1",
     "trpc-playground": "^1.0.4",
     "zod": "^3.21.4"
   },

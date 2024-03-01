@@ -9,8 +9,10 @@ export type FormValues = {
     patientAddress: string;
     patientMobile: string;
     patientEmail: string;
-    patientProblem: string;
+    patientNote: string;
     AppointmentDate: Date | null;
     slotId: string;
     docid: string;
 };
+
+
