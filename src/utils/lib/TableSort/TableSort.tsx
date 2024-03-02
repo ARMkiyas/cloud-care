@@ -1,10 +1,11 @@
 "use client";
 import React,{ useState } from 'react';
-import { Table, Badge,ActionIcon ,TextInput,Text,Button} from '@mantine/core';
+import { Table, Badge,ActionIcon ,TextInput,Text,Button,Modal,Notification} from '@mantine/core';
 import { IconEdit, IconTrash,IconLockOpen } from '@tabler/icons-react';
 import {ButtonAdd} from '@/utils/lib/ButtonAdd/ButtonAdd';
 import {IconSearch } from '@tabler/icons-react';
 import { useApiClient } from '@/utils/trpc/Trpc';
+import { useDisclosure } from '@mantine/hooks';
 
 interface RowData {
   id:string;
@@ -56,7 +57,7 @@ function sortData(
   );
 }
 
-const TableSort = ({ userdata }) => {
+const TableSort = ({userdata}) => {  
 
   const {
     mutateAsync: updateAsync,
@@ -77,6 +78,17 @@ const TableSort = ({ userdata }) => {
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [editingRow, setEditingRow] = useState<string | null>(null);
   const [editedData, setEditedData] = useState<RowData | null>(null);
+  const [openedUpdateModal, { open: openUpdateModal, close: closeUpdateModal }] = useDisclosure(false);
+  const [openedDeleteModal, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  
+  const [showNotification, setShowNotification] = useState(false);
+
+// Function to open the delete modal and set the user id
+const handleOpenDeleteModal = (userId: string) => {
+  setDeleteUserId(userId);
+  openDeleteModal();
+};
 
     const toggleEditing = (userId: string) => {
     setEditingRow(editingRow === userId ? null : userId);
@@ -84,19 +96,22 @@ const TableSort = ({ userdata }) => {
     setEditedData(editingRow === userId ?  null : userdata.data.find(user => user.id === userId));
   };
 
-  const deletey=async(userId)=>{
+const deletey = async (userId: string) => {
+  try {
+    const deleteuserdata = await deleteAsync({ userid: userId });
+    console.log(deleteuserdata);
 
-    try{
-      if(userdata){
-        const deleteuserdata=await deleteAsync({
-          userid:userId,
-        });
-        console.log(deleteuserdata)
-      }
-    }catch(error){
-      
-    }
-  };
+    // Update table data after deletion
+    const updatedData = sortedData.filter(user => user.id !== userId);
+    setSortedData(updatedData);
+
+    // Close the delete modal
+    closeDeleteModal();
+  } catch (error) {
+    console.error('Error deleting user:', error);
+  }
+};
+
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.currentTarget;
@@ -178,6 +193,8 @@ const TableSort = ({ userdata }) => {
 
       // Handle successful response
       console.log('Password reset request sent successfully:', result);
+
+      setShowNotification(true);
     } catch (error) {
       // Handle error
       console.error('Error sending password reset request:', error);
@@ -195,7 +212,15 @@ const TableSort = ({ userdata }) => {
         value={search}
         onChange={handleSearchChange}
       />
-      
+            {showNotification && (
+        <Notification className='w-1/4'
+          title="We notify you that"
+          color="green"
+          onClose={() => setShowNotification(false)}
+        >
+          Password reset request has been sent successfully.
+        </Notification>
+      )}
     <Table>
       <Table.Thead>
         <Table.Tr>
@@ -266,13 +291,33 @@ const TableSort = ({ userdata }) => {
       </Table.Td>
       <Table.Td>
       {editingRow === user.id ? (
-                  <Button onClick={handleSave}>Update</Button>
+                  
+                  <>
+                  <Modal opened={openedUpdateModal} onClose={closeUpdateModal} 
+                  title="Are you Sure you want to do this?">
+                    <div className="flex justify-end space-x-2">
+                        <Button onClick={handleSave}>Confirm</Button>
+                        <Button style={{ backgroundColor: 'white', color: 'black',border: '1px solid black' }}
+                        onClick={closeUpdateModal}>Cancel</Button>
+                    </div>
+                </Modal>
+                  <Button onClick={openUpdateModal}>Update</Button>
+                  </>
                 ) : (
           <div className="flex items-center space-x-2">
                <ActionIcon color="green" onClick={() => toggleEditing(user.id)}>
                  <IconEdit size="1rem" />
                </ActionIcon>
-               <ActionIcon color="red" onClick={()=>deletey(user.id)}>
+               <ActionIcon color="red" onClick={()=>handleOpenDeleteModal(user.id)}>
+               <Modal opened={openedDeleteModal} onClose={closeDeleteModal} 
+               style={{ display: 'flex', justifyContent: 'center'}}
+                  title="Are you Sure you want to delete ">
+                    <div className="flex justify-end space-x-2">
+                        <Button style={{ backgroundColor: 'white', color: 'black',border: '1px solid black' }} 
+                        onClick={closeDeleteModal}>Cancel</Button>
+                        <Button onClick={()=>deletey(deleteUserId)}>Delete</Button>
+                    </div>
+                </Modal>
                  <IconTrash size="1rem" />
                </ActionIcon>
                <ActionIcon color="blue" onClick={() => handlePasswordReset(user.id)}>
@@ -285,6 +330,7 @@ const TableSort = ({ userdata }) => {
         ))}
       </Table.Tbody>
     </Table>
+
     </>
   );
 }

@@ -48,6 +48,7 @@ export function UserForm({
     },
   });
   
+  
   const{
     mutateAsync,
     isError:addUsererror,
@@ -131,6 +132,7 @@ export function UserForm({
 const staffMembersselect = updateStaffMembers(staffdata);
 
   console.log('staffMembers:', updateStaffMembers(staffdata));
+  
 
   return (
     <Paper
@@ -193,7 +195,7 @@ const staffMembersselect = updateStaffMembers(staffdata);
         mt="md"
         {...form.getInputProps('role')}
       >
-        <option value="GUEST">Select Role</option>
+        <option value=" ">Select Role</option>
         <option value="ADMIN">Admin</option>
         <option value="ROOTUSER">Root User</option>
         <option value="STAFF">Staff</option>
