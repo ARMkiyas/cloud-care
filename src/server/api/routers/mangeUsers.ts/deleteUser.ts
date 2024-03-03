@@ -46,7 +46,7 @@ const deleteUser = protectedProcedure.input(deleteUserSchema).mutation(async ({ 
 
     } catch (error) {
 
-        return ErrorHandler(error, "User", "delete")
+        throw ErrorHandler(error, "User", "delete")
     } finally {
         ctx.db.$disconnect();
     }

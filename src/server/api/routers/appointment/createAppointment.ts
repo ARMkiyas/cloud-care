@@ -4,6 +4,7 @@ import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { TRPCError } from "@trpc/server";
 import { createAppointmentSchema } from "./validation/schema";
 import generateUniqueReferenceId from "@/utils/lib/UniqueReferenceIdGenerator";
+import dayjs from "dayjs";
 
 
 const createAppointment = publicProcedure.input(createAppointmentSchema).mutation(async ({ input, ctx }) => {
@@ -37,6 +38,7 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
 
         const isPetiontHasAppointment = await ctx.db.appointment.findFirst({
             where: {
+                appointmentDate: new Date(dayjs(input.AppointmentDate).format("YYYY-MM-DD")).toISOString(),
                 Slot: {
                     id: input.slotId.trim()
                 },
@@ -61,7 +63,7 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
         if (isPetiontHasAppointment) {
             throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
-                message: "You already have an appointment for this slot",
+                message: "You already have an appointment in this date. Please select another date",
             })
         }
 
@@ -72,9 +74,6 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
                 message: "the slot is full. Please select another slot.",
             })
         }
-
-
-
 
 
         const uniqueId = generateUniqueReferenceId('cloudcare'); // Generate a unique reference id for the appointment
@@ -111,7 +110,7 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
                             lastName: input.patientLastName,
                             NIC: input.patientNIC && input.patientNIC.trim(),
                             Passport: input.patientPassport && input.patientPassport.trim(),
-                            dateOfBirth: input.patientDob,
+                            dateOfBirth: new Date(dayjs(input.patientDob).format("YYYY-MM-DD")).toISOString(),
                             email: input.patientEmail,
                             gender: input.patientGender,
                             address: input.patientAddress,
@@ -119,6 +118,8 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
                         },
                     }
                 },
+                appointmentDate: new Date(dayjs(input.AppointmentDate).format("YYYY-MM-DD")).toISOString(),
+                patientNote: input.patientNote,
                 referenceid: uniqueId,
                 appointmentNumber: slot._count.appointment + 1,
                 appointmentstart: new Date(new Date(slot.startTime).getTime() + (slotTimePerAppointment * (slot._count.appointment))).toISOString(),
@@ -127,11 +128,6 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
 
             }
         })
-
-
-
-
-
 
         return {
             data: appointment,
@@ -142,21 +138,14 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
         }
 
 
-
-
-
-
-
-
-
-
     } catch (error) {
 
-        console.log(error);
-
-        return ErrorHandler(error, "createAppointment", "An error occured while creating an appointment. Please try again later.")
+        throw ErrorHandler(error, "createAppointment", "An error occured while creating an appointment. Please try again later.")
 
 
+    } finally {
+
+        ctx.db.$disconnect()
     }
 
 

@@ -52,7 +52,24 @@ const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema
                 }
             },
             include: {
-                doctor: true,
+                doctor: {
+
+                    select: {
+                        id: true,
+                        specialization: true,
+                        staff: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                title: true,
+                                image: true,
+
+                            }
+                        }
+                    }
+
+                },
+
                 Slot: true,
                 Appointment: true,
                 _count: {
@@ -75,7 +92,7 @@ const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema
     } catch (error) {
 
 
-        return ErrorHandler(error, "schedule", "Error getting schedule")
+        throw ErrorHandler(error, "schedule", "Error getting schedule")
     } finally {
         ctx.db.$disconnect()
     }

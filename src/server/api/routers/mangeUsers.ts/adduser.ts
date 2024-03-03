@@ -90,7 +90,7 @@ const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, i
 
 
     } catch (err) {
-        return ErrorHandler(err, "User")
+        throw ErrorHandler(err, "User")
     } finally {
         ctx.db.$disconnect();
     }

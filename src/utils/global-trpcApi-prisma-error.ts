@@ -7,7 +7,7 @@ type globalTrpcApiPrismaErrorHandlerType = (
     ctx: string,
     message?: string,
     action?: string
-) => void
+) => TRPCError
 
 
 const ErrorHandler: globalTrpcApiPrismaErrorHandlerType = (error, ctx, action, message) => {
@@ -59,11 +59,12 @@ const ErrorHandler: globalTrpcApiPrismaErrorHandlerType = (error, ctx, action, m
                 })
         }
 
-
-
     }
 
-    console.log(error);
+    if (error instanceof TRPCError) {
+        throw error;
+    }
+
 
     throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",

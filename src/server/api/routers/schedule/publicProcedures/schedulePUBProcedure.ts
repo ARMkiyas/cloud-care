@@ -3,14 +3,15 @@ import "server-only";
 import { z } from "zod";
 
 import { TRPCError } from "@trpc/server";
-import { DayOfWeek, RecurrencePattern, UserRoles } from "@prisma/client";
+import { DayOfWeek, DoctorSpecialization, RecurrencePattern, UserRoles } from "@prisma/client";
 
 const scheduleGetProcedureSchema = z.object({
 
     doctorId: z.string().nonempty(),
     doctorname: z.string().nonempty().optional(),
     date: z.date().optional(),
-    order: z.enum(["asc", "desc"]).default("asc").optional()
+    order: z.enum(["asc", "desc"]).default("asc").optional(),
+    specialty: z.nativeEnum(DoctorSpecialization).optional(),
 
 })
 
@@ -18,7 +19,7 @@ const scheduleGetProcedureSchema = z.object({
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { publicProcedure } from "@/server/api/trpc";
 
-const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).mutation(async ({ input, ctx }) => {
+const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).query(async ({ input, ctx }) => {
 
     try {
 
@@ -31,6 +32,9 @@ const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).m
                     equals: input.date
                 },
                 doctor: {
+                    specialization: {
+                        equals: input.specialty
+                    },
                     staff: {
                         lastName: {
                             search: input.doctorname
@@ -38,6 +42,7 @@ const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).m
                         firstName: {
                             search: input.doctorname
                         }
+
                     }
                 }
 
@@ -47,11 +52,13 @@ const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).m
                 doctor: {
                     select: {
                         id: true,
+                        specialization: true,
                         staff: {
                             select: {
                                 title: true,
                                 firstName: true,
-                                lastName: true
+                                lastName: true,
+                                image: true
                             }
                         }
                     }
@@ -67,15 +74,7 @@ const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).m
                         ScheduleId: true,
                     }
                 },
-                Appointment: {
-                    select: {
-                        Slot: {
-                            select: {
-                                _count: true
-                            }
-                        }
-                    }
-                },
+
                 _count: {
                     select: {
                         Appointment: true,
@@ -100,7 +99,7 @@ const schedulePUBProcedure = publicProcedure.input(scheduleGetProcedureSchema).m
 
 
 
-        return ErrorHandler(error, "schedule", "Error getting schedule")
+        throw ErrorHandler(error, "schedule", "Error getting schedule")
     } finally {
         ctx.db.$disconnect()
     }

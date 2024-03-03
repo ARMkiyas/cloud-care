@@ -101,7 +101,7 @@ const updatestaffProceture = protectedProcedure.input(updatestaffSchema).mutatio
 
 
     } catch (e) {
-        return ErrorHandler(e, "Staff")
+        throw ErrorHandler(e, "Staff")
 
     } finally {
         ctx.db.$disconnect();
