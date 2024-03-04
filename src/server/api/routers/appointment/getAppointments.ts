@@ -55,12 +55,24 @@ const GetAppointmentsProcedure = protectedProcedure.input(scheduleGetProcedureSc
                         contains: input.patientEmail
                     }
 
-
                 },
             },
             include: {
                 Slot: true,
-                patient: true
+                patient: true,
+                doctor: {
+                    select: {
+                        staff: {
+                            select: {
+                                title: true,
+                                firstName: true,
+                                lastName: true,
+                                image: true,
+
+                            }
+                        }
+                    }
+                }
             }
         })
 
