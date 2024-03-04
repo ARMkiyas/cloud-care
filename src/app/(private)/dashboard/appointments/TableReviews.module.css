@@ -1,0 +1,53 @@
+.selectedRow {
+    background-color: #a4f2b1; /* Light blue color, adjust as needed */
+  }
+  
+  .waiting {
+    color: red;
+  }
+  
+  .scheduled {
+    color: rgb(16, 201, 16);
+  }
+  
+  .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Adjust alignment as needed */
+  }
+  
+  .addAppointmentButton {
+    margin-left: auto;
+  }
+  
+  
+  .error {
+    color: red;
+    margin-top: 5px;
+  }
+  
+  .saveButton {
+    margin-top: 10px;
+  }
+  .addButtonContainer {
+    display: flex;
+    justify-content: flex-end; /* Align button to the right */
+    margin-bottom: 20px;
+  }
+  
+  .addButton {
+    background-color: #28a745; /* Blue color */
+    color: #ffffff; /* White text color */
+  }
+  
+  .saveButton {
+    background-color: #28a745; /* Green color */
+    color: #ffffff; /* White text color */
+  }
+  .saveButton {
+    margin-top: 20px; /* Add space from the top */
+    margin-right: 10px; /* Add space between the button and input fields */
+    /* Add other desired styles */
+  }
+  
+ 
