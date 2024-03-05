@@ -18,6 +18,7 @@ import { cookies } from "next/headers";
 import { TrpcProvider } from "@/utils/trpc/TrpcProvider";
 import { Notifications } from "@mantine/notifications";
 import SsonProvider from "./_helpers/SsonProvider";
+import { ModalsProvider } from '@mantine/modals';
 
 // creating metedata
 export const metadata = {
@@ -40,7 +41,9 @@ export default async function RootLayout({
           <TrpcProvider cookies={cookies().toString()}>
             <MantineProvider theme={theme}>
               <Notifications />
-              {children}
+              <ModalsProvider>     
+                 {children}
+              </ModalsProvider>
             </MantineProvider>
           </TrpcProvider>
         </SsonProvider>
