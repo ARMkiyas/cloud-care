@@ -24,6 +24,7 @@ import {
   IconPencil,
   IconPlus,
 } from "@tabler/icons-react";
+import AppointmentDataTable from "../../componets/AppointmentDataTable";
 
 const initialAppointments = [
   {
@@ -128,11 +129,6 @@ export default function TableReviews() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleEditAppointment = (index) => {
-    setEditedAppointment(appointments[index]);
-    setShowEditModal(true);
-  };
-
   const handleSaveAppointment = () => {
     const updatedAppointments = appointments.map((appointment) =>
       appointment.id === editedAppointment.id ? editedAppointment : appointment,
@@ -180,47 +176,6 @@ export default function TableReviews() {
     }
   };
 
-  const rows = appointments.map((appointment, index) => (
-    <Table.Tr key={appointment.id}>
-      <Table.Td>
-        <input type="checkbox" aria-label="Select row" />
-      </Table.Td>
-      <Table.Td>{appointment.patientId}</Table.Td>
-      <Table.Td>{appointment.patientName}</Table.Td>
-      <Table.Td>{appointment.time}</Table.Td>
-      <Table.Td>{appointment.date}</Table.Td>
-      <Table.Td>
-        {appointment.status === "waiting" ? (
-          <>
-            <IconClock size={20} color="red" />
-            <span style={{ marginLeft: 5 }}>Waiting</span>
-          </>
-        ) : (
-          <>
-            <IconCircleCheck size={20} color="green" />
-            <span style={{ marginLeft: 5 }}>Scheduled</span>
-          </>
-        )}
-      </Table.Td>
-      <Table.Td>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <IconPencil
-            size={20}
-            color="green"
-            style={{ cursor: "pointer" }}
-            onClick={() => handleEditAppointment(index)}
-          />
-          <IconTrash
-            size={20}
-            color="red"
-            style={{ marginLeft: 5, cursor: "pointer" }}
-            onClick={() => handleDeleteAppointment(index)}
-          />
-        </div>
-      </Table.Td>
-    </Table.Tr>
-  ));
-
   return (
     <div>
       <h1 style={{ textAlign: "left" }}>Appointments</h1>
@@ -234,88 +189,7 @@ export default function TableReviews() {
           Add New Appointment
         </Button>
       </div>
-      <Table>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th />
-            <Table.Th>Patient ID</Table.Th>
-            <Table.Th>Patient Name</Table.Th>
-            <Table.Th>Time</Table.Th>
-            <Table.Th>Date</Table.Th>
-            <Table.Th>Status</Table.Th>
-            <Table.Th />
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>{rows}</Table.Tbody>
-      </Table>
-      {showEditModal && (
-        <Modal
-          opened={showEditModal}
-          onClose={() => setShowEditModal(false)}
-          title="Edit Appointment"
-          size="sm"
-        >
-          <div>
-            <TextInput
-              value={editedAppointment.patientId}
-              onChange={(event) =>
-                setEditedAppointment({
-                  ...editedAppointment,
-                  patientId: event.currentTarget.value,
-                })
-              }
-              label="Patient ID"
-            />
-            <TextInput
-              value={editedAppointment.patientName}
-              onChange={(event) =>
-                setEditedAppointment({
-                  ...editedAppointment,
-                  patientName: event.currentTarget.value,
-                })
-              }
-              label="Patient Name"
-            />
-            <TextInput
-              value={editedAppointment.date}
-              onChange={(event) =>
-                setEditedAppointment({
-                  ...editedAppointment,
-                  date: event.currentTarget.value,
-                })
-              }
-              label="Date"
-            />
-            <TextInput
-              value={editedAppointment.time}
-              onChange={(event) =>
-                setEditedAppointment({
-                  ...editedAppointment,
-                  time: event.currentTarget.value,
-                })
-              }
-              label="Time"
-            />
-            <TextInput
-              value={editedAppointment.status}
-              onChange={(event) =>
-                setEditedAppointment({
-                  ...editedAppointment,
-                  status: event.currentTarget.value,
-                })
-              }
-              label="Status"
-            />
-            <Button
-              color="green"
-              onClick={handleSaveAppointment}
-              style={{ marginTop: "20px", marginRight: "10px" }}
-            >
-              Save
-            </Button>
-          </div>
-        </Modal>
-      )}
+      <AppointmentDataTable />
 
       {showAddModal && (
         <Modal
