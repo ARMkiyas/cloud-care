@@ -4,12 +4,12 @@
  *
  */
 
-import "@mantine/core/styles.css";
-
-import "@/styles/globals.css";
-
+import '@mantine/core/styles.layer.css';
 import "@mantine/notifications/styles.css";
 import "@mantine/dates/styles.css";
+import 'mantine-datatable/styles.layer.css';
+import "@/styles/globals.css";
+
 import theme from "@styles/Mglobaltheme";
 
 import { MantineProvider, ColorSchemeScript } from "@mantine/core";
