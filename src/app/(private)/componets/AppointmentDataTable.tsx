@@ -7,16 +7,16 @@ import {
   Group,
   TextInput,
 } from "@mantine/core";
-import { useSetState } from "@mantine/hooks";
-import { showNotification } from "@mantine/notifications";
 import {
   IconClick,
   IconEdit,
   IconMessage,
+  IconSearch,
   IconTrash,
   IconTrashX,
+  IconX,
 } from "@tabler/icons-react";
-import { useContextMenu } from "mantine-contextmenu";
+// import { useContextMenu } from "mantine-contextmenu";
 import dayjs from "dayjs";
 import {
   DataTable,
@@ -26,6 +26,11 @@ import {
 } from "mantine-datatable";
 import React, { useState } from "react";
 import { useApiClient } from "@/utils/trpc/Trpc";
+import type { TAppointmentsGet } from "@/server/api/ApiTypeFactory";
+
+const PAGE_SIZE = 10;
+
+export type AppointmentDataType = TAppointmentsGet["data"][0];
 
 type data = {
   id: string;
@@ -264,17 +269,35 @@ const sampleData = [
 export default function AppointmentDataTable() {
   const [selectedRecords, setSelectedRecords] = useState([]);
 
-  const { data: appointmentData, isFetching: appointmentFetching } =
-    useApiClient.appointment.getAppointments.useQuery({});
+  const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState({
+    patientName: undefined,
+  });
+  const {
+    data: appointmentData,
+    isFetching: appointmentFetching,
+    refetch,
+  } = useApiClient.appointment.getAppointments.useQuery(
+    {
+      limit: PAGE_SIZE,
+      page: page,
+      patientName: searchQuery.patientName,
+    },
+    {
+      staleTime: 1000 * 60 * 5,
+    },
+  );
 
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus<data>>({
     columnAccessor: "appointmentDate",
     direction: "asc",
   });
 
-  const { showContextMenu, hideContextMenu } = useContextMenu();
+  // const { showContextMenu, hideContextMenu } = useContextMenu();
 
-  const renderActions: DataTableColumn<data>["render"] = (record) => (
+  const renderActions: DataTableColumn<AppointmentDataType>["render"] = (
+    record,
+  ) => (
     <Group gap={4} justify="right" wrap="nowrap">
       <ActionIcon size="sm" variant="transparent" color="green">
         <IconMessage size={16} />
@@ -285,42 +308,47 @@ export default function AppointmentDataTable() {
     </Group>
   );
 
-  const handleContextMenu: DataTableProps<data>["onRowContextMenu"] = ({
-    record,
-    event,
-  }) =>
-    showContextMenu([
-      {
-        key: "edit",
-        icon: <IconEdit size={14} />,
-        title: `Edit ${record.patient.firstName} ${record.patient.lastName}`,
-        onClick: () => editRecord(record),
-      },
-      {
-        key: "delete",
-        title: `Delete ${record.patient.firstName} ${record.patient.lastName}`,
-        icon: <IconTrashX size={14} />,
-        color: "red",
-        onClick: () => deleteRecord(record),
-      },
-      { key: "divider" },
-      {
-        key: "deleteMany",
-        hidden:
-          selectedRecords.length <= 1 ||
-          !selectedRecords.map((r) => r.id).includes(record.id),
-        title: `Delete ${selectedRecords.length} selected records`,
-        icon: <IconTrash size={14} />,
-        color: "red",
-        onClick: deleteSelectedRecords,
-      },
-    ])(event);
+  // const handleContextMenu: DataTableProps<data>["onRowContextMenu"] = ({
+  //   record,
+  //   event,
+  // }) =>
+  //   showContextMenu([
+  //     {
+  //       key: "edit",
+  //       icon: <IconEdit size={14} />,
+  //       title: `Edit ${record.patient.firstName} ${record.patient.lastName}`,
+  //       onClick: () => editRecord(record),
+  //     },
+  //     {
+  //       key: "delete",
+  //       title: `Delete ${record.patient.firstName} ${record.patient.lastName}`,
+  //       icon: <IconTrashX size={14} />,
+  //       color: "red",
+  //       onClick: () => deleteRecord(record),
+  //     },
+  //     { key: "divider" },
+  //     {
+  //       key: "deleteMany",
+  //       hidden:
+  //         selectedRecords.length <= 1 ||
+  //         !selectedRecords.map((r) => r.id).includes(record.id),
+  //       title: `Delete ${selectedRecords.length} selected records`,
+  //       icon: <IconTrash size={14} />,
+  //       color: "red",
+  //       onClick: deleteSelectedRecords,
+  //     },
+  //   ])(event);
 
-  const Tablecolumns: DataTableProps<data>["columns"] = [
+  const [query, setQuery] = useState("");
+
+  const Tablecolumns: DataTableProps<AppointmentDataType>["columns"] = [
     {
       accessor: "index",
       title: "#",
-      render: (record) => sampleData.indexOf(record) + 1,
+      render: (record) => {
+        const index = appointmentData?.data.indexOf(record);
+        return page * PAGE_SIZE - PAGE_SIZE + (index || 0) + 1;
+      },
     },
     {
       accessor: "doctor",
@@ -331,6 +359,41 @@ export default function AppointmentDataTable() {
     {
       accessor: "patient",
       title: "patient",
+      filter: (
+        <div>
+          <TextInput
+            label="Employees"
+            description="Search patient by name,nic or passport Number"
+            placeholder="type name and press enter to search"
+            leftSection={<IconSearch size={16} />}
+            onKeyUp={(e) => {
+              if (e.key === "Enter") {
+                setPage(1);
+                setSearchQuery({ patientName: query });
+              }
+            }}
+            rightSection={
+              query !== "" && (
+                <ActionIcon
+                  size="sm"
+                  variant="transparent"
+                  c="dimmed"
+                  onClick={() => {
+                    setQuery("");
+                    setPage(1);
+                    setSearchQuery({ patientName: undefined });
+                  }}
+                >
+                  <IconX size={14} />
+                </ActionIcon>
+              )
+            }
+            value={query}
+            onChange={(e) => setQuery(e.currentTarget.value)}
+          />
+        </div>
+      ),
+      filtering: query !== "",
       render: (record) =>
         `${record.patient.title} ${record.patient.firstName} ${record.patient.lastName}`,
     },
@@ -382,7 +445,7 @@ export default function AppointmentDataTable() {
       <DataTable
         withTableBorder
         withColumnBorders
-        height={400}
+        minHeight={500}
         striped
         highlightOnHover
         verticalAlign="center"
@@ -390,10 +453,14 @@ export default function AppointmentDataTable() {
         selectionTrigger="cell"
         selectedRecords={selectedRecords}
         onSelectedRecordsChange={setSelectedRecords}
-        onRowContextMenu={handleContextMenu}
-        onScroll={hideContextMenu}
+        page={page}
+        onPageChange={setPage}
+        totalRecords={appointmentData?.pagenation.total || 0}
+        recordsPerPage={PAGE_SIZE}
+        // onRowContextMenu={handleContextMenu}
+        // onScroll={hideContextMenu}
         // provide data
-        records={sampleData}
+        records={appointmentData?.data}
         fetching={appointmentFetching}
         // define columns
         columns={Tablecolumns}
@@ -402,101 +469,11 @@ export default function AppointmentDataTable() {
     </div>
   );
 }
-function editRecord(record: {
-  id: string;
-  referenceid: string;
-  appointmentNumber: number;
-  appointmentDate: string;
-  appointmentstart: string;
-  appointmentEnd: string;
-  createdat: string;
-  updatedat: string;
-  patientNote: any;
-  status: string;
-  patientId: string;
-  doctorId: string;
-  nurseId: any;
-  oPDId: any;
-  scheduleId: string;
-  slotId: string;
-  Slot: {
-    id: string;
-    ScheduleId: string;
-    maxAppointmentsPerSlot: number;
-    startTime: string;
-    endTime: string;
-  };
-  patient: {
-    id: string;
-    title: string;
-    firstName: string;
-    lastName: string;
-    dateOfBirth: string;
-    gender: string;
-    email: string;
-    phone: string;
-    address: string;
-    NIC: string;
-    Passport: any;
-  };
-  doctor: {
-    staff: {
-      title: string;
-      firstName: string;
-      lastName: string;
-      image: string;
-    };
-  };
-}) {
+function editRecord(record: AppointmentDataType) {
   throw new Error("Function not implemented.");
 }
 
-function deleteRecord(record: {
-  id: string;
-  referenceid: string;
-  appointmentNumber: number;
-  appointmentDate: string;
-  appointmentstart: string;
-  appointmentEnd: string;
-  createdat: string;
-  updatedat: string;
-  patientNote: any;
-  status: string;
-  patientId: string;
-  doctorId: string;
-  nurseId: any;
-  oPDId: any;
-  scheduleId: string;
-  slotId: string;
-  Slot: {
-    id: string;
-    ScheduleId: string;
-    maxAppointmentsPerSlot: number;
-    startTime: string;
-    endTime: string;
-  };
-  patient: {
-    id: string;
-    title: string;
-    firstName: string;
-    lastName: string;
-    dateOfBirth: string;
-    gender: string;
-    email: string;
-    phone: string;
-    address: string;
-    NIC: string;
-    Passport: any;
-  };
-  doctor: {
-    staff: {
-      title: string;
-      firstName: string;
-      lastName: string;
-      image: string;
-    };
-  };
-}) {
+function deleteRecord(record: AppointmentDataType) {
   throw new Error("Function not implemented.");
 }
 

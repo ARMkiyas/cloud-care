@@ -1,7 +1,7 @@
 
 import { protectedProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
-import { UserRoles } from "@prisma/client";
+import { Prisma, UserRoles } from "@prisma/client";
 
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { scheduleGetProcedureSchema } from "./validation/schema";
@@ -27,7 +27,9 @@ const GetAppointmentsProcedure = protectedProcedure.input(scheduleGetProcedureSc
         ctx.session.user.role === UserRoles.DOCTOR ? input.doctorid = ctx.session.user.id : null
 
 
-        const appointments = await ctx.db.appointment.findMany({
+        const query = {
+            skip: input.page > 1 ? (input.page - 1) * input.limit : 0,
+            take: input.limit + 1,
             where: {
                 doctorId: {
                     equals: input.doctorid
@@ -35,12 +37,14 @@ const GetAppointmentsProcedure = protectedProcedure.input(scheduleGetProcedureSc
                 referenceid: {
                     contains: input.referenceId
                 },
-                patient: {
+                patient:
+
+                {
                     firstName: {
-                        search: input.patientName
+                        search: input.patientName || undefined
                     },
                     lastName: {
-                        search: input.patientName
+                        search: input.patientName || undefined
                     },
                     NIC: {
                         contains: input.patientNIC
@@ -58,6 +62,7 @@ const GetAppointmentsProcedure = protectedProcedure.input(scheduleGetProcedureSc
                 },
             },
             include: {
+
                 Slot: true,
                 patient: true,
                 doctor: {
@@ -73,11 +78,41 @@ const GetAppointmentsProcedure = protectedProcedure.input(scheduleGetProcedureSc
                         }
                     }
                 }
+            },
+            orderBy: {
+                createdat: "desc",
+
             }
-        })
+
+        } satisfies Prisma.AppointmentFindManyArgs
+
+
+        const [appointments, count] = await ctx.db.$transaction([
+            ctx.db.appointment.findMany(query),
+            ctx.db.appointment.count({
+                where: query.where
+            })
+        ])
+
+
+
+
+        let nextCursor: typeof input.cursor | undefined = undefined
+
+        if (appointments.length > input.limit) {
+            nextCursor = appointments[appointments.length - 1].id
+            appointments.pop()
+        }
+
 
         return {
             data: appointments,
+            pagenation: {
+                nextCursor: nextCursor,
+                pages: input.page,
+                total: count
+            },
+
             status: 200,
             error: null,
             ok: true,

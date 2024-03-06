@@ -74,6 +74,11 @@ export const deleteAppointmentProcedureSchema = z.object({
 
 export const scheduleGetProcedureSchema = z.object({
 
+    limit: z.number(),
+    page: z.number().default(1).optional(),
+    cursor: z.string().optional(),
+    skip: z.number().optional(),
+
     doctorid: z.string().optional(),
     referenceId: z.string().optional(),
     patientName: z.string().optional(),
