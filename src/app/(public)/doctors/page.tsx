@@ -1,8 +1,9 @@
 import React from "react";
-import Header from "../../components/navbar/Header";
-import Footer from "../../components/footer/Footer";
-import BookPageStyles from "../../appoinment/book/BookPageStyles";
+import Header from "../components/navbar/Header";
+import Footer from "../components/footer/Footer";
+import "../appointment/book/page";
 import "./DoctorPageStyles.css";
+
 
 export default function page() {
   return (
@@ -14,7 +15,7 @@ export default function page() {
           </div>
           <div className="containerText2dev">
             <div className="text-white text-base leading-6 uppercase">Home</div>
-            <div className="items-stretch flex justify-between gap-2 pl-2">
+            <div className="items-stretch flex justify-between gap-2 ">
               <div className="text-blue-50 text-base leading-6 uppercase">
                 /
               </div>
