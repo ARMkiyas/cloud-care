@@ -27,6 +27,7 @@ import {
 import React, { useState } from "react";
 import { useApiClient } from "@/utils/trpc/Trpc";
 import type { TAppointmentsGet } from "@/server/api/ApiTypeFactory";
+import { useDebouncedValue } from "@mantine/hooks";
 
 const PAGE_SIZE = 10;
 
@@ -271,8 +272,12 @@ export default function AppointmentDataTable() {
 
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState({
-    patientName: undefined,
+    patientSearchQuery: "",
+    refSearch: "",
   });
+
+  const [debounced] = useDebouncedValue(searchQuery, 700);
+
   const {
     data: appointmentData,
     isFetching: appointmentFetching,
@@ -281,7 +286,8 @@ export default function AppointmentDataTable() {
     {
       limit: PAGE_SIZE,
       page: page,
-      patientName: searchQuery.patientName,
+      patientSearchQuery: debounced.patientSearchQuery,
+      referenceId: debounced.refSearch,
     },
     {
       staleTime: 1000 * 60 * 5,
@@ -339,8 +345,6 @@ export default function AppointmentDataTable() {
   //     },
   //   ])(event);
 
-  const [query, setQuery] = useState("");
-
   const Tablecolumns: DataTableProps<AppointmentDataType>["columns"] = [
     {
       accessor: "index",
@@ -362,38 +366,39 @@ export default function AppointmentDataTable() {
       filter: (
         <div>
           <TextInput
-            label="Employees"
-            description="Search patient by name,nic or passport Number"
-            placeholder="type name and press enter to search"
+            label="Patients"
+            description="Search patient by last or first name,nic or passport Number"
+            placeholder="type to search...."
             leftSection={<IconSearch size={16} />}
-            onKeyUp={(e) => {
-              if (e.key === "Enter") {
-                setPage(1);
-                setSearchQuery({ patientName: query });
-              }
-            }}
             rightSection={
-              query !== "" && (
+              searchQuery.patientSearchQuery !== "" && (
                 <ActionIcon
                   size="sm"
                   variant="transparent"
                   c="dimmed"
                   onClick={() => {
-                    setQuery("");
                     setPage(1);
-                    setSearchQuery({ patientName: undefined });
+                    setSearchQuery((pevstate) => ({
+                      ...pevstate,
+                      patientSearchQuery: "",
+                    }));
                   }}
                 >
                   <IconX size={14} />
                 </ActionIcon>
               )
             }
-            value={query}
-            onChange={(e) => setQuery(e.currentTarget.value)}
+            value={searchQuery.patientSearchQuery}
+            onChange={(e) =>
+              setSearchQuery((pevstate) => ({
+                ...pevstate,
+                patientSearchQuery: e.target.value,
+              }))
+            }
           />
         </div>
       ),
-      filtering: query !== "",
+      filtering: searchQuery.patientSearchQuery !== "",
       render: (record) =>
         `${record.patient.title} ${record.patient.firstName} ${record.patient.lastName}`,
     },
@@ -419,6 +424,42 @@ export default function AppointmentDataTable() {
     {
       accessor: "referenceid",
       title: "Reference",
+      filter: (
+        <div>
+          <TextInput
+            label="Patients"
+            description="Search patient by Appointment Reference Id"
+            placeholder="type to search...."
+            leftSection={<IconSearch size={16} />}
+            rightSection={
+              searchQuery.refSearch !== "" && (
+                <ActionIcon
+                  size="sm"
+                  variant="transparent"
+                  c="dimmed"
+                  onClick={() => {
+                    setPage(1);
+                    setSearchQuery((pevstate) => ({
+                      ...pevstate,
+                      refSearch: "",
+                    }));
+                  }}
+                >
+                  <IconX size={14} />
+                </ActionIcon>
+              )
+            }
+            value={searchQuery.refSearch}
+            onChange={(e) =>
+              setSearchQuery((pevstate) => ({
+                ...pevstate,
+                refSearch: e.target.value,
+              }))
+            }
+          />
+        </div>
+      ),
+      filtering: searchQuery.refSearch !== "",
     },
     {
       accessor: "status",

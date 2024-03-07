@@ -38,26 +38,42 @@ const GetAppointmentsProcedure = protectedProcedure.input(scheduleGetProcedureSc
                     contains: input.referenceId
                 },
                 patient:
-
                 {
-                    firstName: {
-                        search: input.patientName || undefined
-                    },
-                    lastName: {
-                        search: input.patientName || undefined
-                    },
-                    NIC: {
-                        contains: input.patientNIC
-                    },
-                    Passport: {
-                        contains: input.patientPassport
-                    },
-                    phone: {
-                        contains: input.patientMobile
-                    },
-                    email: {
-                        contains: input.patientEmail
+                    ...input.patientSearchQuery?.trim() && {
+                        OR: [
+                            {
+                                firstName: {
+                                    contains: input.patientSearchQuery?.trim()?.split(" ").join(" & ") || input.patientName || undefined
+                                }
+                            },
+                            {
+                                lastName: {
+                                    contains: input.patientSearchQuery?.trim().split(" ").join(" & ") || input.patientName || undefined
+                                }
+                            },
+                            {
+                                NIC: {
+                                    contains: input?.patientSearchQuery?.split(" ")?.join(" & ") || input.patientName || undefined
+                                }
+                            },
+                            {
+                                Passport: {
+                                    contains: input?.patientSearchQuery?.split(" ")?.join(" & ") || input.patientName || undefined
+                                }
+                            },
+                            {
+                                phone: {
+                                    contains: input?.patientSearchQuery?.split(" ")?.join(" & ") || input.patientName || undefined
+                                }
+                            },
+                            {
+                                email: {
+                                    search: input?.patientSearchQuery?.split(" ")?.join(" & ") || input.patientName || undefined
+                                }
+                            }
+                        ],
                     }
+
 
                 },
             },

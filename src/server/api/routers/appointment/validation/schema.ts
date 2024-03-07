@@ -81,6 +81,7 @@ export const scheduleGetProcedureSchema = z.object({
 
     doctorid: z.string().optional(),
     referenceId: z.string().optional(),
+    patientSearchQuery: z.string().optional(),
     patientName: z.string().optional(),
     patientNIC: z.string().optional(),
     patientPassport: z.string().optional(),
