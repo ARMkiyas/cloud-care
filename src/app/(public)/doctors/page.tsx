@@ -3,6 +3,7 @@ import Header from "../components/navbar/Header";
 import Footer from "../components/footer/Footer";
 import "../appointment/book/page";
 import "./DoctorPageStyles.css";
+import { Pagination } from '@mantine/core';
 
 
 export default function page() {
@@ -182,31 +183,13 @@ export default function page() {
           </div>
         </div>
         <div className="flex items-start gap-3.5 mr-2.5 mt-9 self-end">
-          <div className="text-white text-center text-sm leading-5 whitespace-nowrap justify-center items-stretch rounded border border-[color:var(--Gray-Gray-3,#DEE2E6)] bg-blue-900 self-stretch aspect-[0.9230769230769231] px-1.5 py-0.5 border-solid">
-            1
-          </div>
-          <div className="text-black text-center text-sm leading-5 whitespace-nowrap justify-center items-stretch rounded border self-stretch aspect-[0.9230769230769231] px-1.5 py-0.5 border-solid border-zinc-200">
-            2
-          </div>
-          <div className="text-black text-center text-sm leading-5 whitespace-nowrap justify-center items-stretch rounded border border-[color:var(--Gray-Gray-3,#DEE2E6)] self-stretch aspect-[0.9230769230769231] px-1.5 py-0.5 border-solid">
-            3
-          </div>
-          <div className="text-black text-center text-sm leading-5 whitespace-nowrap justify-center items-stretch rounded border border-[color:var(--Gray-Gray-3,#DEE2E6)] self-stretch aspect-[0.9230769230769231] px-1.5 py-0.5 border-solid">
-            4
-          </div>
-          <div className="text-black text-center text-sm leading-5 whitespace-nowrap justify-center items-stretch rounded border border-[color:var(--Gray-Gray-3,#DEE2E6)] self-stretch aspect-[0.9230769230769231] px-1.5 py-0.5 border-solid">
-            5
-          </div>
-          <div className="w-[30px] h-[26px] flex-col justify-center items-center inline-flex">
-            <div className="justify-start items-start gap-1 inline-flex">
-              <div className="w-[3px] h-[3px] bg-black rounded-full"></div>
-              <div className="w-[3px] h-[3px] bg-black rounded-full"></div>
-              <div className="w-[3px] h-[3px] bg-black rounded-full"></div>
-            </div>
-          </div>
-          <div className="text-black text-center text-sm leading-5 whitespace-nowrap justify-center items-stretch rounded border border-[color:var(--Gray-Gray-3,#DEE2E6)] self-stretch aspect-[1.1153846153846154] px-1.5 py-0.5 border-solid">
-            10
-          </div>
+          <Pagination
+            total={10} // Total number of pages
+            size="sm" // Size of pagination component (optional)
+            color="#1b2c51" // Color of pagination component (optional)
+            //radius="xl" // Border radius of pagination component (optional)
+            // Add any other props as needed
+          />
         </div>
       </div>
     </div>
