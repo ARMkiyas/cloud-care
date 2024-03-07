@@ -187,8 +187,6 @@ export default function page() {
             total={10} // Total number of pages
             size="sm" // Size of pagination component (optional)
             color="#1b2c51" // Color of pagination component (optional)
-            //radius="xl" // Border radius of pagination component (optional)
-            // Add any other props as needed
           />
         </div>
       </div>
