@@ -11,6 +11,8 @@ import {
   NativeSelectFactory,
   Select,
   SelectFactory,
+  Loader,
+  LoadingOverlay,
 } from "@mantine/core";
 import { DateInput, DateInputFactory } from "@mantine/dates";
 import { IconCalendarPlus } from "@tabler/icons-react";
@@ -19,81 +21,13 @@ import { IMaskInput } from "react-imask";
 import DoctorSelectAsync from "./DoctorSelect";
 import dayjs from "dayjs";
 import { useForm, zodResolver } from "@mantine/form";
-import { z } from "zod";
 import { BookAppointmentSchema } from "@/utils/ValidationSchemas/FrontendValidation";
 import { FormValues } from "./Types";
-
-const sampleData = [
-  {
-    id: "clskwnyuq000kt56gf8a2n5lb",
-    dayOfWeek: null,
-    createdDate: new Date(2024, 1, 14, 3, 29), // February 14, 2024 at 03:29
-    Date: new Date(2024, 1, 14, 5, 30), // February 14, 2024 at 05:30
-    recurrence: "ONCE",
-    recurringEvery: 1,
-    startTime: new Date(1970, 0, 2, 2, 0), // January 2, 1970 at 02:00
-    endTime: new Date(1970, 0, 2, 3, 0), // January 2, 1970 at 03:00
-    endDate: null,
-    totalAppointment: 20,
-    doctorId: "cls3inf74000ffbmgyjtk4lxr",
-    OptRoomsid: null,
-    doctor: {
-      id: "cls3inf74000ffbmgyjtk4lxr",
-      staff: {
-        title: "Dr",
-        firstName: "Robert",
-        lastName: "White",
-      },
-    },
-  },
-  {
-    id: "clskwp91p000ut56g3uqb30qq",
-    dayOfWeek: 1,
-    createdDate: new Date(2024, 1, 14, 3, 30), // February 14, 2024 at 03:30
-    Date: null,
-    recurrence: "WEEKLY",
-    recurringEvery: 1,
-    startTime: new Date(1970, 0, 1, 8, 4), // January 1, 1970 at 08:04
-    endTime: new Date(1970, 0, 1, 12, 0), // January 1, 1970 at 12:00
-    endDate: null,
-    totalAppointment: 20,
-    doctorId: "cls3inf74000ffbmgyjtk4lxr",
-    OptRoomsid: null,
-    doctor: {
-      id: "cls3inf74000ffbmgyjtk4lxr",
-      staff: {
-        title: "Dr",
-        firstName: "Robert",
-        lastName: "White",
-      },
-    },
-  },
-  {
-    id: "clskwogoc000pt56gfjiwq10l",
-    dayOfWeek: 3,
-    createdDate: new Date(2024, 1, 14, 3, 29, 24), // February 14, 2024 at 03:29:24
-    Date: null,
-    recurrence: "WEEKLY",
-    recurringEvery: 1,
-    startTime: new Date(1970, 0, 1, 7, 0), // January 1, 1970 at 07:00
-    endTime: new Date(1970, 0, 1, 8, 0), // January 1, 1970 at 08:00
-    endDate: null,
-    totalAppointment: 20,
-    doctorId: "cls3inf74000ffbmgyjtk4lxr",
-    OptRoomsid: null,
-    doctor: {
-      id: "cls3inf74000ffbmgyjtk4lxr",
-      staff: {
-        title: "Dr",
-        firstName: "Robert",
-        lastName: "White",
-      },
-    },
-  },
-];
-
-const title = ["Mr", "Mrs", "Ms", "Miss", "Dr", "Prof"] as const;
-const gender = ["Male", "Female"] as const;
+import { useApiClient } from "@/utils/trpc/Trpc";
+import { notifications } from "@mantine/notifications";
+import SuccessFullBook from "./SuccessFullBook";
+import getweeknumber from "@/utils/lib/others/getweeknumber";
+import { gender, title } from "@/utils/lib/others/person";
 
 const TextInputClasses: ClassNames<
   | TextInputFactory
@@ -108,47 +42,77 @@ const TextInputClasses: ClassNames<
 };
 
 export default function AppointmentBookingForm() {
-  const [data, setData] = useState(sampleData);
-
   const form = useForm<FormValues>({
     initialValues: {
       patientTitle: "Mr",
-      patientFirstName: undefined,
-      patientLastName: undefined,
+      patientFirstName: "",
+      patientLastName: "",
       idType: "NIC",
-      idNumber: undefined,
+      idNumber: "",
       patientGender: "Male",
-      patientDob: undefined,
-      patientAddress: undefined,
-      patientMobile: undefined,
-      patientEmail: undefined,
-      patientProblem: undefined,
-      AppointmentDate: undefined,
-      slotId: undefined,
-      docid: undefined,
+      patientDob: null,
+      patientAddress: "",
+      patientMobile: "",
+      patientEmail: "",
+      patientNote: "",
+      AppointmentDate: null,
+      slotId: "",
+      docid: "",
     },
     validate: zodResolver(BookAppointmentSchema),
   });
 
+  const {
+    isLoading,
+    isError,
+    isFetching,
+
+    data: schedules,
+  } = useApiClient.schedule.getPublic.useQuery(
+    {
+      doctorId: form.values.docid,
+    },
+    {
+      enabled: !!form.values.docid,
+    },
+  );
+
+  const {
+    mutateAsync,
+    reset,
+    isLoading: createloading,
+    isSuccess: createSuccess,
+    data: createdDate,
+    isError: createError,
+  } = useApiClient.appointment.createAppointment.useMutation();
+
+  const [slot, setSlot] = useState([]);
+
+  /// FUNCTION TO CHECK IF THE DATE IS AN APPOINTMENT DATE OR NOT
   const isAppointmentDate = (date) => {
     const key = dayjs(date).format("YYYY-MM-DD");
     // check for one-time appointments
+    if (isFetching || isError) return false;
 
     if (
-      data.some(
-        (item) => item.Date && dayjs(item.Date).format("YYYY-MM-DD") === key,
+      schedules.data.some(
+        (item) =>
+          item.Date &&
+          item.recurrence == "ONCE" &&
+          dayjs(item.Date).format("YYYY-MM-DD") === key,
       )
     ) {
       return true;
     }
     // check for weekly appointments
     if (
-      data.some(
+      schedules.data.some(
         (item) =>
           item.dayOfWeek &&
           item.recurrence === "WEEKLY" &&
           // compare the day of the week of the date with the dayOfWeek property
-          dayjs(date).day() === dayjs().day(item.dayOfWeek).day() &&
+          dayjs(date).day() ===
+            dayjs().day(getweeknumber(item.dayOfWeek)).day() &&
           // check if the date is within the recurrence range
           (!item.endDate || dayjs(date).isBefore(dayjs(item.endDate))) &&
           // check if the date matches the recurringEvery interval
@@ -157,20 +121,19 @@ export default function AppointmentBookingForm() {
             0,
       )
     ) {
-      console.log("weekly");
       return true;
     }
     // check for monthly appointments
     // if (
-    //   data.some(
+    //   schedules.data.some(
     //     (item) =>
-    //       item.dayOfMonth &&
+    //       item.Date &&
     //       item.recurrence === "MONTHLY" &&
-    //       // compare the day of the month of the date with the dayOfMonth property
+    //       //       // compare the day of the month of the date with the dayOfMonth property
     //       dayjs(date).date() === item.dayOfMonth &&
-    //       // check if the date is within the recurrence range
+    //       //       // check if the date is within the recurrence range
     //       (!item.endDate || dayjs(date).isBefore(dayjs(item.endDate))) &&
-    //       // check if the date matches the recurringEvery interval
+    //       //       // check if the date matches the recurringEvery interval
     //       dayjs(date).diff(dayjs(item.createdDate), "month") %
     //         item.recurringEvery ===
     //         0,
@@ -178,26 +141,32 @@ export default function AppointmentBookingForm() {
     // ) {
     //   return true;
     // }
-    // otherwise, return false
+
     return false;
   };
 
-  const getId = () => {
+  /// FUNCTION TO SET SLOT OPTIONS
+  const setSlotOptions = () => {
     //  GET THE KEY OF THE SELECTED DATE
     const key = dayjs(form.values.AppointmentDate).format("YYYY-MM-DD");
 
+    if (isFetching || isError) return;
+
     // FIND THE ITEM THAT MATCHES THE KEY
-    const item = data.filter((item) => {
-      if (item.Date && dayjs(item.Date).format("YYYY-MM-DD") === key) {
-        console.log("once");
+    const item = schedules.data.filter((item) => {
+      if (
+        item.Date &&
+        item.recurrence == "ONCE" &&
+        dayjs(item.Date).isAfter(dayjs()) &&
+        dayjs(item.Date).format("YYYY-MM-DD") === key
+      ) {
         return true;
       }
-
       if (
         item.dayOfWeek &&
         item.recurrence === "WEEKLY" &&
         dayjs(form.values.AppointmentDate).day() ===
-          dayjs().day(item.dayOfWeek).day() &&
+          dayjs().day(getweeknumber(item.dayOfWeek)).day() &&
         (!item.endDate ||
           dayjs(form.values.AppointmentDate).isBefore(dayjs(item.endDate))) &&
         dayjs(form.values.AppointmentDate).diff(
@@ -213,10 +182,33 @@ export default function AppointmentBookingForm() {
       return false;
     });
 
-    console.log(item);
+    type Slottype = (typeof item)[0]["Slot"][0];
 
-    // RETURN  THE ITEM
-    return item ? item : null;
+    let slotsNoSorted: Slottype[] = [];
+
+    item.map((item) => {
+      item.Slot.map((slot) => {
+        if (slot._count.appointment < slot.maxAppointmentsPerSlot) {
+          slotsNoSorted.push(slot);
+        }
+      });
+    });
+    const slotsSorted = slotsNoSorted
+      .sort((a, b) => {
+        return (a.startTime as any) - (b.startTime as any);
+      })
+      .map((item) => {
+        if (item._count.appointment === item.maxAppointmentsPerSlot) return;
+        return {
+          label: `${dayjs(item.startTime).format("hh:mm A")} - ${dayjs(
+            item.endTime,
+          ).format("hh:mm A")} (${item._count.appointment})`,
+          value: item.id,
+        };
+      });
+
+    setSlot(slotsSorted);
+    return slotsSorted || [];
   };
 
   //  FUNCTION TO EXCLUDE NON-APPOINTMENT DATES
@@ -224,20 +216,74 @@ export default function AppointmentBookingForm() {
     return !isAppointmentDate(date);
   };
 
-  const formsubmitHanlder = () => {
-    const id = getId();
+  const [optionRef, setOptionRef] = useState(false);
 
-    console.log(form.values);
-    console.log(id);
-    console.log("submitted");
+  /// FUNCTION TO RESET ALL THE FORM VALUES
+  const ALLResetter = () => {
+    form.reset();
+    reset();
+    setOptionRef(true);
+    setSlot([]);
+  };
+
+  /// FUNCTION TO HANDLE FORM SUBMISSION
+  const formsubmitHanlder = async () => {
+    try {
+      const createAppointment = await mutateAsync({
+        AppointmentDate: form.values.AppointmentDate,
+        patientDob: form.values.patientDob,
+        patientEmail: form.values.patientEmail,
+        patientFirstName: form.values.patientFirstName,
+        patientGender: form.values.patientGender === "Male" ? "male" : "female",
+        patientLastName: form.values.patientLastName,
+
+        patientNote: form.values.patientNote,
+        patientTitle: form.values.patientTitle,
+        slotId: form.values.slotId,
+        ...(form.values.idType === "NIC"
+          ? { patientNIC: form.values.idNumber }
+          : { patientPassport: form.values.idNumber }),
+
+        ...(form.values.patientAddress && {
+          patientAddress: form.values.patientAddress,
+        }),
+        ...(form.values.patientMobile && {
+          patientMobile: "+" + form.values.patientMobile.replace(/\D/g, ""),
+        }),
+      });
+      if (createAppointment && !createError) {
+        notifications.show({
+          title: "Appointment Booked",
+          message: "Your appointment has been booked successfully",
+          duration: 5000,
+          color: "teal",
+          icon: <IconCalendarPlus />,
+          iconLabel: "Appointment Booked",
+        });
+      }
+    } catch {}
   };
 
   return (
-    <>
+    <div className="relative">
+      <LoadingOverlay
+        visible={createloading}
+        zIndex={1000}
+        overlayProps={{ radius: "sm", blur: 2 }}
+        loaderProps={{ color: "cyan", type: "bars" }}
+      />
+      {createSuccess && (
+        <SuccessFullBook
+          BookedDate={createdDate.data.appointmentDate}
+          BookedTime={createdDate.data.appointmentstart}
+          referenceId={createdDate.data.referenceid}
+          reset={ALLResetter}
+        />
+      )}
       <form
         action=""
         onSubmit={form.onSubmit(() => {
-          formsubmitHanlder();
+          return formsubmitHanlder();
         })}
       >
         <div className="flex items-stretch justify-between gap-2 max-md:max-w-full max-md:flex-wrap">
@@ -293,7 +339,9 @@ export default function AppointmentBookingForm() {
             data={gender}
             {...form.getInputProps("patientGender")}
           />
+
           <DateInput
+            maxDate={new Date()}
             size="md"
             placeholder="Date of Birth"
             classNames={TextInputClasses}
@@ -336,29 +384,32 @@ export default function AppointmentBookingForm() {
           />
         </div>
         <div className="flex items-stretch justify-between gap-4 mt-5 max-md:max-w-full max-md:flex-wrap">
-          <DoctorSelectAsync form={form} />
+          <DoctorSelectAsync
+            form={form}
+            key={createSuccess && createdDate.status}
+          />
         </div>
         <div className="flex items-stretch justify-between gap-4 mt-5 max-md:max-w-full max-md:flex-wrap">
           <DateInput
             minDate={new Date()}
             size="md"
             excludeDate={excludeDate}
-            disabled={!form.values.docid}
+            disabled={!form.values.docid || isFetching}
             classNames={TextInputClasses}
             placeholder="Pick an appointment date"
+            rightSection={isFetching && <Loader size={18} />}
             valueFormat="DD MMM YYYY"
             {...form.getInputProps("AppointmentDate")}
           />
           <Select
             size="md"
             placeholder="Your slot"
+            key={createSuccess && createdDate.status}
             classNames={TextInputClasses}
-            data={[
-              {
-                label: " 08:00 AM - 09:00 AM",
-                value: "clskwnyuq000kt56gf8a2n5lb",
-              },
-            ]}
+            data={slot}
+            onDropdownOpen={() => {
+              setSlotOptions();
+            }}
             disabled={!form.values.docid || !form.values.AppointmentDate}
             {...form.getInputProps("slotId")}
           />
@@ -374,7 +425,7 @@ export default function AppointmentBookingForm() {
             }}
             minRows={5}
             maxRows={6}
-            {...form.getInputProps("patientProblem")}
+            {...form.getInputProps("patientNote")}
           />
         </div>
         <div className="mt-8">
@@ -390,6 +441,6 @@ export default function AppointmentBookingForm() {
           </Button>
         </div>
       </form>
-    </>
+    </div>
   );
 }

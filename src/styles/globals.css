@@ -1,2 +1,5 @@
+@layer mantine, mantine-datatable;
+
+
 @tailwind components;
 @tailwind utilities;
