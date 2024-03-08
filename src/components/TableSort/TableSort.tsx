@@ -8,14 +8,17 @@ import {
   Text,
   Button,
   Modal,
-  Notification,
+  Notification,Select,rem,HoverCard
 } from "@mantine/core";
 import { IconEdit, IconTrash, IconLockOpen } from "@tabler/icons-react";
 import { ButtonAdd } from "@/components/ButtonAdd/ButtonAdd";
 import { IconSearch } from "@tabler/icons-react";
 import { useApiClient } from "@/utils/trpc/Trpc";
-import { useDisclosure } from "@mantine/hooks";
 import { extend } from "dayjs";
+import { modals } from '@mantine/modals';
+import { FaCheckCircle } from "react-icons/fa";
+import { MdLockReset } from "react-icons/md";
+
 
 type UserRoles = "ROOTUSER" | "ADMIN" | "GUEST" | "DOCTOR" | "NURSE" | "STAFF";
 
@@ -90,8 +93,16 @@ const TableSort = ({}) => {
       isError: usererror,
       isLoading: userloading,
       isFetching: userfetching,
+      refetch:userRefetch,
     },
   } = useApiClient.manageUsers.getUsers.useSuspenseQuery({});
+  const handleRefetch = async () => {
+    try {
+      await userRefetch();
+    } catch (error) {
+      console.error("Error refetching user data:", error);
+    }
+  };
 
   const {
     mutateAsync: deleteAsync,
@@ -105,14 +116,53 @@ const TableSort = ({}) => {
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [editingRow, setEditingRow] = useState<string | null>(null);
   const [editedData, setEditedData] = useState<RowData | null>(null);
-  const [
-    openedUpdateModal,
-    { open: openUpdateModal, close: closeUpdateModal },
-  ] = useDisclosure(false);
-  const [
-    openedDeleteModal,
-    { open: openDeleteModal, close: closeDeleteModal },
-  ] = useDisclosure(false);
+  const checkIcon = (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <FaCheckCircle style={{ width: rem(70), height: rem(70), color: "teal" }} />
+    </div>
+  );
+  
+ 
+  const openUpdateModal = () => modals.openConfirmModal({
+    title: 'Please confirm your action',
+    centered: true,
+    children: (
+      <Text size="sm">
+        Are you Sure you want to edit this? Please click
+        one of these buttons to proceed.
+      </Text>
+    ),
+    labels: { confirm: 'Confirm', cancel: 'Cancel' },
+    onCancel: () => console.log('Cancel'),
+    onConfirm: ()=> {handleSave();console.log('Confirmed')},
+  });
+
+  const openPasswordRQ=()=>modals.open({
+    title:'A password reset requet sent successfully',
+    centered:true,
+    children: (
+      <>
+      {checkIcon}       
+      </>
+    ),
+  });
+
+  const openDeleteModal = () =>
+  modals.openConfirmModal({
+    title: 'Delete your profile',
+    centered: true,
+    children: (
+      <Text size="sm">
+        Are you sure you want to delete this user? 
+      </Text>
+    ),
+    labels: { confirm: 'Delete account', cancel: "No don't delete it" },
+    confirmProps: { color: 'red' },
+    onCancel: () => console.log('Cancel'),
+    onConfirm: () => {deletey(deleteUserId);
+          console.log('Confirmed');
+  }
+  });
   const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
 
   const [showNotification, setShowNotification] = useState(false);
@@ -122,6 +172,7 @@ const TableSort = ({}) => {
     setDeleteUserId(userId);
     openDeleteModal();
   };
+
 
   const toggleEditing = (userId: string) => {
     setEditingRow(editingRow === userId ? null : userId);
@@ -143,7 +194,7 @@ const TableSort = ({}) => {
       setSortedData(updatedData);
 
       // Close the delete modal
-      closeDeleteModal();
+      //closeDeleteModal();
     } catch (error) {
       console.error("Error deleting user:", error);
     }
@@ -191,7 +242,7 @@ const TableSort = ({}) => {
           username: editedData.username,
           email: editedData.email,
           phone: editedData.phone,
-          //role:editedData.role.role,
+          role:editedData.role.role,
         };
 
         // Send the payload to the API for updating the user
@@ -213,14 +264,21 @@ const TableSort = ({}) => {
           return user;
         });
         setSortedData(updatedData);
+        
 
         // Reset editing after successful save
         setEditingRow(null);
         setEditedData(null);
+        handleRefetch();
+        
       }
     } catch (error) {
       console.error("Error updating user:", userUpdateError);
+    }finally {
+      // Close all modals after saving
+      modals.closeAll();
     }
+    
   };
 
   const setSorting = (field: keyof RowData) => {
@@ -237,13 +295,21 @@ const TableSort = ({}) => {
 
       // Handle successful response
       console.log("Password reset request sent successfully:", result);
-
-      setShowNotification(true);
+      openPasswordRQ();
     } catch (error) {
       // Handle error
       console.error("Error sending password reset request:", error);
     }
   };
+
+  const roleOptions: { label: string; value: UserRoles }[] = [
+    { label: "Root User", value: "ROOTUSER" },
+    { label: "Admin", value: "ADMIN" },
+    { label: "Guest", value: "GUEST" },
+    { label: "Doctor", value: "DOCTOR" },
+    { label: "Nurse", value: "NURSE" },
+    { label: "Staff", value: "STAFF" },
+  ];
 
   return (
     <>
@@ -255,16 +321,6 @@ const TableSort = ({}) => {
         value={search}
         onChange={handleSearchChange}
       />
-      {showNotification && (
-        <Notification
-          className="w-1/4"
-          title="We notify you that"
-          color="green"
-          onClose={() => setShowNotification(false)}
-        >
-          Password reset request has been sent successfully.
-        </Notification>
-      )}
       <Table>
         <Table.Thead>
           <Table.Tr>
@@ -319,12 +375,13 @@ const TableSort = ({}) => {
               </Table.Td>
               <Table.Td>
                 {editingRow === user.id ? (
-                  <TextInput
-                    value={editedData?.role.role || user.role.role}
-                    onChange={(event) =>
-                      handleFieldChange("role", event.target.value)
-                    }
-                  />
+              <Select
+              data={roleOptions}
+              value={editedData?.role.role || user.role.role}
+              onChange={(value) =>
+                handleFieldChange("role", value as string)
+              }
+            />
                 ) : (
                   <Text>{user.role.role}</Text>
                 )}
@@ -332,28 +389,7 @@ const TableSort = ({}) => {
 
               <Table.Td>
                 {editingRow === user.id ? (
-                  <>
-                    <Modal
-                      opened={openedUpdateModal}
-                      onClose={closeUpdateModal}
-                      title="Are you Sure you want to do this?"
-                    >
-                      <div className="flex justify-end space-x-2">
-                        <Button onClick={handleSave}>Confirm</Button>
-                        <Button
-                          style={{
-                            backgroundColor: "white",
-                            color: "black",
-                            border: "1px solid black",
-                          }}
-                          onClick={closeUpdateModal}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    </Modal>
                     <Button onClick={openUpdateModal}>Update</Button>
-                  </>
                 ) : (
                   <div className="flex items-center space-x-2">
                     <ActionIcon
@@ -362,42 +398,29 @@ const TableSort = ({}) => {
                     >
                       <IconEdit size="1rem" />
                     </ActionIcon>
-                    <ActionIcon
+                   <ActionIcon
                       color="red"
                       onClick={() => handleOpenDeleteModal(user.id)}
                     >
-                      <Modal
-                        opened={openedDeleteModal}
-                        onClose={closeDeleteModal}
-                        style={{ display: "flex", justifyContent: "center" }}
-                        title="Are you Sure you want to delete "
-                      >
-                        <div className="flex justify-end space-x-2">
-                          <Button
-                            style={{
-                              backgroundColor: "white",
-                              color: "black",
-                              border: "1px solid black",
-                            }}
-                            onClick={closeDeleteModal}
-                          >
-                            Cancel
-                          </Button>
-                          <Button onClick={() => deletey(deleteUserId)}>
-                            Delete
-                          </Button>
-                        </div>
-                      </Modal>
+                      
                       <IconTrash size="1rem" />
-                    </ActionIcon>
+                </ActionIcon>
+                <HoverCard shadow="md">
+                 <HoverCard.Target>
                     <ActionIcon
                       color="blue"
                       onClick={() => handlePasswordReset(user.id)}
                     >
-                      <IconLockOpen size="1rem" />
+                      <MdLockReset size="1.4rem"/>
                     </ActionIcon>
+                    </HoverCard.Target>
+                    <HoverCard.Dropdown>
+                      <Text size="xs">Reset Password</Text>
+                    </HoverCard.Dropdown>
+                    </HoverCard>
                   </div>
                 )}
+                
               </Table.Td>
             </Table.Tr>
           ))}
