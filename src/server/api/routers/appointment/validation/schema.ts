@@ -1,7 +1,8 @@
 
 import "server-only";
-import { gender, title } from "@prisma/client"
+import { Appointmentstatus, gender, title } from "@prisma/client"
 import { z } from "zod"
+
 
 export const createAppointmentSchema = z.object({
 
@@ -80,13 +81,50 @@ export const scheduleGetProcedureSchema = z.object({
     skip: z.number().optional(),
 
     doctorid: z.string().optional(),
+    doctorSearchQuery: z.string().optional(),
+
     referenceId: z.string().optional(),
     patientSearchQuery: z.string().optional(),
     patientName: z.string().optional(),
     patientNIC: z.string().optional(),
     patientPassport: z.string().optional(),
     patientMobile: z.string().optional(),
-    patientEmail: z.string().optional()
+    patientEmail: z.string().optional(),
+
+    status: z.nativeEnum(Appointmentstatus).optional(),
+    date: z.array(z.date().nullable()).nullable().optional(),
+
+
+}).superRefine((val, ctx) => {
+
+
+    if (val.limit > 100) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Limit cannot exceed 100"
+        })
+    }
+
+    if (val.page < 1) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Page number cannot be less than 1"
+        })
+    }
+
+    if (val.status && !Object.values(Appointmentstatus).includes(val.status)) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Invalid status"
+        })
+    }
+
+    if (val.date && val.date.length > 2) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Invalid date range"
+        })
+    }
 
 
 })

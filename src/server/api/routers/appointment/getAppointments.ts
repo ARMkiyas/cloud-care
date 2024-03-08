@@ -5,6 +5,7 @@ import { Prisma, UserRoles } from "@prisma/client";
 
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { scheduleGetProcedureSchema } from "./validation/schema";
+import dayjs from "dayjs";
 
 
 
@@ -26,6 +27,11 @@ const GetAppointmentsProcedure = protectedProcedure.input(scheduleGetProcedureSc
         // allow only doctor to get his schedule
         ctx.session.user.role === UserRoles.DOCTOR ? input.doctorid = ctx.session.user.id : null
 
+        if (input?.date[0]) {
+
+
+        }
+
 
         const query = {
             skip: input.page > 1 ? (input.page - 1) * input.limit : 0,
@@ -36,6 +42,42 @@ const GetAppointmentsProcedure = protectedProcedure.input(scheduleGetProcedureSc
                 },
                 referenceid: {
                     contains: input.referenceId
+                },
+                status: {
+                    equals: input.status
+                },
+                appointmentDate: {
+
+                    ...input.date[0] && input.date[1] && {
+                        gte: new Date(dayjs(input.date[0]).format("YYYY-MM-DD")).toISOString(),
+                        lte: new Date(dayjs(input.date[1]).format("YYYY-MM-DD")).toISOString()
+                    },
+                    ...input.date[0] && !input.date[1] && {
+
+                        equals: input.date[0] ? new Date(dayjs(input.date[0]).format("YYYY-MM-DD")).toISOString() : undefined,
+                    }
+
+
+                },
+                doctor: {
+                    ...input.doctorSearchQuery?.trim() && {
+                        staff: {
+                            OR: [
+                                {
+                                    firstName: {
+                                        search: input.doctorSearchQuery?.trim()?.split(" ").join(" & ") || undefined
+
+                                    }
+
+                                }, {
+                                    lastName: {
+                                        search: input.doctorSearchQuery?.trim()?.split(" ").join(" & ") || undefined
+                                    }
+                                }
+
+                            ]
+                        }
+                    }
                 },
                 patient:
                 {

@@ -5,6 +5,7 @@ import {
   Button,
   Center,
   Group,
+  Select,
   TextInput,
 } from "@mantine/core";
 import {
@@ -28,6 +29,7 @@ import React, { useState } from "react";
 import { useApiClient } from "@/utils/trpc/Trpc";
 import type { TAppointmentsGet } from "@/server/api/ApiTypeFactory";
 import { useDebouncedValue } from "@mantine/hooks";
+import { DatePicker } from "@mantine/dates";
 
 const PAGE_SIZE = 10;
 
@@ -267,13 +269,31 @@ const sampleData = [
   },
 ];
 
+const Appointmentstatus = [
+  "Pending",
+  "Confirmed",
+  "Cancelled",
+  "Completed",
+] as const;
+
+type searchQueryType = {
+  patientSearchQuery: string;
+  doctorSearchQuery: string;
+  refSearch: string;
+  status: (typeof Appointmentstatus)[number] | undefined;
+  date: [Date | null, Date | null];
+};
+
 export default function AppointmentDataTable() {
   const [selectedRecords, setSelectedRecords] = useState([]);
 
   const [page, setPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState({
+  const [searchQuery, setSearchQuery] = useState<searchQueryType>({
     patientSearchQuery: "",
+    doctorSearchQuery: "",
     refSearch: "",
+    status: undefined,
+    date: [null, null],
   });
 
   const [debounced] = useDebouncedValue(searchQuery, 700);
@@ -287,7 +307,10 @@ export default function AppointmentDataTable() {
       limit: PAGE_SIZE,
       page: page,
       patientSearchQuery: debounced.patientSearchQuery,
+      doctorSearchQuery: debounced.doctorSearchQuery,
       referenceId: debounced.refSearch,
+      status: debounced.status,
+      date: debounced.date,
     },
     {
       staleTime: 1000 * 60 * 5,
@@ -345,6 +368,11 @@ export default function AppointmentDataTable() {
   //     },
   //   ])(event);
 
+  const [datefilter, setdatefilter] = useState<[Date | null, Date | null]>([
+    null,
+    null,
+  ]);
+
   const Tablecolumns: DataTableProps<AppointmentDataType>["columns"] = [
     {
       accessor: "index",
@@ -359,6 +387,43 @@ export default function AppointmentDataTable() {
       title: "Doctor",
       render: (record) =>
         `${record.doctor.staff.title} ${record.doctor.staff.firstName} ${record.doctor.staff.lastName}`,
+
+      filter: (
+        <div>
+          <TextInput
+            label="Doctor"
+            description="Search Doctor by last or first name"
+            placeholder="type to search...."
+            leftSection={<IconSearch size={16} />}
+            rightSection={
+              searchQuery.doctorSearchQuery !== "" && (
+                <ActionIcon
+                  size="sm"
+                  variant="transparent"
+                  c="dimmed"
+                  onClick={() => {
+                    setPage(1);
+                    setSearchQuery((pevstate) => ({
+                      ...pevstate,
+                      doctorSearchQuery: "",
+                    }));
+                  }}
+                >
+                  <IconX size={14} />
+                </ActionIcon>
+              )
+            }
+            value={searchQuery.doctorSearchQuery}
+            onChange={(e) =>
+              setSearchQuery((pevstate) => ({
+                ...pevstate,
+                doctorSearchQuery: e.target.value,
+              }))
+            }
+          />
+        </div>
+      ),
+      filtering: searchQuery.patientSearchQuery !== "",
     },
     {
       accessor: "patient",
@@ -406,6 +471,23 @@ export default function AppointmentDataTable() {
       accessor: "appointmentDate",
       title: "Date",
       render: (record) => dayjs(record.appointmentDate).format("DD/MM/YYYY"),
+      filter: (
+        <div>
+          <DatePicker
+            locale=""
+            type="range"
+            value={searchQuery.date}
+            onChange={(e) => {
+              setPage(1);
+              setSearchQuery((pevstate) => ({
+                ...pevstate,
+                date: e,
+              }));
+            }}
+          />
+        </div>
+      ),
+      filtering: searchQuery.date[0] !== null || searchQuery.date[1] !== null,
     },
     {
       accessor: "appointmentstart",
@@ -464,6 +546,45 @@ export default function AppointmentDataTable() {
     {
       accessor: "status",
       title: "Status",
+      filter: (
+        <div>
+          <Select
+            label="Status"
+            description="Filter by status"
+            placeholder="type to search...."
+            leftSection={<IconSearch size={16} />}
+            rightSection={
+              searchQuery.status !== undefined && (
+                <ActionIcon
+                  size="sm"
+                  variant="transparent"
+                  c="dimmed"
+                  onClick={() => {
+                    setPage(1);
+                    setSearchQuery((pevstate) => ({
+                      ...pevstate,
+                      status: undefined,
+                    }));
+                  }}
+                >
+                  <IconX size={14} />
+                </ActionIcon>
+              )
+            }
+            clearable
+            data={Appointmentstatus}
+            value={searchQuery.status}
+            onChange={(e: (typeof Appointmentstatus)[number]) => {
+              setPage(1);
+              setSearchQuery((pevstate) => ({
+                ...pevstate,
+                status: e,
+              }));
+            }}
+          />
+        </div>
+      ),
+      filtering: searchQuery.status !== undefined,
     },
     {
       accessor: "actions",

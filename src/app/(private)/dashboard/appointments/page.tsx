@@ -25,6 +25,7 @@ import {
   IconPlus,
 } from "@tabler/icons-react";
 import AppointmentDataTable from "../../componets/AppointmentDataTable";
+import AppointmentBookingForm from "@/components/Appointment/AppointmentBookingForm";
 
 const initialAppointments = [
   {
@@ -147,35 +148,6 @@ export default function TableReviews() {
     setShowAddModal(true);
   };
 
-  const handleSaveNewAppointment = () => {
-    if (
-      newAppointment.patientId &&
-      newAppointment.patientName &&
-      newAppointment.date &&
-      newAppointment.time &&
-      newAppointment.status
-    ) {
-      setAppointments((prevAppointments) => [
-        ...prevAppointments,
-        {
-          id: prevAppointments.length + 1,
-          ...newAppointment,
-        },
-      ]);
-      setShowAddModal(false);
-      setNewAppointment({
-        patientId: "",
-        patientName: "",
-        date: "",
-        time: "",
-        status: "",
-      });
-      setValidationError("");
-    } else {
-      setValidationError("Please fill all fields");
-    }
-  };
-
   return (
     <div>
       <h1 style={{ textAlign: "left" }}>Appointments</h1>
@@ -196,67 +168,15 @@ export default function TableReviews() {
           opened={showAddModal}
           onClose={() => setShowAddModal(false)}
           title="Add New Appointment"
-          size="sm"
+          size="lg"
+          centered
+          transitionProps={{
+            transition: "rotate-left",
+            duration: 500,
+            timingFunction: "ease",
+          }}
         >
-          <div>
-            <TextInput
-              value={newAppointment.patientId}
-              onChange={(event) =>
-                setNewAppointment({
-                  ...newAppointment,
-                  patientId: event.currentTarget.value,
-                })
-              }
-              label="Patient ID"
-            />
-            <TextInput
-              value={newAppointment.patientName}
-              onChange={(event) =>
-                setNewAppointment({
-                  ...newAppointment,
-                  patientName: event.currentTarget.value,
-                })
-              }
-              label="Patient Name"
-            />
-            <TextInput
-              value={newAppointment.date}
-              onChange={(event) =>
-                setNewAppointment({
-                  ...newAppointment,
-                  date: event.currentTarget.value,
-                })
-              }
-              label="Date"
-            />
-            <TextInput
-              value={newAppointment.time}
-              onChange={(event) =>
-                setNewAppointment({
-                  ...newAppointment,
-                  time: event.currentTarget.value,
-                })
-              }
-              label="Time"
-            />
-            <TextInput
-              value={newAppointment.status}
-              onChange={(event) =>
-                setNewAppointment({
-                  ...newAppointment,
-                  status: event.currentTarget.value,
-                })
-              }
-              label="Status"
-            />
-            <Button
-              color="green"
-              onClick={handleSaveNewAppointment}
-              style={{ marginTop: "20px", marginRight: "10px" }}
-            >
-              Save
-            </Button>
-          </div>
+          <AppointmentBookingForm />
         </Modal>
       )}
     </div>
