@@ -345,21 +345,20 @@ export default function AppointmentDataTable() {
       console.log(deleteId);
       const response = await deleteappointasync({ deleteMany: deleteId });
       console.log(response);
-    } catch (error) {
       notifications.update({
         id,
-        title: "Error",
-        message: "Error while deleting the appointment",
+        title: "Deleted",
+        message: "Appointment deleted successfully",
         loading: false,
         autoClose: 5000,
         withCloseButton: true,
         color: "red",
       });
-    } finally {
+    } catch (error) {
       notifications.update({
         id,
-        title: "Deleted",
-        message: "Appointment deleted successfully",
+        title: "Error",
+        message: "Error while deleting the appointment",
         loading: false,
         autoClose: 5000,
         withCloseButton: true,
@@ -383,11 +382,10 @@ export default function AppointmentDataTable() {
       confirmProps: { color: "red" },
       onCancel: () => console.log("Cancel"),
       onConfirm: () => {
-        return deleteHandler([
-          {
-            id: record.id,
-          },
-        ]);
+        const data = record.map((item) => ({
+          id: item.id,
+        }));
+        return deleteHandler(data);
       },
     });
 
@@ -406,7 +404,7 @@ export default function AppointmentDataTable() {
         variant="transparent"
         color="red"
         onClick={() => {
-          return openDeleteModal(record);
+          return openDeleteModal([record]);
         }}
       >
         <IconTrash size={16} />
@@ -681,11 +679,27 @@ export default function AppointmentDataTable() {
   };
 
   return (
-    <div>
+    <div className="space-y-2">
+      <div className="flex justify-end">
+        {selectedRecords.length > 0 && (
+          <Button
+            leftSection={<IconTrashX size={16} />}
+            color="red"
+            radius={8}
+            onClick={() => {
+              openDeleteModal(selectedRecords);
+            }}
+          >
+            Delete selected
+          </Button>
+        )}
+      </div>
       <DataTable
+        title="Appointments"
         withTableBorder
         withColumnBorders
         minHeight={500}
+        borderRadius={12}
         striped
         highlightOnHover
         verticalAlign="center"
@@ -700,6 +714,7 @@ export default function AppointmentDataTable() {
         // onRowContextMenu={handleContextMenu}
         // onScroll={hideContextMenu}
         // provide data
+
         records={appointmentData?.data}
         fetching={appointmentFetching}
         // define columns
