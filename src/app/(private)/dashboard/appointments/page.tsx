@@ -26,6 +26,7 @@ import {
 } from "@tabler/icons-react";
 import AppointmentDataTable from "../../componets/AppointmentDataTable";
 import AppointmentBookingForm from "@/components/Appointment/AppointmentBookingForm";
+import { useApiClient } from "@/utils/trpc/Trpc";
 
 const initialAppointments = [
   {
@@ -138,6 +139,8 @@ export default function TableReviews() {
     setShowEditModal(false);
   };
 
+  const utils = useApiClient.useUtils();
+
   const handleDeleteAppointment = (index) => {
     const updatedAppointments = [...appointments];
     updatedAppointments.splice(index, 1);
@@ -166,7 +169,10 @@ export default function TableReviews() {
       {showAddModal && (
         <Modal
           opened={showAddModal}
-          onClose={() => setShowAddModal(false)}
+          onClose={() => {
+            setShowAddModal(false);
+            utils.appointment.getAppointments.invalidate();
+          }}
           title="Add New Appointment"
           size="lg"
           centered
