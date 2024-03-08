@@ -7,6 +7,7 @@ import {
   Group,
   Select,
   TextInput,
+  Text,
 } from "@mantine/core";
 import {
   IconClick,
@@ -30,6 +31,8 @@ import { useApiClient } from "@/utils/trpc/Trpc";
 import type { TAppointmentsGet } from "@/server/api/ApiTypeFactory";
 import { useDebouncedValue } from "@mantine/hooks";
 import { DatePicker } from "@mantine/dates";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
 
 const PAGE_SIZE = 10;
 
@@ -298,31 +301,95 @@ export default function AppointmentDataTable() {
 
   const [debounced] = useDebouncedValue(searchQuery, 700);
 
-  const {
-    data: appointmentData,
-    isFetching: appointmentFetching,
-    refetch,
-  } = useApiClient.appointment.getAppointments.useQuery(
-    {
-      limit: PAGE_SIZE,
-      page: page,
-      patientSearchQuery: debounced.patientSearchQuery,
-      doctorSearchQuery: debounced.doctorSearchQuery,
-      referenceId: debounced.refSearch,
-      status: debounced.status,
-      date: debounced.date,
-    },
-    {
-      staleTime: 1000 * 60 * 5,
-    },
-  );
+  const { data: appointmentData, isFetching: appointmentFetching } =
+    useApiClient.appointment.getAppointments.useQuery(
+      {
+        limit: PAGE_SIZE,
+        page: page,
+        patientSearchQuery: debounced.patientSearchQuery,
+        doctorSearchQuery: debounced.doctorSearchQuery,
+        referenceId: debounced.refSearch,
+        status: debounced.status,
+        date: debounced.date,
+      },
+      {
+        staleTime: 1000 * 60 * 5,
+      },
+    );
+
+  const utils = useApiClient.useUtils();
+
+  const { mutateAsync: deleteappointasync, isSuccess: deletedsuccess } =
+    useApiClient.appointment.deleteAppointment.useMutation({
+      onSuccess: (data) => {
+        if (data.data.count > 0) {
+          utils.appointment.getAppointments.invalidate();
+        }
+      },
+    });
 
   const [sortStatus, setSortStatus] = useState<DataTableSortStatus<data>>({
     columnAccessor: "appointmentDate",
     direction: "asc",
   });
 
-  // const { showContextMenu, hideContextMenu } = useContextMenu();
+  const deleteHandler = async (deleteId: { id: string }[]) => {
+    const id = notifications.show({
+      title: "Deleting",
+      message: "Deleting the appointment....",
+      autoClose: false,
+      withCloseButton: false,
+      loading: true,
+    });
+    try {
+      console.log(deleteId);
+      const response = await deleteappointasync({ deleteMany: deleteId });
+      console.log(response);
+    } catch (error) {
+      notifications.update({
+        id,
+        title: "Error",
+        message: "Error while deleting the appointment",
+        loading: false,
+        autoClose: 5000,
+        withCloseButton: true,
+        color: "red",
+      });
+    } finally {
+      notifications.update({
+        id,
+        title: "Deleted",
+        message: "Appointment deleted successfully",
+        loading: false,
+        autoClose: 5000,
+        withCloseButton: true,
+        color: "red",
+      });
+    }
+  };
+
+  const openDeleteModal = (record) =>
+    modals.openConfirmModal({
+      title: "Delete your profile",
+      centered: true,
+      children: (
+        <Text size="sm">
+          Are you sure you want to delete your the Appointment? This action is
+          destructive and the data cannot be recovered.
+        </Text>
+      ),
+      labels: { confirm: "Delete account", cancel: "No don't delete it" },
+
+      confirmProps: { color: "red" },
+      onCancel: () => console.log("Cancel"),
+      onConfirm: () => {
+        return deleteHandler([
+          {
+            id: record.id,
+          },
+        ]);
+      },
+    });
 
   const renderActions: DataTableColumn<AppointmentDataType>["render"] = (
     record,
@@ -334,9 +401,20 @@ export default function AppointmentDataTable() {
       <ActionIcon size="sm" variant="transparent">
         <IconEdit size={16} />
       </ActionIcon>
+      <ActionIcon
+        size="sm"
+        variant="transparent"
+        color="red"
+        onClick={() => {
+          return openDeleteModal(record);
+        }}
+      >
+        <IconTrash size={16} />
+      </ActionIcon>
     </Group>
   );
 
+  // const { showContextMenu, hideContextMenu } = useContextMenu();
   // const handleContextMenu: DataTableProps<data>["onRowContextMenu"] = ({
   //   record,
   //   event,
