@@ -1,4 +1,5 @@
-import { z } from "zod";
+import "server-only";
+
 import { protectedProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
 import { UserRoles } from "@prisma/client";
@@ -11,7 +12,7 @@ const scheduleDeleteProcedure = protectedProcedure.input(scheduleDeleteProcedure
 
     try {
         if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
             })
@@ -28,7 +29,7 @@ const scheduleDeleteProcedure = protectedProcedure.input(scheduleDeleteProcedure
         })
 
         if (!schedule.count || schedule.count === 0) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "Schedule not found"
             })
@@ -46,7 +47,7 @@ const scheduleDeleteProcedure = protectedProcedure.input(scheduleDeleteProcedure
     } catch (error) {
 
 
-        return ErrorHandler(error, "Schedule")
+        throw ErrorHandler(error, "Schedule")
     } finally {
         ctx.db.$disconnect()
     }

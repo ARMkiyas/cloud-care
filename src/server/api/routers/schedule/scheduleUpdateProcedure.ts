@@ -1,6 +1,8 @@
-import { z } from "zod";
+import "server-only";
+
+
 import { protectedProcedure } from "../../trpc";
-import { DayOfWeek, UserRoles } from "@prisma/client";
+import { UserRoles } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { ValidateDB } from "./validation/ValidateDB";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
@@ -14,7 +16,7 @@ const scheduleUpdateProcedure = protectedProcedure.input(scheduleUpdateProcedure
 
 
         if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
             })
@@ -41,7 +43,7 @@ const scheduleUpdateProcedure = protectedProcedure.input(scheduleUpdateProcedure
 
         // check is the doctor id is valid
         if (!schedule) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "schedule not found"
             })
@@ -50,7 +52,7 @@ const scheduleUpdateProcedure = protectedProcedure.input(scheduleUpdateProcedure
 
         if (schedule.totalAppointment / 5 < input.noOfSlots) {
 
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "Number of slots should be less than or equal to max appointments divided by 5"
             })
@@ -58,7 +60,7 @@ const scheduleUpdateProcedure = protectedProcedure.input(scheduleUpdateProcedure
 
         if (schedule._count.Slot > input.maxAppointments / 5) {
 
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "Number of slots should be less than or equal to max appointments divided by 5"
             })
@@ -66,7 +68,7 @@ const scheduleUpdateProcedure = protectedProcedure.input(scheduleUpdateProcedure
         }
 
         if (schedule._count.Appointment > 0) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "cannot update schedule with appointments"
             })
@@ -83,7 +85,7 @@ const scheduleUpdateProcedure = protectedProcedure.input(scheduleUpdateProcedure
         const Timevalidate = await ValidateDB(docid, date, startTime, endTime, day, true, input.scheduleId)
 
         if (!Timevalidate) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
                 message: "cannot update schedule"
             })
@@ -131,7 +133,7 @@ const scheduleUpdateProcedure = protectedProcedure.input(scheduleUpdateProcedure
 
     } catch (e) {
 
-        return ErrorHandler(e, "Schedule")
+        throw ErrorHandler(e, "Schedule")
 
     } finally {
         ctx.db.$disconnect()

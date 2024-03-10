@@ -9,7 +9,8 @@ import { imageSchema } from "@/utils/ValidationSchemas/commonSc";
 import { getAvatar } from "@/utils/getavatar";
 import { generate2FASecret } from "@/utils/OtpHelper";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
-import { adduserschema } from "@/utils/ValidationSchemas/manageUserSc";
+import { adduserschema } from "./validation/schema";
+
 
 
 
@@ -18,7 +19,7 @@ const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, i
     try {
 
         if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
             })
@@ -34,7 +35,7 @@ const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, i
         })
 
         if (!staff) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "NOT_FOUND",
                 message: "Staff not found",
             })
@@ -89,7 +90,7 @@ const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, i
 
 
     } catch (err) {
-        return ErrorHandler(err, "User")
+        throw ErrorHandler(err, "User")
     } finally {
         ctx.db.$disconnect();
     }

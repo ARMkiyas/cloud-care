@@ -1,4 +1,4 @@
-import { createStaffSchema } from "@/utils/ValidationSchemas/manageStaffSc"
+import "server-only";
 import { protectedProcedure } from "../../trpc"
 import { UserRoles } from "@prisma/client"
 import { TRPCError } from "@trpc/server"
@@ -7,6 +7,7 @@ import { getAvatar } from "@/utils/getavatar"
 import { hashPwd } from "@/utils/hashPwdHelper"
 import { generate2FASecret } from "@/utils/OtpHelper"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error"
+import { createStaffSchema } from "./validation/schema"
 
 
 
@@ -14,7 +15,7 @@ const createStaffProceture = protectedProcedure.input(createStaffSchema).mutatio
 
     try {
         if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
-            return new TRPCError({
+            throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
             })
@@ -113,7 +114,7 @@ const createStaffProceture = protectedProcedure.input(createStaffSchema).mutatio
         }
 
     } catch (e) {
-        return ErrorHandler(e, "Staff")
+        throw ErrorHandler(e, "Staff")
 
     } finally {
         ctx.db.$disconnect();

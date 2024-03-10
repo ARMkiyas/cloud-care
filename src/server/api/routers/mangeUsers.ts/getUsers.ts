@@ -3,7 +3,8 @@ import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
 import { User, UserRoles } from "@prisma/client"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
-import { getUserschema } from "@/utils/ValidationSchemas/manageUserSc";
+import { getUserschema } from "./validation/schema";
+
 
 
 
@@ -58,6 +59,8 @@ const getUsers = protectedProcedure.input(getUserschema).query(async ({ ctx, inp
 
         })
 
+
+
         return {
             status: 200,
             error: null,
@@ -68,7 +71,7 @@ const getUsers = protectedProcedure.input(getUserschema).query(async ({ ctx, inp
 
     } catch (error) {
 
-        return ErrorHandler(error, "User")
+        throw ErrorHandler(error, "User")
     } finally {
         ctx.db.$disconnect();
     }

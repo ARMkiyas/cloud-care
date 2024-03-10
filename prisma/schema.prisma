@@ -75,25 +75,35 @@ model UserRole {
 }
 
 model User {
-    id               String      @id @default(cuid())
-    name             String
-    email            String      @unique
-    phone            String?     @unique @map("phoneNumber")
-    username         String      @unique
-    emailVerified    DateTime?
-    image            String?
-    password         String
-    twoFactorEnabled Boolean     @default(true)
-    twoFactorSecret  String?
-    userRoleId       Int
-    role             UserRole    @relation(references: [id], fields: [userRoleId])
-    accounts         Account[]
-    Log              Log[]
-    sessions         Session[]
-    staffid          String      @unique
-    staff            Staff       @relation(fields: [staffid], references: [id], onDelete: Cascade)
-    Permission       Permission? @relation(fields: [permissionId], references: [id])
-    permissionId     Int?
+    id                 String               @id @default(cuid())
+    name               String
+    email              String               @unique
+    phone              String?              @unique @map("phoneNumber")
+    username           String               @unique
+    emailVerified      DateTime?
+    image              String?
+    password           String
+    twoFactorEnabled   Boolean              @default(true)
+    twoFactorSecret    String?
+    userRoleId         Int
+    role               UserRole             @relation(references: [id], fields: [userRoleId])
+    accounts           Account[]
+    Log                Log[]
+    sessions           Session[]
+    staffid            String               @unique
+    staff              Staff                @relation(fields: [staffid], references: [id], onDelete: Cascade)
+    Permission         Permission?          @relation(fields: [permissionId], references: [id])
+    permissionId       Int?
+    PasswordResetToken PasswordResetToken[]
+}
+
+model PasswordResetToken {
+    id        String   @id @default(cuid())
+    userId    String
+    token     String   @unique
+    createdAt DateTime @default(now())
+    used      Boolean  @default(false)
+    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum title {
@@ -176,9 +186,9 @@ model Patient {
     title          title           @default(Mr)
     firstName      String
     lastName       String
-    dateOfBirth    DateTime
+    dateOfBirth    DateTime        @db.Date
     gender         gender
-    email          String          @unique
+    email          String
     phone          String?         @map("phoneNumber")
     address        String?
     NIC            String?         @unique
@@ -195,21 +205,28 @@ enum Appointmentstatus {
 }
 
 model Appointment {
-    id          String            @id @default(cuid())
-    createdDate DateTime          @default(now())
-    status      Appointmentstatus @default(Pending)
-    patientId   String
-    doctorId    String
-    nurseId     String?
-    oPDId       Int?
-    scheduleId  String
-    doctor      Doctor            @relation(fields: [doctorId], references: [id])
-    Nurse       Nurse?            @relation(fields: [nurseId], references: [id])
-    OPD         OPD?              @relation(fields: [oPDId], references: [id])
-    patient     Patient           @relation(fields: [patientId], references: [id])
-    schedule    Schedule          @relation(fields: [scheduleId], references: [id])
-    slotId      String?
-    Slot        Slot?             @relation(fields: [slotId], references: [id])
+    id                String            @id @default(cuid())
+    referenceid       String            @unique
+    appointmentNumber Int
+    appointmentDate   DateTime          @db.Date
+    appointmentstart  DateTime          @db.Time()
+    appointmentEnd    DateTime          @db.Time()
+    createdat         DateTime          @default(now())
+    updatedat         DateTime          @updatedAt
+    patientNote       String?
+    status            Appointmentstatus @default(Pending)
+    patientId         String
+    doctorId          String
+    nurseId           String?
+    oPDId             Int?
+    scheduleId        String
+    doctor            Doctor            @relation(fields: [doctorId], references: [id])
+    Nurse             Nurse?            @relation(fields: [nurseId], references: [id])
+    OPD               OPD?              @relation(fields: [oPDId], references: [id])
+    patient           Patient           @relation(fields: [patientId], references: [id])
+    schedule          Schedule          @relation(fields: [scheduleId], references: [id])
+    slotId            String
+    Slot              Slot              @relation(fields: [slotId], references: [id])
 }
 
 enum RecurrencePattern {
