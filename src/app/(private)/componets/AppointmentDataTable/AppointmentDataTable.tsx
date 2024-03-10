@@ -10,6 +10,8 @@ import {
   Text,
   Badge,
   Tooltip,
+  Flex,
+  rem,
 } from "@mantine/core";
 import {
   IconClick,
@@ -377,6 +379,49 @@ export default function AppointmentDataTable() {
         },
       ])(event);
 
+  const rowExpansion: DataTableProps<AppointmentDataType>["rowExpansion"] = {
+    allowMultiple: true,
+    content: ({ record: { id, patient, patientNote } }) => (
+      <Flex p="xs" pl={rem(50)} gap="sm" align="start" direction={"column"}>
+        <Text size="sm" fs="italic">
+          {patientNote && (
+            <div>
+              <Badge color="red">Patient Note :</Badge>
+
+              <br />
+              {patientNote}
+              <br />
+            </div>
+          )}
+        </Text>
+        <div>
+          <Badge color="cyan">
+            {`${patient.title} ${patient.firstName} ${patient.lastName}`} Info:
+          </Badge>
+        </div>
+        <div className="flex flex-col w-full space-y-1 lg:space-y-0 lg:space-x-1 lg:flex-row">
+          <Badge color="gray">Gender: {patient.gender}</Badge>
+          {patient.NIC ? (
+            <Badge color="gray">NIC : {patient.NIC}</Badge>
+          ) : (
+            <Badge color="gray">Passport : {patient.Passport}</Badge>
+          )}
+
+          <Badge color="gray">
+            DOB : {dayjs(patient.dateOfBirth).format("DD/MM/YYYY")}
+          </Badge>
+          {patient.email && <Badge color="gray">Email : {patient.email}</Badge>}
+          {patient.phone && (
+            <Badge color="gray">Mobile : {patient.phone}</Badge>
+          )}
+          {patient.address && (
+            <Badge color="gray">Address: {patient.address}</Badge>
+          )}
+        </div>
+      </Flex>
+    ),
+  };
+
   const Tablecolumns: DataTableProps<AppointmentDataType>["columns"] = [
     {
       accessor: "index",
@@ -656,13 +701,10 @@ export default function AppointmentDataTable() {
         recordsPerPage={PAGE_SIZE}
         onRowContextMenu={handleContextMenu}
         onScroll={hideContextMenu}
-        // provide data
-
+        rowExpansion={rowExpansion}
         records={appointmentData?.data}
         fetching={appointmentFetching}
-        // define columns
         columns={Tablecolumns}
-        // execute this callback when a row is clicked
       />
     </div>
   );

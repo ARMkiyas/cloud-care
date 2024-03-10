@@ -9,6 +9,7 @@ type SuccessFullBookprops = {
   BookedDate: Date;
   BookedTime: Date;
   referenceId: string;
+  cancel?: () => void;
   reset?: () => void;
 };
 
@@ -16,8 +17,9 @@ export default function SuccessFullBook({
   BookedDate,
   BookedTime,
   referenceId,
+  cancel,
   reset,
-}) {
+}: SuccessFullBookprops) {
   return (
     <Overlay
       backgroundOpacity={0}
@@ -76,9 +78,16 @@ export default function SuccessFullBook({
         >
           Book Another Appointment
         </Button>
-        <Button variant="outline" color="teal" component={Link} href="/">
-          Back to Home
-        </Button>
+
+        {cancel ? (
+          <Button variant="outline" color="red" onClick={() => cancel()}>
+            Cancel
+          </Button>
+        ) : (
+          <Button variant="outline" color="teal" component={Link} href={"/"}>
+            Back to Home
+          </Button>
+        )}
       </div>
     </Overlay>
   );

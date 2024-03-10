@@ -56,7 +56,12 @@ export default function TableReviews() {
             timingFunction: "ease",
           }}
         >
-          <AppointmentBookingForm />
+          <AppointmentBookingForm
+            cancel={() => {
+              setShowAddModal(false);
+              utils.appointment.getAppointments.invalidate();
+            }}
+          />
         </Modal>
       )}
     </div>

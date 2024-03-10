@@ -41,7 +41,13 @@ const TextInputClasses: ClassNames<
   root: "w-full",
 };
 
-export default function AppointmentBookingForm() {
+type AppointmentBookingFormProps = {
+  cancel?: () => void;
+};
+
+export default function AppointmentBookingForm({
+  cancel,
+}: AppointmentBookingFormProps) {
   const form = useForm<FormValues>({
     initialValues: {
       patientTitle: "Mr",
@@ -276,6 +282,7 @@ export default function AppointmentBookingForm() {
         <SuccessFullBook
           BookedDate={createdDate.data.appointmentDate}
           BookedTime={createdDate.data.appointmentstart}
+          cancel={cancel}
           referenceId={createdDate.data.referenceid}
           reset={ALLResetter}
         />
