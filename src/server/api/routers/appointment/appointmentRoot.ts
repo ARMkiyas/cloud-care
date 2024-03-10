@@ -5,13 +5,15 @@ import createAppointment from "./createAppointment";
 import GetAppointmentsProcedure from "./getAppointments";
 import deleteAppointmentProcedure from "./deleteAppointment";
 import CheckAppointmentProcedure from "./pubProcedures/CheckAppointment";
+import EditAppointmentProcedure from "./EditAppointment";
 
 const appointmentRouter = createTRPCRouter({
 
     createAppointment: createAppointment,
     getAppointments: GetAppointmentsProcedure,
     deleteAppointment: deleteAppointmentProcedure,
-    CheckAppointment: CheckAppointmentProcedure
+    CheckAppointment: CheckAppointmentProcedure,
+    editAppointment: EditAppointmentProcedure
 
 
 });

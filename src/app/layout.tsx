@@ -4,21 +4,24 @@
  *
  */
 
-import '@mantine/core/styles.layer.css';
+import "@mantine/core/styles.layer.css";
 import "@mantine/notifications/styles.css";
 import "@mantine/dates/styles.css";
-import 'mantine-datatable/styles.layer.css';
+import "mantine-datatable/styles.layer.css";
+import "mantine-contextmenu/styles.layer.css";
 import "@/styles/globals.css";
 
 import theme from "@styles/Mglobaltheme";
 
 import { MantineProvider, ColorSchemeScript } from "@mantine/core";
+import { ContextMenuProvider } from "mantine-contextmenu";
+
 import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import { TrpcProvider } from "@/utils/trpc/TrpcProvider";
 import { Notifications } from "@mantine/notifications";
 import SsonProvider from "./_helpers/SsonProvider";
-import { ModalsProvider } from '@mantine/modals';
+import { ModalsProvider } from "@mantine/modals";
 
 // creating metedata
 export const metadata = {
@@ -41,9 +44,9 @@ export default async function RootLayout({
           <TrpcProvider cookies={cookies().toString()}>
             <MantineProvider theme={theme}>
               <Notifications />
-              <ModalsProvider>     
-                 {children}
-              </ModalsProvider>
+              <ContextMenuProvider>
+                <ModalsProvider>{children}</ModalsProvider>
+              </ContextMenuProvider>
             </MantineProvider>
           </TrpcProvider>
         </SsonProvider>
