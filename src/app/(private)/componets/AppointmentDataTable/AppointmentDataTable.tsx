@@ -14,7 +14,6 @@ import {
 import {
   IconClick,
   IconEdit,
-  IconMessage,
   IconSearch,
   IconTrash,
   IconTrashX,
@@ -25,12 +24,7 @@ import {
 } from "@tabler/icons-react";
 // import { useContextMenu } from "mantine-contextmenu";
 import dayjs from "dayjs";
-import {
-  DataTable,
-  DataTableColumn,
-  DataTableProps,
-  DataTableSortStatus,
-} from "mantine-datatable";
+import { DataTable, DataTableColumn, DataTableProps } from "mantine-datatable";
 import React, { useState } from "react";
 import { useApiClient } from "@/utils/trpc/Trpc";
 import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
@@ -290,17 +284,16 @@ export default function AppointmentDataTable() {
       </Tooltip>
     </Group>
   );
-
   const { showContextMenu, hideContextMenu } = useContextMenu();
   const handleContextMenu: DataTableProps<AppointmentDataType>["onRowContextMenu"] =
     ({ record, event }) =>
       showContextMenu([
-        {
-          key: "edit",
-          icon: <IconEdit size={14} />,
-          title: `Edit ${record.patient.firstName} ${record.patient.lastName}`,
-          onClick: () => openDeleteModal([record]),
-        },
+        // {
+        //   key: "edit",
+        //   icon: <IconEdit size={14} />,
+        //   title: `Edit ${record.patient.firstName} ${record.patient.lastName}`,
+        //   onClick: () => openDeleteModal([record]),
+        // },
         {
           key: "active",
           hidden: record.status === "Active",
@@ -383,11 +376,6 @@ export default function AppointmentDataTable() {
           onClick: () => openDeleteModal(selectedRecords),
         },
       ])(event);
-
-  const [datefilter, setdatefilter] = useState<[Date | null, Date | null]>([
-    null,
-    null,
-  ]);
 
   const Tablecolumns: DataTableProps<AppointmentDataType>["columns"] = [
     {
