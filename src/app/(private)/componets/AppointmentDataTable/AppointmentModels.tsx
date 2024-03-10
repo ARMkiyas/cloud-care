@@ -2,6 +2,8 @@ import { modals } from "@mantine/modals";
 import { Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { useApiClient } from "@/utils/trpc/Trpc";
+import { AppointmentDataType } from "@/utils/types";
+import { Appointmentstatus } from "@/utils/comonDatas";
 
 export const openDeleteModal = (record) => {
   const utils = useApiClient.useUtils();
@@ -68,5 +70,80 @@ export const openDeleteModal = (record) => {
       }));
       return deleteHandler(data);
     },
+  });
+};
+
+export const openEditModal = (
+  record: AppointmentDataType[],
+  type: (typeof Appointmentstatus)[number],
+) => {
+  const utils = useApiClient.useUtils();
+  const { mutateAsync, isLoading } =
+    useApiClient.appointment.editAppointment.useMutation({
+      onSuccess: (data) => {
+        if (data.data.count > 0) {
+          utils.appointment.getAppointments.invalidate();
+        }
+      },
+    });
+
+  const handleAppointmentedit = async (
+    record: AppointmentDataType[],
+    data: (typeof Appointmentstatus)[number],
+  ) => {
+    const id = notifications.show({
+      title: "Updating",
+      message: "Updating the appointment....",
+      autoClose: false,
+      withCloseButton: false,
+      loading: true,
+    });
+    try {
+      const response = await mutateAsync({
+        data: record.map((item) => ({
+          id: item.id,
+          status: data,
+          date: item.appointmentDate,
+        })),
+      });
+
+      if (response.data.count > 0) {
+        notifications.update({
+          id,
+          title: "Updated",
+          message: "Appointment updated successfully",
+          loading: false,
+          autoClose: 5000,
+          withCloseButton: true,
+          color: "green",
+        });
+      } else {
+        return new Error("Error while Updating the appointment");
+      }
+    } catch (error) {
+      notifications.update({
+        id,
+        title: "Error",
+        message: "Error while Updating the appointment",
+        loading: false,
+        autoClose: 5000,
+        withCloseButton: true,
+        color: "red",
+      });
+    }
+  };
+
+  return modals.openConfirmModal({
+    title: "Please confirm your action",
+    centered: true,
+    children: (
+      <Text size="sm">
+        Are you sure you want to change the status of the Appointments to {type}{" "}
+        ?
+      </Text>
+    ),
+    labels: { confirm: "Confirm", cancel: "Cancel" },
+    onCancel: () => console.log("Cancel"),
+    onConfirm: () => handleAppointmentedit(record, type),
   });
 };

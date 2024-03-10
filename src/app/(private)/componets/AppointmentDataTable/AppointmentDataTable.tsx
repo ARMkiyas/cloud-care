@@ -39,16 +39,9 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { useContextMenu } from "mantine-contextmenu";
 import { AppointmentDataType } from "@/utils/types";
+import { Appointmentstatus } from "@/utils/comonDatas";
 
 const PAGE_SIZE = 15;
-
-const Appointmentstatus = [
-  "Pending",
-  "Active",
-  "Confirmed",
-  "Cancelled",
-  "Completed",
-] as const;
 
 type searchQueryType = {
   patientSearchQuery: string;
