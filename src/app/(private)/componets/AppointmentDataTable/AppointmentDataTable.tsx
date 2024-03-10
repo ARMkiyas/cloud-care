@@ -8,6 +8,8 @@ import {
   Select,
   TextInput,
   Text,
+  Badge,
+  Tooltip,
 } from "@mantine/core";
 import {
   IconClick,
@@ -17,6 +19,9 @@ import {
   IconTrash,
   IconTrashX,
   IconX,
+  IconCheckbox,
+  IconCalendarCancel,
+  IconCalendarCheck,
 } from "@tabler/icons-react";
 // import { useContextMenu } from "mantine-contextmenu";
 import dayjs from "dayjs";
@@ -28,252 +33,18 @@ import {
 } from "mantine-datatable";
 import React, { useState } from "react";
 import { useApiClient } from "@/utils/trpc/Trpc";
-import type { TAppointmentsGet } from "@/server/api/ApiTypeFactory";
-import { useDebouncedValue } from "@mantine/hooks";
+import { useDebouncedValue, useMediaQuery } from "@mantine/hooks";
 import { DatePicker } from "@mantine/dates";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
+import { useContextMenu } from "mantine-contextmenu";
+import { AppointmentDataType } from "@/utils/types";
 
-const PAGE_SIZE = 10;
-
-export type AppointmentDataType = TAppointmentsGet["data"][0];
-
-type data = {
-  id: string;
-  referenceid: string;
-  appointmentNumber: number;
-  appointmentDate: string;
-  appointmentstart: string;
-  appointmentEnd: string;
-  createdat: string;
-  updatedat: string;
-  patientNote: any;
-  status: string;
-  patientId: string;
-  doctorId: string;
-  nurseId: any;
-  oPDId: any;
-  scheduleId: string;
-  slotId: string;
-  Slot: {
-    id: string;
-    ScheduleId: string;
-    maxAppointmentsPerSlot: number;
-    startTime: string;
-    endTime: string;
-  };
-  patient: {
-    id: string;
-    title: string;
-    firstName: string;
-    lastName: string;
-    dateOfBirth: string;
-    gender: string;
-    email: string;
-    phone: string;
-    address: string;
-    NIC: string;
-    Passport: any;
-  };
-  doctor: {
-    staff: {
-      title: string;
-      firstName: string;
-      lastName: string;
-      image: string;
-    };
-  };
-};
-
-const sampleData = [
-  {
-    id: "clt9678qh000eyoo0t3301033",
-    referenceid: "cloudcare-lt9678qf-xijx",
-    appointmentNumber: 3,
-    appointmentDate: "Tue Mar 03 2026 05:30:00 GMT+0530",
-    appointmentstart: "Thu Jan 01 1970 07:36:00 GMT+0530",
-    appointmentEnd: "Thu Jan 01 1970 07:39:00 GMT+0530",
-    createdat: "Sat Mar 02 2024 03:02:24 GMT+0530",
-    updatedat: "Sat Mar 02 2024 03:02:24 GMT+0530",
-    patientNote: null,
-    status: "Pending",
-    patientId: "clskyf1a6001ct56gofoibcda",
-    doctorId: "cls3ikk9r0007fbmgy9i70xgw",
-    nurseId: null,
-    oPDId: null,
-    scheduleId: "clt66udb00000rf5bgdrz67bv",
-    slotId: "clt66udb10003rf5brtloj14e",
-    Slot: {
-      id: "clt66udb10003rf5brtloj14e",
-      ScheduleId: "clt66udb00000rf5bgdrz67bv",
-      maxAppointmentsPerSlot: 5,
-      startTime: "Thu Jan 01 1970 07:30:00 GMT+0530",
-      endTime: "Thu Jan 01 1970 07:45:00 GMT+0530",
-    },
-    patient: {
-      id: "clskyf1a6001ct56gofoibcda",
-      title: "Mr",
-      firstName: "Mohammed",
-      lastName: "farnas",
-      dateOfBirth: "Fri Feb 14 1992 05:30:00 GMT+0530",
-      gender: "male",
-      email: "armkiyas99@gmail.com",
-      phone: "76721151233",
-      address: "21,hostpital road",
-      NIC: "866487543v",
-      Passport: null,
-    },
-    doctor: {
-      staff: {
-        title: "Mr",
-        firstName: "John",
-        lastName: "Doe",
-        image: "/img/avatar/person-male.png",
-      },
-    },
-  },
-  {
-    id: "clt8xe6jy0007n8cl28x36ezc",
-    referenceid: "cloudcare-lt8xe6jx-fuh0",
-    appointmentNumber: 1,
-    appointmentDate: "Sat Mar 03 2018 05:30:00 GMT+0530",
-    appointmentstart: "Thu Jan 01 1970 07:30:00 GMT+0530",
-    appointmentEnd: "Thu Jan 01 1970 07:33:00 GMT+0530",
-    createdat: "Fri Mar 01 2024 22:55:52 GMT+0530",
-    updatedat: "Fri Mar 01 2024 22:55:52 GMT+0530",
-    patientNote: null,
-    status: "Pending",
-    patientId: "clskyf1a6001ct56gofoibcda",
-    doctorId: "cls3ikk9r0007fbmgy9i70xgw",
-    nurseId: null,
-    oPDId: null,
-    scheduleId: "clt66udb00000rf5bgdrz67bv",
-    slotId: "clt66udb10003rf5brtloj14e",
-    Slot: {
-      id: "clt66udb10003rf5brtloj14e",
-      ScheduleId: "clt66udb00000rf5bgdrz67bv",
-      maxAppointmentsPerSlot: 5,
-      startTime: "Thu Jan 01 1970 07:30:00 GMT+0530",
-      endTime: "Thu Jan 01 1970 07:45:00 GMT+0530",
-    },
-    patient: {
-      id: "clskyf1a6001ct56gofoibcda",
-      title: "Mr",
-      firstName: "Mohammed",
-      lastName: "farnas",
-      dateOfBirth: "Fri Feb 14 1992 05:30:00 GMT+0530",
-      gender: "male",
-      email: "armkiyas99@gmail.com",
-      phone: "76721151233",
-      address: "21,hostpital road",
-      NIC: "866487543v",
-      Passport: null,
-    },
-    doctor: {
-      staff: {
-        title: "Mr",
-        firstName: "John",
-        lastName: "Doe",
-        image: "/img/avatar/person-male.png",
-      },
-    },
-  },
-  {
-    id: "clt8v6y0m0010z5onoeptdgih",
-    referenceid: "cloudcare-lt8v6y0k-x85v",
-    appointmentNumber: 1,
-    appointmentDate: "Sat Mar 03 2018 05:30:00 GMT+0530",
-    appointmentstart: "Thu Jan 01 1970 07:00:00 GMT+0530",
-    appointmentEnd: "Thu Jan 01 1970 07:03:00 GMT+0530",
-    createdat: "Fri Mar 01 2024 21:54:15 GMT+0530",
-    updatedat: "Fri Mar 01 2024 21:54:15 GMT+0530",
-    patientNote: null,
-    status: "Pending",
-    patientId: "clskyf1a6001ct56gofoibcda",
-    doctorId: "cls3ikk9r0007fbmgy9i70xgw",
-    nurseId: null,
-    oPDId: null,
-    scheduleId: "clt66udb00000rf5bgdrz67bv",
-    slotId: "clt66udb10001rf5bgxceyz92",
-    Slot: {
-      id: "clt66udb10001rf5bgxceyz92",
-      ScheduleId: "clt66udb00000rf5bgdrz67bv",
-      maxAppointmentsPerSlot: 5,
-      startTime: "Thu Jan 01 1970 07:00:00 GMT+0530",
-      endTime: "Thu Jan 01 1970 07:15:00 GMT+0530 ",
-    },
-    patient: {
-      id: "clskyf1a6001ct56gofoibcda",
-      title: "Mr",
-      firstName: "Mohammed",
-      lastName: "farnas",
-      dateOfBirth: "Fri Feb 14 1992 05:30:00 GMT+0530",
-      gender: "male",
-      email: "armkiyas99@gmail.com",
-      phone: "76721151233",
-      address: "21,hostpital road",
-      NIC: "866487543v",
-      Passport: null,
-    },
-    doctor: {
-      staff: {
-        title: "Mr",
-        firstName: "John",
-        lastName: "Doe",
-        image: "/img/avatar/person-male.png",
-      },
-    },
-  },
-  {
-    id: "clt7qlj2x0002z5onfhkbvr65",
-    referenceid: "cloudcare-lt7qlj2w-z2tp",
-    appointmentNumber: 2,
-    appointmentDate: "Wed Mar 13 2024 05:30:00 GMT+0530",
-    appointmentstart: "Fri Jan 02 1970 02:18:00 GMT+0530",
-    appointmentEnd: "Fri Jan 02 1970 02:21:00 GMT+0530 ",
-    createdat: "Fri Mar 01 2024 02:57:51 GMT+0530",
-    updatedat: "Fri Mar 01 2024 02:57:51 GMT+0530",
-    patientNote: null,
-    status: "Pending",
-    patientId: "clt7qlj2x0003z5onqp9mglbu",
-    doctorId: "cls3ikk9r0007fbmgy9i70xgw",
-    nurseId: null,
-    oPDId: null,
-    scheduleId: "clt6ezsl90005rf5bedufqlku",
-    slotId: "clt6ezsla0007rf5bj6v79w5f",
-    Slot: {
-      id: "clt6ezsla0007rf5bj6v79w5f",
-      ScheduleId: "clt6ezsl90005rf5bedufqlku",
-      maxAppointmentsPerSlot: 5,
-      startTime: "Fri Jan 02 1970 02:15:00 GMT+0530",
-      endTime: "Fri Jan 02 1970 02:30:00 GMT+0530",
-    },
-    patient: {
-      id: "clt7qlj2x0003z5onqp9mglbu",
-      title: "Mr",
-      firstName: "farnas",
-      lastName: "mohammed",
-      dateOfBirth: "Mon Mar 26 1990 05:30:00 GMT+0530",
-      gender: "male",
-      email: "arhg@gjfjg.com",
-      phone: null,
-      address: null,
-      NIC: "99943488",
-      Passport: null,
-    },
-    doctor: {
-      staff: {
-        title: "Mr",
-        firstName: "John",
-        lastName: "Doe",
-        image: "/img/avatar/person-male.png",
-      },
-    },
-  },
-];
+const PAGE_SIZE = 15;
 
 const Appointmentstatus = [
   "Pending",
+  "Active",
   "Confirmed",
   "Cancelled",
   "Completed",
@@ -289,6 +60,8 @@ type searchQueryType = {
 
 export default function AppointmentDataTable() {
   const [selectedRecords, setSelectedRecords] = useState([]);
+
+  const isTouch = useMediaQuery("(pointer: coarse)");
 
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState<searchQueryType>({
@@ -328,11 +101,6 @@ export default function AppointmentDataTable() {
       },
     });
 
-  const [sortStatus, setSortStatus] = useState<DataTableSortStatus<data>>({
-    columnAccessor: "appointmentDate",
-    direction: "asc",
-  });
-
   const deleteHandler = async (deleteId: { id: string }[]) => {
     const id = notifications.show({
       title: "Deleting",
@@ -352,7 +120,7 @@ export default function AppointmentDataTable() {
         loading: false,
         autoClose: 5000,
         withCloseButton: true,
-        color: "red",
+        color: "green",
       });
     } catch (error) {
       notifications.update({
@@ -373,7 +141,7 @@ export default function AppointmentDataTable() {
       centered: true,
       children: (
         <Text size="sm">
-          Are you sure you want to delete your the Appointment? This action is
+          Are you sure you want to delete the Appointments? This action is
           destructive and the data cannot be recovered.
         </Text>
       ),
@@ -389,60 +157,239 @@ export default function AppointmentDataTable() {
       },
     });
 
+  const openEditModal = (
+    record: AppointmentDataType[],
+    type: (typeof Appointmentstatus)[number],
+  ) =>
+    modals.openConfirmModal({
+      title: "Please confirm your action",
+      centered: true,
+      children: (
+        <Text size="sm">
+          Are you sure you want to change the status of the Appointments to{" "}
+          {type} ?
+        </Text>
+      ),
+      labels: { confirm: "Confirm", cancel: "Cancel" },
+      onCancel: () => console.log("Cancel"),
+      onConfirm: () => handleAppointmentedit(record, type),
+    });
+
+  const { mutateAsync, isLoading } =
+    useApiClient.appointment.editAppointment.useMutation({
+      onSuccess: (data) => {
+        if (data.data.count > 0) {
+          utils.appointment.getAppointments.invalidate();
+        }
+      },
+    });
+
+  const handleAppointmentedit = async (
+    record: AppointmentDataType[],
+    data: (typeof Appointmentstatus)[number],
+  ) => {
+    const id = notifications.show({
+      title: "Updating",
+      message: "Updating the appointment....",
+      autoClose: false,
+      withCloseButton: false,
+      loading: true,
+    });
+    try {
+      const response = await mutateAsync({
+        data: record.map((item) => ({
+          id: item.id,
+          status: data,
+          date: item.appointmentDate,
+        })),
+      });
+
+      if (response.data.count > 0) {
+        notifications.update({
+          id,
+          title: "Updated",
+          message: "Appointment updated successfully",
+          loading: false,
+          autoClose: 5000,
+          withCloseButton: true,
+          color: "green",
+        });
+      } else {
+        return new Error("Error while Updating the appointment");
+      }
+    } catch (error) {
+      notifications.update({
+        id,
+        title: "Error",
+        message: "Error while Updating the appointment",
+        loading: false,
+        autoClose: 5000,
+        withCloseButton: true,
+        color: "red",
+      });
+    }
+  };
+
   const renderActions: DataTableColumn<AppointmentDataType>["render"] = (
     record,
   ) => (
     <Group gap={4} justify="right" wrap="nowrap">
-      <ActionIcon size="sm" variant="transparent" color="green">
-        <IconMessage size={16} />
-      </ActionIcon>
-      <ActionIcon size="sm" variant="transparent">
-        <IconEdit size={16} />
-      </ActionIcon>
-      <ActionIcon
-        size="sm"
-        variant="transparent"
-        color="red"
-        onClick={() => {
-          return openDeleteModal([record]);
-        }}
+      <Tooltip
+        label={`${
+          record.status == "Active" || record.status == "Completed"
+            ? "Cannot Make "
+            : ""
+        }Active`}
       >
-        <IconTrash size={16} />
-      </ActionIcon>
+        <ActionIcon
+          size="sm"
+          variant="transparent"
+          color="green"
+          disabled={record.status == "Active" || record.status == "Completed"}
+          onClick={() => openEditModal([record], "Active")}
+        >
+          <IconCheckbox size={16} />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip
+        label={`${
+          record.status == "Cancelled" || record.status == "Completed"
+            ? "Cannot Make "
+            : ""
+        }Completed`}
+      >
+        <ActionIcon
+          size="sm"
+          variant="transparent"
+          color="green"
+          disabled={
+            record.status == "Cancelled" || record.status == "Completed"
+          }
+          onClick={() => openEditModal([record], "Completed")}
+        >
+          <IconCalendarCheck size={16} />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip
+        label={`${record.status == "Completed" ? "Cannot Make " : ""}Cancel`}
+      >
+        <ActionIcon
+          size="sm"
+          variant="transparent"
+          color="gray"
+          disabled={record.status == "Completed"}
+          onClick={() => openEditModal([record], "Cancelled")}
+        >
+          <IconCalendarCancel size={16} />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip label="Delete">
+        <ActionIcon
+          size="sm"
+          variant="transparent"
+          color="red"
+          onClick={() => {
+            return openDeleteModal([record]);
+          }}
+        >
+          <IconTrash size={16} />
+        </ActionIcon>
+      </Tooltip>
     </Group>
   );
 
-  // const { showContextMenu, hideContextMenu } = useContextMenu();
-  // const handleContextMenu: DataTableProps<data>["onRowContextMenu"] = ({
-  //   record,
-  //   event,
-  // }) =>
-  //   showContextMenu([
-  //     {
-  //       key: "edit",
-  //       icon: <IconEdit size={14} />,
-  //       title: `Edit ${record.patient.firstName} ${record.patient.lastName}`,
-  //       onClick: () => editRecord(record),
-  //     },
-  //     {
-  //       key: "delete",
-  //       title: `Delete ${record.patient.firstName} ${record.patient.lastName}`,
-  //       icon: <IconTrashX size={14} />,
-  //       color: "red",
-  //       onClick: () => deleteRecord(record),
-  //     },
-  //     { key: "divider" },
-  //     {
-  //       key: "deleteMany",
-  //       hidden:
-  //         selectedRecords.length <= 1 ||
-  //         !selectedRecords.map((r) => r.id).includes(record.id),
-  //       title: `Delete ${selectedRecords.length} selected records`,
-  //       icon: <IconTrash size={14} />,
-  //       color: "red",
-  //       onClick: deleteSelectedRecords,
-  //     },
-  //   ])(event);
+  const { showContextMenu, hideContextMenu } = useContextMenu();
+  const handleContextMenu: DataTableProps<AppointmentDataType>["onRowContextMenu"] =
+    ({ record, event }) =>
+      showContextMenu([
+        {
+          key: "edit",
+          icon: <IconEdit size={14} />,
+          title: `Edit ${record.patient.firstName} ${record.patient.lastName}`,
+          onClick: () => openDeleteModal([record]),
+        },
+        {
+          key: "active",
+          hidden: record.status === "Active",
+          title: `Active ${record.patient.title} ${record.patient.firstName} ${record.patient.lastName} appointment`,
+          icon: <IconCheckbox size={14} />,
+          color: "green",
+          onClick: () => openEditModal([record], "Active"),
+        },
+        {
+          key: "complete",
+          hidden:
+            record.status === "Completed" ||
+            record.status === "Cancelled" ||
+            record.status === "Pending",
+          title: `complete ${record.patient.title} ${record.patient.firstName} ${record.patient.lastName} appointment`,
+          icon: <IconCalendarCheck size={14} />,
+          color: "green",
+          onClick: () => openEditModal([record], "Completed"),
+        },
+        {
+          key: "Cancel Appointment",
+          icon: <IconCalendarCancel size={14} />,
+          hidden: record.status === "Cancelled",
+          title: `Cancel ${record.patient.title} ${record.patient.firstName} ${record.patient.lastName} appointment`,
+          color: "gray",
+          onClick: () => openEditModal([record], "Cancelled"),
+        },
+        {
+          key: "delete",
+          title: `Delete ${record.patient.title} ${record.patient.firstName} ${record.patient.lastName} appointment`,
+          icon: <IconTrashX size={14} />,
+          color: "red",
+          onClick: () => openDeleteModal([record]),
+        },
+        { key: "divider" },
+        {
+          key: "activeMany",
+          hidden:
+            selectedRecords.length <= 1 ||
+            !selectedRecords.map((r) => r.id).includes(record.id) ||
+            selectedRecords.map((r) => r.status).includes("Active") ||
+            selectedRecords.map((r) => r.status).includes("Cancelled") ||
+            selectedRecords.map((r) => r.status).includes("Completed"),
+          title: `Active ${selectedRecords.length} selected records`,
+          icon: <IconCheckbox size={14} />,
+          color: "green",
+          onClick: () => openEditModal(selectedRecords, "Active"),
+        },
+        {
+          key: "completemany",
+          hidden:
+            selectedRecords.length <= 1 ||
+            !selectedRecords.map((r) => r.id).includes(record.id) ||
+            selectedRecords.map((r) => r.status).includes("Pending") ||
+            selectedRecords.map((r) => r.status).includes("Cancelled"),
+          title: `complete ${selectedRecords.length} selected records`,
+          icon: <IconCheckbox size={14} />,
+          color: "green",
+          onClick: () => openEditModal(selectedRecords, "Completed"),
+        },
+        {
+          key: "ceancelMany",
+          hidden:
+            selectedRecords.length <= 1 ||
+            !selectedRecords.map((r) => r.id).includes(record.id),
+
+          title: `Cancel ${selectedRecords.length} selected records`,
+          icon: <IconCalendarCancel size={14} />,
+          color: "gray",
+          onClick: () => openEditModal(selectedRecords, "Cancelled"),
+        },
+        {
+          key: "deleteMany",
+          hidden:
+            selectedRecords.length <= 1 ||
+            !selectedRecords.map((r) => r.id).includes(record.id),
+          title: `Delete ${selectedRecords.length} selected records`,
+          icon: <IconTrash size={14} />,
+          color: "red",
+          onClick: () => openDeleteModal(selectedRecords),
+        },
+      ])(event);
 
   const [datefilter, setdatefilter] = useState<[Date | null, Date | null]>([
     null,
@@ -453,6 +400,8 @@ export default function AppointmentDataTable() {
     {
       accessor: "index",
       title: "#",
+      textAlign: "center",
+      width: "0%",
       render: (record) => {
         const index = appointmentData?.data.indexOf(record);
         return page * PAGE_SIZE - PAGE_SIZE + (index || 0) + 1;
@@ -578,6 +527,7 @@ export default function AppointmentDataTable() {
     {
       accessor: "appointmentNumber",
       title: "Number",
+      textAlign: "center",
     },
     {
       accessor: "referenceid",
@@ -622,6 +572,21 @@ export default function AppointmentDataTable() {
     {
       accessor: "status",
       title: "Status",
+      textAlign: "center",
+      width: "0%",
+      render: (record) => (
+        <Badge
+          color={
+            record.status == "Active"
+              ? "green"
+              : record.status == "Completed"
+              ? "indigo"
+              : "gray"
+          }
+        >
+          {record.status}
+        </Badge>
+      ),
       filter: (
         <div>
           <Select
@@ -674,14 +639,10 @@ export default function AppointmentDataTable() {
     },
   ];
 
-  const handleSortStatusChange = (status: DataTableSortStatus<data>) => {
-    setSortStatus(status);
-  };
-
   return (
     <div className="space-y-2">
       <div className="flex justify-end">
-        {selectedRecords.length > 0 && (
+        {selectedRecords.length > 0 && isTouch && (
           <Button
             leftSection={<IconTrashX size={16} />}
             color="red"
@@ -695,6 +656,7 @@ export default function AppointmentDataTable() {
         )}
       </div>
       <DataTable
+        textSelectionDisabled={isTouch}
         title="Appointments"
         withTableBorder
         withColumnBorders
@@ -711,8 +673,8 @@ export default function AppointmentDataTable() {
         onPageChange={setPage}
         totalRecords={appointmentData?.pagenation.total || 0}
         recordsPerPage={PAGE_SIZE}
-        // onRowContextMenu={handleContextMenu}
-        // onScroll={hideContextMenu}
+        onRowContextMenu={handleContextMenu}
+        onScroll={hideContextMenu}
         // provide data
 
         records={appointmentData?.data}
@@ -723,15 +685,4 @@ export default function AppointmentDataTable() {
       />
     </div>
   );
-}
-function editRecord(record: AppointmentDataType) {
-  throw new Error("Function not implemented.");
-}
-
-function deleteRecord(record: AppointmentDataType) {
-  throw new Error("Function not implemented.");
-}
-
-function deleteSelectedRecords() {
-  throw new Error("Function not implemented.");
 }

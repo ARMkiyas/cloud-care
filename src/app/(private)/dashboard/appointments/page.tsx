@@ -24,9 +24,10 @@ import {
   IconPencil,
   IconPlus,
 } from "@tabler/icons-react";
-import AppointmentDataTable from "../../componets/AppointmentDataTable";
-import AppointmentBookingForm from "@/components/Appointment/AppointmentBookingForm";
+
 import { useApiClient } from "@/utils/trpc/Trpc";
+import AppointmentDataTable from "../../componets/AppointmentDataTable/AppointmentDataTable";
+import AppointmentBookingForm from "@/components/Appointment/AppointmentBookingForm";
 
 const initialAppointments = [
   {

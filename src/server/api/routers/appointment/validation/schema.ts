@@ -1,7 +1,7 @@
 
 import "server-only";
 import { Appointmentstatus, gender, title } from "@prisma/client"
-import { z } from "zod"
+import { date, z } from "zod"
 
 
 export const createAppointmentSchema = z.object({
@@ -60,6 +60,41 @@ export const createAppointmentSchema = z.object({
 
 
 
+export const EditAppointmentProcedureSchema = z.object({
+
+
+    data: z.array(z.object({
+        id: z.string(),
+        status: z.nativeEnum(Appointmentstatus),
+        date: z.date()
+
+    }))
+
+
+}).superRefine((val, ctx) => {
+
+    if (val.data && val.data.length > 0) {
+        val.data.forEach((item) => {
+            if (item.status === Appointmentstatus.Active && item.date < new Date()) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "Appointment date cannot be in the past for status 'Active'"
+                })
+
+            }
+            if (item.status === Appointmentstatus.Completed && item.date > new Date()) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "Appointment date cannot be in the future for status 'Completed'"
+                })
+            }
+        })
+
+    }
+
+
+})
+
 
 export const deleteAppointmentProcedureSchema = z.object({
 
@@ -75,7 +110,7 @@ export const deleteAppointmentProcedureSchema = z.object({
 
 export const scheduleGetProcedureSchema = z.object({
 
-    limit: z.number(),
+    limit: z.number().default(10),
     page: z.number().default(1).optional(),
     cursor: z.string().optional(),
     skip: z.number().optional(),
@@ -92,7 +127,7 @@ export const scheduleGetProcedureSchema = z.object({
     patientEmail: z.string().optional(),
 
     status: z.nativeEnum(Appointmentstatus).optional(),
-    date: z.array(z.date().nullable()).nullable().optional(),
+    date: z.array(z.date().nullable()).default([undefined, undefined]).optional(),
 
 
 }).superRefine((val, ctx) => {
