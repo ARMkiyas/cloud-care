@@ -135,7 +135,6 @@ const GetAppointmentsProcedure = protectedProcedure.input(scheduleGetProcedureSc
             },
             orderBy: {
                 createdat: "desc",
-
             }
 
         } satisfies Prisma.AppointmentFindManyArgs

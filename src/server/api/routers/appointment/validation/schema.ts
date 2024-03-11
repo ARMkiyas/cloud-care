@@ -2,6 +2,7 @@
 import "server-only";
 import { Appointmentstatus, gender, title } from "@prisma/client"
 import { date, z } from "zod"
+import { pagenationSchema } from "@/utils/ValidationSchemas/commonSc";
 
 
 export const createAppointmentSchema = z.object({
@@ -110,10 +111,7 @@ export const deleteAppointmentProcedureSchema = z.object({
 
 export const scheduleGetProcedureSchema = z.object({
 
-    limit: z.number().default(10),
-    page: z.number().default(1).optional(),
-    cursor: z.string().optional(),
-    skip: z.number().optional(),
+
 
     doctorid: z.string().optional(),
     doctorSearchQuery: z.string().optional(),
@@ -130,7 +128,7 @@ export const scheduleGetProcedureSchema = z.object({
     date: z.array(z.date().nullable()).default([undefined, undefined]).optional(),
 
 
-}).superRefine((val, ctx) => {
+}).merge(pagenationSchema).superRefine((val, ctx) => {
 
 
     if (val.limit > 100) {
