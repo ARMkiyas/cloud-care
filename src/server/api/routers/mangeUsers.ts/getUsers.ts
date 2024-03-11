@@ -1,9 +1,10 @@
 import "server-only";
 import { z } from "zod";
 import { protectedProcedure } from "../../trpc";
-import { User, UserRoles } from "@prisma/client"
+import { Prisma, User, UserRoles } from "@prisma/client"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { getUserschema } from "./validation/schema";
+import { TRPCError } from "@trpc/server";
 
 
 
@@ -14,7 +15,17 @@ const getUsers = protectedProcedure.input(getUserschema).query(async ({ ctx, inp
 
     try {
 
-        const users = await ctx.db.user.findMany({
+        if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
+            throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "You are not authorized to perform this action",
+            })
+        }
+
+
+        const userQuery = {
+            skip: input.page > 1 ? (input.page - 1) * input.limit : 0,
+            take: input.limit + 1,
             where: {
                 id: {
                     equals: input.userid ? input.userid.trim() : undefined
@@ -57,12 +68,32 @@ const getUsers = protectedProcedure.input(getUserschema).query(async ({ ctx, inp
                 }
             }
 
-        })
+        } satisfies Prisma.UserFindManyArgs
+
+        const [users, count] = await ctx.db.$transaction([
+            ctx.db.user.findMany(userQuery),
+            ctx.db.user.count({
+                where: userQuery.where
+            })
+        ])
+
+
+        let nextCursor: typeof input.cursor | undefined = undefined
+
+        if (users.length > input.limit) {
+            nextCursor = users[users.length - 1].id
+            users.pop()
+        }
 
 
 
         return {
             status: 200,
+            pagenation: {
+                nextCursor: nextCursor,
+                pages: input.page,
+                total: count
+            },
             error: null,
             ok: true,
             data: users
