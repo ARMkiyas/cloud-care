@@ -8,8 +8,9 @@ import {
   Text,
   Button,
   Modal,
-  Notification,Select,rem,HoverCard
+  Notification,Select,rem,HoverCard,Pagination
 } from "@mantine/core";
+import { randomId } from '@mantine/hooks';
 import { IconEdit, IconTrash, IconLockOpen } from "@tabler/icons-react";
 import { ButtonAdd } from "@/components/ButtonAdd/ButtonAdd";
 import { IconSearch } from "@tabler/icons-react";
@@ -18,6 +19,8 @@ import { extend } from "dayjs";
 import { modals } from '@mantine/modals';
 import { FaCheckCircle } from "react-icons/fa";
 import { MdLockReset } from "react-icons/md";
+
+
 
 
 type UserRoles = "ROOTUSER" | "ADMIN" | "GUEST" | "DOCTOR" | "NURSE" | "STAFF";
@@ -40,6 +43,24 @@ type users = {
 };
 
 interface RowData extends users {}
+
+const ITEMS_PER_PAGE = 10;
+
+function chunk<T>(array: T[], size: number): T[][] {
+  if (!array.length) {
+    return [];
+  }
+  const head = array.slice(0, size);
+  const tail = array.slice(size);
+  return [head, ...chunk(tail, size)];
+}
+
+const data = chunk(
+  Array(30)
+    .fill(0)
+    .map((_, index) => ({ id: index, name: randomId() })),
+  ITEMS_PER_PAGE
+);
 
 function filterData(data: RowData[], search: string, tableRefect?: any) {
   const query = search.toLowerCase().trim();
@@ -121,7 +142,7 @@ const TableSort = ({}) => {
       <FaCheckCircle style={{ width: rem(70), height: rem(70), color: "teal" }} />
     </div>
   );
-  
+  const [activePage, setPage] = useState(1);
  
   const openUpdateModal = () => modals.openConfirmModal({
     title: 'Please confirm your action',
@@ -310,6 +331,9 @@ const TableSort = ({}) => {
     { label: "Nurse", value: "NURSE" },
     { label: "Staff", value: "STAFF" },
   ];
+  const handlePageChange = (page: number) => {
+    setPage(page);
+  };
 
   return (
     <>
@@ -334,7 +358,7 @@ const TableSort = ({}) => {
           </Table.Tr>
         </Table.Thead>
         <Table.Tbody>
-          {sortedData.map((user) => (
+          {sortedData.slice((activePage - 1) * ITEMS_PER_PAGE, activePage * ITEMS_PER_PAGE).map((user) => (
             <Table.Tr key={user.id}>
               <Table.Td>{user.name}</Table.Td>
               <Table.Td>
@@ -426,6 +450,9 @@ const TableSort = ({}) => {
           ))}
         </Table.Tbody>
       </Table>
+      <div className="grid place-content-center absolute inset-x-0 bottom-10">
+      <Pagination total={Math.ceil(sortedData.length / ITEMS_PER_PAGE)} value={activePage} onChange={handlePageChange} mt="sm" />
+      </div>
     </>
   );
 };
