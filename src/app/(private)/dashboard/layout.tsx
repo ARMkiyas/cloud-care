@@ -63,11 +63,11 @@ export default function layout({ children }: { children: React.ReactNode }) {
                 width="22"
                 height="22"
                 viewBox="0 0 22 22"
-                stroke-width="2"
+                strokeWidth="2"
                 stroke="currentColor"
                 fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
