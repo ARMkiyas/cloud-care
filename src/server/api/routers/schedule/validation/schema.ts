@@ -2,6 +2,7 @@ import "server-only"
 
 import { DayOfWeek, RecurrencePattern } from "@prisma/client"
 import { z } from "zod"
+import { pagenationSchema } from "@/utils/ValidationSchemas/commonSc"
 
 const DEFAULTmaxAppointments = 20
 const DEFAULTnoOfSlots = 4
@@ -147,7 +148,7 @@ export const scheduleGetProcedureSchema = z.object({
     DayOfWeek: z.nativeEnum(DayOfWeek).optional(),
     doctorname: z.string().optional(),
 
-})
+}).merge(pagenationSchema)
 
 
 

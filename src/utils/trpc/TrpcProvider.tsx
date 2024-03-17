@@ -19,12 +19,11 @@ import { useApiClient } from "@/utils/trpc/Trpc";
 import SuperJSON from "superjson";
 import { getUrl, transformer } from "./shared";
 import { useSession } from "next-auth/react";
-import { AppRouterType } from "@/server/api/root";
 import { notifications } from "@mantine/notifications";
+import { ZodError } from "zod";
 
 const errorHander = (error) => {
   if (error instanceof TRPCClientError) {
-    console.log(error.data.code);
     notifications.show({
       title: error.data.code || "Error",
       message: error.message,

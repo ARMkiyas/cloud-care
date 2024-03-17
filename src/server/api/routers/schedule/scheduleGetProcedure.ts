@@ -2,7 +2,7 @@ import "server-only";
 
 import { protectedProcedure } from "../../trpc";
 import { TRPCError } from "@trpc/server";
-import { UserRoles } from "@prisma/client";
+import { Prisma, UserRoles } from "@prisma/client";
 import { scheduleGetProcedureSchema } from "./validation/schema";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 
@@ -23,7 +23,9 @@ const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema
         ctx.session.user.role === UserRoles.DOCTOR ? input.doctorId = ctx.session.user.id : null
 
 
-        const schedules = await ctx.db.schedule.findMany({
+        const scheduleQuery = {
+            skip: input.page > 1 ? (input.page - 1) * input.limit : 0,
+            take: input.limit + 1,
             where: {
                 doctorId: {
                     equals: input.doctorId
@@ -52,7 +54,24 @@ const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema
                 }
             },
             include: {
-                doctor: true,
+                doctor: {
+
+                    select: {
+                        id: true,
+                        specialization: true,
+                        staff: {
+                            select: {
+                                firstName: true,
+                                lastName: true,
+                                title: true,
+                                image: true,
+
+                            }
+                        }
+                    }
+
+                },
+
                 Slot: true,
                 Appointment: true,
                 _count: {
@@ -63,10 +82,30 @@ const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema
 
                 },
             },
-        })
+        } satisfies Prisma.ScheduleFindManyArgs
+
+
+        const [schedules, count] = await ctx.db.$transaction([
+            ctx.db.schedule.findMany(scheduleQuery),
+            ctx.db.schedule.count({
+                where: scheduleQuery.where
+            })
+        ])
+
+        let nextCursor: typeof input.cursor | undefined = undefined
+
+        if (schedules.length > input.limit) {
+            nextCursor = schedules[schedules.length - 1].id
+            schedules.pop()
+        }
 
         return {
             data: schedules,
+            pagenation: {
+                nextCursor: nextCursor,
+                pages: input.page,
+                total: count
+            },
             status: 200,
             error: null,
             ok: true,

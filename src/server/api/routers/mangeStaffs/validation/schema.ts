@@ -2,7 +2,7 @@ import "server-only"
 
 import { DoctorSpecialization, UserRoles, adminDepartment, gender, title } from "@prisma/client"
 import { z } from "zod"
-import { imageSchema } from "@/utils/ValidationSchemas/commonSc"
+import { imageSchema, pagenationSchema } from "@/utils/ValidationSchemas/commonSc"
 
 
 
@@ -18,9 +18,7 @@ export const getStaffschema = z.object({
     getadmins: z.boolean().optional(),
     staffType: z.enum(["doctor", "nurse", "admin"]).optional(),
 
-
-
-})
+}).merge(pagenationSchema)
 
 
 export const userAccSchema = z.object({

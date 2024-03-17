@@ -2,7 +2,7 @@
 import "server-only";
 import { protectedProcedure } from "../../trpc"
 import { TRPCError } from "@trpc/server"
-import { UserRoles } from "@prisma/client"
+import { Prisma, UserRoles } from "@prisma/client"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error"
 import { getStaffschema } from "./validation/schema"
 
@@ -18,10 +18,13 @@ const getStaffProceture = protectedProcedure
                     code: "UNAUTHORIZED",
                     message: "You are not authorized to perform this action",
                 })
+
             }
 
-            const staff = await ctx.db.staff.findMany({
 
+            const staffquery = {
+                skip: input.page > 1 ? (input.page - 1) * input.limit : 0,
+                take: input.limit + 1,
                 where: {
                     email: {
                         equals: input?.email
@@ -47,7 +50,6 @@ const getStaffProceture = protectedProcedure
 
                     AND: [
                         {
-
                             doctor: {
                                 isNot: input?.staffType === "doctor" ? null : undefined
                             },
@@ -71,12 +73,32 @@ const getStaffProceture = protectedProcedure
                     firstName: "asc"
                 }
 
-            })
+            } satisfies Prisma.StaffFindManyArgs
+
+            const [staff, count] = await ctx.db.$transaction([
+                ctx.db.staff.findMany(staffquery),
+                ctx.db.staff.count({
+                    where: staffquery.where
+                })
+            ])
+
+
+            let nextCursor: typeof input.cursor | undefined = undefined
+
+            if (staff.length > input.limit) {
+                nextCursor = staff[staff.length - 1].id
+                staff.pop()
+            }
 
 
             return {
                 status: 200,
                 error: null,
+                pagenation: {
+                    nextCursor: nextCursor,
+                    pages: input.page,
+                    total: count
+                },
                 ok: true,
                 data: staff
             }

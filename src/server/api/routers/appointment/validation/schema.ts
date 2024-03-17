@@ -1,11 +1,14 @@
 
 import "server-only";
-import { gender, title } from "@prisma/client"
-import { z } from "zod"
+import { Appointmentstatus, gender, title } from "@prisma/client"
+import { date, z } from "zod"
+import { pagenationSchema } from "@/utils/ValidationSchemas/commonSc";
+
 
 export const createAppointmentSchema = z.object({
 
     slotId: z.string(),
+    AppointmentDate: z.date(),
     patientTitle: z.nativeEnum(title).optional(),
     patientFirstName: z.string().min(2),
     patientLastName: z.string().min(2),
@@ -16,7 +19,7 @@ export const createAppointmentSchema = z.object({
     patientAddress: z.string().min(5).optional(),
     patientMobile: z.string().min(9).max(14).optional(),
     patientEmail: z.string().email(),
-
+    patientNote: z.string().optional()
 
 }).superRefine((val, ctx) => {
 
@@ -36,11 +39,62 @@ export const createAppointmentSchema = z.object({
         })
     }
 
+    if (val.patientDob > new Date()) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Date of birth cannot be in the future"
+        })
+    }
+
+    if (val.AppointmentDate < new Date()) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Appointment date cannot be in the past"
+        })
+    }
+
+
+
 
 
 })
 
 
+
+export const EditAppointmentProcedureSchema = z.object({
+
+
+    data: z.array(z.object({
+        id: z.string(),
+        status: z.nativeEnum(Appointmentstatus),
+        date: z.date()
+
+    }))
+
+
+}).superRefine((val, ctx) => {
+
+    if (val.data && val.data.length > 0) {
+        val.data.forEach((item) => {
+            if (item.status === Appointmentstatus.Active && item.date < new Date()) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "Appointment date cannot be in the past for status 'Active'"
+                })
+
+            }
+            if (item.status === Appointmentstatus.Completed && item.date > new Date()) {
+                ctx.addIssue({
+                    code: "custom",
+                    message: "Appointment date cannot be in the future for status 'Completed'"
+                })
+            }
+        })
+
+    }
+
+
+})
 
 
 export const deleteAppointmentProcedureSchema = z.object({
@@ -57,13 +111,53 @@ export const deleteAppointmentProcedureSchema = z.object({
 
 export const scheduleGetProcedureSchema = z.object({
 
+
+
     doctorid: z.string().optional(),
+    doctorSearchQuery: z.string().optional(),
+
     referenceId: z.string().optional(),
+    patientSearchQuery: z.string().optional(),
     patientName: z.string().optional(),
     patientNIC: z.string().optional(),
     patientPassport: z.string().optional(),
     patientMobile: z.string().optional(),
-    patientEmail: z.string().optional()
+    patientEmail: z.string().optional(),
+
+    status: z.nativeEnum(Appointmentstatus).optional(),
+    date: z.array(z.date().nullable()).default([undefined, undefined]).optional(),
+
+
+}).merge(pagenationSchema).superRefine((val, ctx) => {
+
+
+    if (val.limit > 100) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Limit cannot exceed 100"
+        })
+    }
+
+    if (val.page < 1) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Page number cannot be less than 1"
+        })
+    }
+
+    if (val.status && !Object.values(Appointmentstatus).includes(val.status)) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Invalid status"
+        })
+    }
+
+    if (val.date && val.date.length > 2) {
+        ctx.addIssue({
+            code: "custom",
+            message: "Invalid date range"
+        })
+    }
 
 
 })

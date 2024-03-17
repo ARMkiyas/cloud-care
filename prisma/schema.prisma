@@ -199,6 +199,7 @@ model Patient {
 
 enum Appointmentstatus {
     Pending
+    Active
     Confirmed
     Cancelled
     Completed
@@ -208,10 +209,12 @@ model Appointment {
     id                String            @id @default(cuid())
     referenceid       String            @unique
     appointmentNumber Int
+    appointmentDate   DateTime          @db.Date
     appointmentstart  DateTime          @db.Time()
     appointmentEnd    DateTime          @db.Time()
     createdat         DateTime          @default(now())
     updatedat         DateTime          @updatedAt
+    patientNote       String?
     status            Appointmentstatus @default(Pending)
     patientId         String
     doctorId          String

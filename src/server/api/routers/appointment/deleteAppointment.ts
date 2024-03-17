@@ -19,11 +19,10 @@ const deleteAppointmentProcedure = protectedProcedure.input(deleteAppointmentPro
         }
 
 
-
         const appointment = await ctx.db.appointment.deleteMany({
             where: {
                 id: {
-                    in: input.appointmentId.trim() ? [input.appointmentId.trim()] : input.deleteMany.map((item) => item.id.trim())
+                    in: input.appointmentId?.trim() ? [input.appointmentId?.trim()] : input.deleteMany.map((item) => item.id.trim())
                 }
             }
         })
@@ -36,6 +35,7 @@ const deleteAppointmentProcedure = protectedProcedure.input(deleteAppointmentPro
         }
 
 
+
         return {
             data: appointment,
             status: 200,
@@ -45,7 +45,7 @@ const deleteAppointmentProcedure = protectedProcedure.input(deleteAppointmentPro
 
 
     } catch (error) {
-
+        console.log(error);
 
         throw ErrorHandler(error, "deleteAppointment", "An error occurred while trying to delete appointment")
     } finally {
