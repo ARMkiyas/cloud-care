@@ -124,7 +124,7 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
                 appointmentNumber: slot._count.appointment + 1,
                 appointmentstart: new Date(new Date(slot.startTime).getTime() + (slotTimePerAppointment * (slot._count.appointment))).toISOString(),
                 appointmentEnd: new Date(new Date(slot.startTime).getTime() + (slotTimePerAppointment * (slot._count.appointment + 1))).toISOString(),
-                status: "Pending"
+                status: "Active"
 
             }
         })

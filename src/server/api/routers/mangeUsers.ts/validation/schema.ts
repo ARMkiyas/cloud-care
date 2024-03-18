@@ -2,7 +2,7 @@ import "server-only";
 
 import { UserRoles } from "@prisma/client";
 import { z } from "zod";
-import { imageSchema } from "@/utils/ValidationSchemas/commonSc";
+import { imageSchema, pagenationSchema } from "@/utils/ValidationSchemas/commonSc";
 
 
 export const adduserschema = z.object({
@@ -32,7 +32,7 @@ export const getUserschema = z.object({
     role: z.enum([UserRoles.ADMIN, UserRoles.ROOTUSER, UserRoles.STAFF, UserRoles.DOCTOR, UserRoles.NURSE, UserRoles.GUEST]).optional(),
     staffid: z.string().optional(),
     name: z.string().optional(),
-})
+}).merge(pagenationSchema)
 
 
 export const updateUserSchema = z.object({
