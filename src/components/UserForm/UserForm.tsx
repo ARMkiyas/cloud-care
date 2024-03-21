@@ -18,6 +18,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useApiClient } from "@/utils/trpc/Trpc";
+import { notifications } from "@mantine/notifications";
 
 export interface AuthenticationFormProps {
   noShadow?: boolean;
@@ -65,6 +66,8 @@ export function UserForm({
   } = useApiClient.manageStaff.getStaff.useQuery({});
   console.log("staffdata", staffdata);
 
+  const utils = useApiClient.useUtils();
+
   const handleSubmit = async () => {
     setLoading(true);
     setError(null);
@@ -93,6 +96,12 @@ export function UserForm({
         twoFactorEnabled: false,
         //@ts-ignore
         image: files[0] || undefined,
+      });
+
+      notifications.show({
+        title: "User Added",
+        message: `${response.data.username} User has been added successfully`,
+        color: "teal",
       });
 
       // Reset form and loading state

@@ -7,193 +7,119 @@ import {
   TextInput,
   Text,
   Button,
-  Modal,
-  Notification,Select,rem,HoverCard,Pagination
+  Select,
+  HoverCard,
+  Pagination,
+  Skeleton,
 } from "@mantine/core";
-import { randomId } from '@mantine/hooks';
-import { IconEdit, IconTrash, IconLockOpen } from "@tabler/icons-react";
+import { useDebouncedValue } from "@mantine/hooks";
+import { IconEdit, IconTrash, IconX } from "@tabler/icons-react";
 import { ButtonAdd } from "@/components/ButtonAdd/ButtonAdd";
 import { IconSearch } from "@tabler/icons-react";
 import { useApiClient } from "@/utils/trpc/Trpc";
-import { extend } from "dayjs";
-import { modals } from '@mantine/modals';
-import { FaCheckCircle } from "react-icons/fa";
+import { modals } from "@mantine/modals";
 import { MdLockReset } from "react-icons/md";
+import { notifications } from "@mantine/notifications";
+import { UserDataType } from "@/utils/types";
 
+const ITEMS_PER_PAGE = 15;
 
+type UserRoles = "ROOTUSER" | "ADMIN" | "GUEST" | "DOCTOR" | "NURSE";
+const roleOptions: { label: string; value: UserRoles }[] = [
+  { label: "Root User", value: "ROOTUSER" },
+  { label: "Admin", value: "ADMIN" },
+  { label: "Guest", value: "GUEST" },
+  { label: "Doctor", value: "DOCTOR" },
+  { label: "Nurse", value: "NURSE" },
+];
 
-
-type UserRoles = "ROOTUSER" | "ADMIN" | "GUEST" | "DOCTOR" | "NURSE" | "STAFF";
-
-type users = {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  username: string;
-  role: {
-    id: number;
-    role: UserRoles;
-  };
-  twoFactorEnabled: boolean;
-  staffid: string;
-  _count: {
-    Log: number;
-  };
-};
-
-interface RowData extends users {}
-
-const ITEMS_PER_PAGE = 10;
-
-function chunk<T>(array: T[], size: number): T[][] {
-  if (!array.length) {
-    return [];
-  }
-  const head = array.slice(0, size);
-  const tail = array.slice(size);
-  return [head, ...chunk(tail, size)];
-}
-
-const data = chunk(
-  Array(30)
-    .fill(0)
-    .map((_, index) => ({ id: index, name: randomId() })),
-  ITEMS_PER_PAGE
-);
-
-function filterData(data: RowData[], search: string, tableRefect?: any) {
-  const query = search.toLowerCase().trim();
-  return data.filter((item) =>
-    Object.keys(item).some((key) => {
-      if (typeof item[key] === "string") {
-        return item[key].toLowerCase().includes(query);
-      } else if (typeof item[key] === "object" && "role" in item[key]) {
-        return item[key].role.toLowerCase().includes(query);
-      }
-      return false;
-    }),
-  );
-}
-
-function sortData(
-  data: RowData[],
-  payload: { sortBy: keyof RowData | null; reversed: boolean; search: string },
-) {
-  const { sortBy } = payload;
-
-  if (!sortBy) {
-    return filterData(data, payload.search);
-  }
-
-  return filterData(
-    [...data].sort((a, b) => {
-      const valueA = a[sortBy] as string; // Type assertion
-      const valueB = b[sortBy] as string; // Type assertion
-
-      if (payload.reversed) {
-        return valueB.localeCompare(valueA);
-      }
-
-      return valueA.localeCompare(valueB);
-    }),
-    payload.search,
-  );
-}
+interface RowData extends UserDataType {}
 
 const TableSort = ({}) => {
   const {
     mutateAsync: updateAsync,
     isError: userUpdateError,
     isSuccess: userUpdateSuccess,
-  } = useApiClient.manageUsers.updateUser.useMutation();
-
-  const {
-    "0": userdata,
-    "1": {
-      isError: usererror,
-      isLoading: userloading,
-      isFetching: userfetching,
-      refetch:userRefetch,
+  } = useApiClient.manageUsers.updateUser.useMutation({
+    onSettled(data, error, variables, context) {
+      utils.manageUsers.getUsers.invalidate();
     },
-  } = useApiClient.manageUsers.getUsers.useSuspenseQuery({});
-  const handleRefetch = async () => {
-    try {
-      await userRefetch();
-    } catch (error) {
-      console.error("Error refetching user data:", error);
-    }
-  };
+  });
+
+  const [activePage, setPage] = useState(1);
+
+  const [search, setSearch] = useState("");
+  const [debouncedSearch] = useDebouncedValue(search, 700);
+  const utils = useApiClient.useUtils();
+  const {
+    data: userdata,
+    refetch: userRefetch,
+    isFetching: userDataFeteching,
+    isLoading: userLoading,
+  } = useApiClient.manageUsers.getUsers.useQuery(
+    {
+      limit: ITEMS_PER_PAGE,
+      page: activePage,
+      name: debouncedSearch,
+      email: debouncedSearch,
+      phone: debouncedSearch,
+      username: debouncedSearch,
+      role: roleOptions.find(
+        (role) => role.value === debouncedSearch.toLocaleUpperCase(),
+      )?.value,
+    },
+    {
+      staleTime: 1000 * 60 * 5,
+    },
+  );
 
   const {
     mutateAsync: deleteAsync,
     isError: userdeleteerror,
     isSuccess: userdeletesucess,
-  } = useApiClient.manageUsers.deleteUser.useMutation();
+  } = useApiClient.manageUsers.deleteUser.useMutation({
+    onSettled(data, variables, context) {
+      utils.manageUsers.getUsers.invalidate();
+    },
+  });
 
-  const [search, setSearch] = useState("");
-  const [sortedData, setSortedData] = useState(userdata.data);
-  const [sortBy, setSortBy] = useState<keyof RowData | null>(null);
-  const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [editingRow, setEditingRow] = useState<string | null>(null);
   const [editedData, setEditedData] = useState<RowData | null>(null);
-  const checkIcon = (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <FaCheckCircle style={{ width: rem(70), height: rem(70), color: "teal" }} />
-    </div>
-  );
-  const [activePage, setPage] = useState(1);
- 
-  const openUpdateModal = () => modals.openConfirmModal({
-    title: 'Please confirm your action',
-    centered: true,
-    children: (
-      <Text size="sm">
-        Are you Sure you want to edit this? Please click
-        one of these buttons to proceed.
-      </Text>
-    ),
-    labels: { confirm: 'Confirm', cancel: 'Cancel' },
-    onCancel: () => console.log('Cancel'),
-    onConfirm: ()=> {handleSave();console.log('Confirmed')},
-  });
 
-  const openPasswordRQ=()=>modals.open({
-    title:'A password reset requet sent successfully',
-    centered:true,
-    children: (
-      <>
-      {checkIcon}       
-      </>
-    ),
-  });
+  const openUpdateModal = () =>
+    modals.openConfirmModal({
+      title: "Please confirm your action",
+      centered: true,
+      children: (
+        <Text size="sm">
+          Are you Sure you want to edit this? Please click one of these buttons
+          to proceed.
+        </Text>
+      ),
+      labels: { confirm: "Confirm", cancel: "Cancel" },
+      onCancel: () => console.log("Cancel"),
+      onConfirm: () => {
+        handleSave();
+        console.log("Confirmed");
+      },
+    });
 
-  const openDeleteModal = () =>
-  modals.openConfirmModal({
-    title: 'Delete your profile',
-    centered: true,
-    children: (
-      <Text size="sm">
-        Are you sure you want to delete this user? 
-      </Text>
-    ),
-    labels: { confirm: 'Delete account', cancel: "No don't delete it" },
-    confirmProps: { color: 'red' },
-    onCancel: () => console.log('Cancel'),
-    onConfirm: () => {deletey(deleteUserId);
-          console.log('Confirmed');
-  }
-  });
-  const [deleteUserId, setDeleteUserId] = useState<string | null>(null);
+  const openDeleteModal = (deleteUserId: string) =>
+    modals.openConfirmModal({
+      title: "Delete your profile",
+      centered: true,
+      children: (
+        <Text size="sm">Are you sure you want to delete this user?</Text>
+      ),
+      labels: { confirm: "Delete account", cancel: "No don't delete it" },
+      confirmProps: { color: "red" },
 
-  const [showNotification, setShowNotification] = useState(false);
-
-  // Function to open the delete modal and set the user id
-  const handleOpenDeleteModal = (userId: string) => {
-    setDeleteUserId(userId);
-    openDeleteModal();
-  };
-
+      onCancel: () => console.log("Cancel"),
+      onConfirm: () => {
+        deletey(deleteUserId);
+        console.log("Confirmed");
+      },
+    });
 
   const toggleEditing = (userId: string) => {
     setEditingRow(editingRow === userId ? null : userId);
@@ -201,36 +127,49 @@ const TableSort = ({}) => {
     setEditedData(
       editingRow === userId
         ? null
-        : userdata.data.find((user) => user.id === userId),
+        : userdata?.data.find((user) => user.id === userId),
     );
   };
 
   const deletey = async (userId: string) => {
+    const id = notifications.show({
+      title: "Deleting",
+      message: "Deleting the user Account....",
+      autoClose: false,
+      withCloseButton: false,
+      loading: true,
+    });
     try {
       const deleteuserdata = await deleteAsync({ userid: userId });
-      console.log(deleteuserdata);
-
-      // Update table data after deletion
-      const updatedData = sortedData.filter((user) => user.id !== userId);
-      setSortedData(updatedData);
-
-      // Close the delete modal
-      //closeDeleteModal();
+      if (userdata.data.length <= 1 && activePage !== 1) {
+        (pre) => pre - 1;
+      }
+      // utils.manageUsers.getUsers.invalidate();
+      notifications.update({
+        id,
+        title: "Deleted",
+        message: "User Account deleted successfully",
+        loading: false,
+        autoClose: 5000,
+        withCloseButton: true,
+        color: "green",
+      });
     } catch (error) {
-      console.error("Error deleting user:", error);
+      notifications.update({
+        id,
+        title: "Error",
+        message: "Error while deleting the User Account",
+        loading: false,
+        autoClose: 5000,
+        withCloseButton: true,
+        color: "red",
+      });
     }
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = event.currentTarget;
     setSearch(value);
-    setSortedData(
-      sortData(userdata.data, {
-        sortBy,
-        reversed: reverseSortDirection,
-        search: value,
-      }),
-    );
   };
 
   const handleFieldChange = (field: keyof RowData, value: string) => {
@@ -241,12 +180,17 @@ const TableSort = ({}) => {
           ...editedData,
           role: { ...editedData.role, role: value as UserRoles },
         });
+      } else if (field === "twoFactorEnabled") {
+        setEditedData({
+          ...editedData,
+          twoFactorEnabled: !!(value === "true"),
+        });
       } else {
         setEditedData({ ...editedData, [field]: value });
       }
     } else {
       // If editedData is null, create a new object with the updated field
-      const updatedUser = userdata.data.find((user) => user.id === editingRow);
+      const updatedUser = userdata?.data.find((user) => user.id === editingRow);
       const newData = updatedUser
         ? { ...updatedUser, [field]: value }
         : { [field]: value };
@@ -255,89 +199,121 @@ const TableSort = ({}) => {
   };
 
   const handleSave = async () => {
+    const id = notifications.show({
+      title: "Updating",
+      message: `Updating the ${editedData.username} Account....`,
+      autoClose: false,
+      withCloseButton: false,
+      loading: true,
+    });
     try {
       if (editedData && editedData.id) {
-        // Construct the payload for updating the user
-        const payload = {
+        // Send the payload to the API for updating the user
+        const updatedUserData = await updateAsync({
           userid: editedData.id,
           username: editedData.username,
           email: editedData.email,
           phone: editedData.phone,
-          role:editedData.role.role,
-        };
-
-        // Send the payload to the API for updating the user
-        const updatedUserData = await updateAsync(payload);
-
-        console.log("Updated user data:", updatedUserData);
-
-        // Update table data
-        const updatedData = sortedData.map((user) => {
-          if (user.id === editedData.id) {
-            return {
-              ...user,
-              email: editedData.email,
-              phone: editedData.phone,
-              username: editedData.username,
-              role: editedData.role,
-            };
-          }
-          return user;
+          role: editedData.role.role,
+          twoFactorEnabled: editedData.twoFactorEnabled,
         });
-        setSortedData(updatedData);
-        
 
         // Reset editing after successful save
         setEditingRow(null);
         setEditedData(null);
-        handleRefetch();
-        
+
+        notifications.update({
+          id,
+          title: "Deleted",
+          message: `${editedData.username} Account Updated successfully`,
+          loading: false,
+          autoClose: 5000,
+          withCloseButton: true,
+          color: "green",
+        });
       }
     } catch (error) {
-      console.error("Error updating user:", userUpdateError);
-    }finally {
+      notifications.update({
+        id,
+        title: "Error",
+        message: `Error while Updating the ${editedData.username} Account`,
+        loading: false,
+        autoClose: 5000,
+        withCloseButton: true,
+        color: "red",
+      });
+    } finally {
       // Close all modals after saving
       modals.closeAll();
     }
-    
   };
 
-  const setSorting = (field: keyof RowData) => {
-    const reversed = field === sortBy ? !reverseSortDirection : false;
-    setReverseSortDirection(reversed);
-    setSortBy(field);
-    setSortedData(sortData(userdata.data, { sortBy: field, reversed, search }));
-  };
-
-  const handlePasswordReset = async (userId: string) => {
+  const handlePasswordReset = async (userId: string, username: string) => {
+    const id = notifications.show({
+      title: "Requesting Password reset",
+      message: `Requesting Password reset for the ${username} Account....`,
+      autoClose: false,
+      withCloseButton: false,
+      loading: true,
+    });
     try {
       // Send the password reset request
       const result = await updateAsync({ userid: userId, pwdreet: true });
-
-      // Handle successful response
-      console.log("Password reset request sent successfully:", result);
-      openPasswordRQ();
+      notifications.update({
+        id,
+        title: "Password reset request sent successfully",
+        message: `Password reset request sent successfully for the ${username} Account`,
+        loading: false,
+        autoClose: 5000,
+        withCloseButton: true,
+        color: "green",
+      });
     } catch (error) {
-      // Handle error
-      console.error("Error sending password reset request:", error);
+      notifications.update({
+        id,
+        title: "Error",
+        message: `Unable to request Password reset for the ${username} Account`,
+        loading: false,
+        autoClose: 5000,
+        withCloseButton: true,
+        color: "red",
+      });
     }
   };
 
-  const roleOptions: { label: string; value: UserRoles }[] = [
-    { label: "Root User", value: "ROOTUSER" },
-    { label: "Admin", value: "ADMIN" },
-    { label: "Guest", value: "GUEST" },
-    { label: "Doctor", value: "DOCTOR" },
-    { label: "Nurse", value: "NURSE" },
-    { label: "Staff", value: "STAFF" },
-  ];
-  const handlePageChange = (page: number) => {
-    setPage(page);
+  const TableItmeSkeletons = () => {
+    return [...Array.from(Array(ITEMS_PER_PAGE).keys())].map((i) => (
+      <Table.Tr key={i}>
+        <Table.Td>
+          <Skeleton height={28} radius="sm" />
+        </Table.Td>
+        <Table.Td>
+          <Skeleton height={28} radius="sm" />
+        </Table.Td>
+        <Table.Td>
+          <Skeleton height={28} radius="sm" />
+        </Table.Td>
+        <Table.Td>
+          <Skeleton height={28} radius="sm" />
+        </Table.Td>
+        <Table.Td>
+          <Skeleton height={28} radius="sm" />
+        </Table.Td>
+
+        <Table.Td>
+          <Skeleton height={28} radius="sm" />
+        </Table.Td>
+        <Table.Td>
+          <Skeleton height={28} radius="sm" />
+        </Table.Td>
+      </Table.Tr>
+    ));
   };
 
   return (
-    <>
+    <div className="space-y-3">
       <ButtonAdd />
+
       <TextInput
         placeholder="Search by any field"
         mb="md"
@@ -345,115 +321,186 @@ const TableSort = ({}) => {
         value={search}
         onChange={handleSearchChange}
       />
-      <Table>
-        <Table.Thead>
-          <Table.Tr>
-            <Table.Th>Name</Table.Th>
-            <Table.Th>Email</Table.Th>
-            <Table.Th>Phone</Table.Th>
-            <Table.Th>User Name</Table.Th>
-            <Table.Th>Role</Table.Th>
+      <Table.ScrollContainer minWidth={500}>
+        <Table striped>
+          <Table.Thead>
+            <Table.Tr>
+              <Table.Th>Name</Table.Th>
+              <Table.Th>Email</Table.Th>
+              <Table.Th>Phone</Table.Th>
+              <Table.Th>User Name</Table.Th>
+              <Table.Th className="text-center">2FA</Table.Th>
+              <Table.Th className="text-center">Role</Table.Th>
 
-            <Table.Th>Action</Table.Th>
-          </Table.Tr>
-        </Table.Thead>
-        <Table.Tbody>
-          {sortedData.slice((activePage - 1) * ITEMS_PER_PAGE, activePage * ITEMS_PER_PAGE).map((user) => (
-            <Table.Tr key={user.id}>
-              <Table.Td>{user.name}</Table.Td>
-              <Table.Td>
-                {editingRow === user.id ? (
-                  <TextInput
-                    value={editedData?.email || user.email}
-                    onChange={(event) =>
-                      handleFieldChange("email", event.target.value)
-                    }
-                  />
-                ) : (
-                  <Text>{user.email}</Text>
-                )}
-              </Table.Td>
-              <Table.Td>
-                {editingRow === user.id ? (
-                  <TextInput
-                    value={editedData?.phone || user.phone}
-                    onChange={(event) =>
-                      handleFieldChange("phone", event.target.value)
-                    }
-                  />
-                ) : (
-                  <Text>{user.phone}</Text>
-                )}
-              </Table.Td>
-              <Table.Td>
-                {editingRow === user.id ? (
-                  <TextInput
-                    value={editedData?.username || user.username}
-                    onChange={(event) =>
-                      handleFieldChange("username", event.target.value)
-                    }
-                  />
-                ) : (
-                  <Text>{user.username}</Text>
-                )}
-              </Table.Td>
-              <Table.Td>
-                {editingRow === user.id ? (
-              <Select
-              data={roleOptions}
-              value={editedData?.role.role || user.role.role}
-              onChange={(value) =>
-                handleFieldChange("role", value as string)
-              }
-            />
-                ) : (
-                  <Text>{user.role.role}</Text>
-                )}
-              </Table.Td>
+              <Table.Th>Action</Table.Th>
+            </Table.Tr>
+          </Table.Thead>
+          <Table.Tbody>
+            {userLoading
+              ? TableItmeSkeletons()
+              : userdata?.data?.map((user) => (
+                  <Table.Tr key={user.id}>
+                    <Table.Td>{user.name}</Table.Td>
+                    <Table.Td>
+                      {editingRow === user.id ? (
+                        <TextInput
+                          value={editedData?.email || user.email}
+                          onChange={(event) =>
+                            handleFieldChange("email", event.target.value)
+                          }
+                        />
+                      ) : (
+                        <Text>{user.email}</Text>
+                      )}
+                    </Table.Td>
+                    <Table.Td>
+                      {editingRow === user.id ? (
+                        <TextInput
+                          value={editedData?.phone || user.phone}
+                          onChange={(event) =>
+                            handleFieldChange("phone", event.target.value)
+                          }
+                        />
+                      ) : (
+                        <Text>{user.phone}</Text>
+                      )}
+                    </Table.Td>
+                    <Table.Td>
+                      {editingRow === user.id ? (
+                        <TextInput
+                          value={editedData?.username || user.username}
+                          onChange={(event) =>
+                            handleFieldChange("username", event.target.value)
+                          }
+                        />
+                      ) : (
+                        <Text>{user.username}</Text>
+                      )}
+                    </Table.Td>
+                    <Table.Td className="text-center">
+                      {editingRow === user.id ? (
+                        <Select
+                          data={["true", "false"]}
+                          value={
+                            String(editedData?.twoFactorEnabled) ||
+                            String(user.twoFactorEnabled)
+                          }
+                          onChange={(value) =>
+                            handleFieldChange("twoFactorEnabled", value)
+                          }
+                        />
+                      ) : (
+                        <Badge
+                          variant="dot"
+                          color={user.twoFactorEnabled ? "green" : "red"}
+                        >
+                          {String(user.twoFactorEnabled)}
+                        </Badge>
+                      )}
+                    </Table.Td>
+                    <Table.Td className="text-center">
+                      {editingRow === user.id ? (
+                        <Select
+                          data={roleOptions}
+                          value={editedData?.role.role || user.role.role}
+                          onChange={(value) =>
+                            handleFieldChange("role", value as string)
+                          }
+                        />
+                      ) : (
+                        <Badge variant="light" color="cyan">
+                          {user.role.role}
+                        </Badge>
+                      )}
+                    </Table.Td>
 
-              <Table.Td>
-                {editingRow === user.id ? (
-                    <Button onClick={openUpdateModal}>Update</Button>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <ActionIcon
-                      color="green"
-                      onClick={() => toggleEditing(user.id)}
-                    >
-                      <IconEdit size="1rem" />
-                    </ActionIcon>
-                   <ActionIcon
-                      color="red"
-                      onClick={() => handleOpenDeleteModal(user.id)}
-                    >
-                      
-                      <IconTrash size="1rem" />
-                </ActionIcon>
-                <HoverCard shadow="md">
-                 <HoverCard.Target>
-                    <ActionIcon
-                      color="blue"
-                      onClick={() => handlePasswordReset(user.id)}
-                    >
-                      <MdLockReset size="1.4rem"/>
-                    </ActionIcon>
-                    </HoverCard.Target>
-                    <HoverCard.Dropdown>
-                      <Text size="xs">Reset Password</Text>
-                    </HoverCard.Dropdown>
-                    </HoverCard>
-                  </div>
-                )}
-                
+                    <Table.Td>
+                      {editingRow === user?.id ? (
+                        <div className="flex items-center justify-center">
+                          <Button onClick={openUpdateModal}>Update</Button>
+                          <ActionIcon
+                            variant="transparent"
+                            onClick={() => {
+                              setEditingRow(null);
+                              setEditedData(null);
+                            }}
+                          >
+                            <IconX />
+                          </ActionIcon>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <ActionIcon
+                            color="green"
+                            onClick={() => toggleEditing(user.id)}
+                          >
+                            <IconEdit size="1rem" />
+                          </ActionIcon>
+                          <ActionIcon
+                            color="red"
+                            onClick={() => openDeleteModal(user.id)}
+                          >
+                            <IconTrash size="1rem" />
+                          </ActionIcon>
+                          <HoverCard shadow="md">
+                            <HoverCard.Target>
+                              <ActionIcon
+                                color="blue"
+                                onClick={() =>
+                                  handlePasswordReset(user.id, user.username)
+                                }
+                              >
+                                <MdLockReset size="1.4rem" />
+                              </ActionIcon>
+                            </HoverCard.Target>
+                            <HoverCard.Dropdown>
+                              <Text size="xs">Reset Password</Text>
+                            </HoverCard.Dropdown>
+                          </HoverCard>
+                        </div>
+                      )}
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+          </Table.Tbody>
+
+          <Table.Tfoot>
+            <Table.Tr>
+              <Table.Td colSpan={3}>
+                <Skeleton
+                  visible={userLoading}
+                  className="flex items-center justify-start"
+                >
+                  <span>
+                    showing{" "}
+                    {activePage === 1 ? 1 : (activePage - 1) * ITEMS_PER_PAGE} -{" "}
+                    {userdata?.pagenation.total > ITEMS_PER_PAGE
+                      ? userdata?.pagenation.pages * ITEMS_PER_PAGE
+                      : userdata?.pagenation.total}{" "}
+                    of {userdata?.pagenation.total} records
+                  </span>
+                </Skeleton>
+              </Table.Td>
+              <Table.Td colSpan={4}>
+                <Skeleton
+                  visible={userLoading}
+                  className="flex items-center justify-end"
+                >
+                  <Pagination
+                    total={Math.ceil(
+                      userdata?.pagenation.total / ITEMS_PER_PAGE,
+                    )}
+                    value={activePage}
+                    onChange={setPage}
+                    mt="sm"
+                  />
+                </Skeleton>
               </Table.Td>
             </Table.Tr>
-          ))}
-        </Table.Tbody>
-      </Table>
-      <div className="grid place-content-center absolute inset-x-0 bottom-10">
-      <Pagination total={Math.ceil(sortedData.length / ITEMS_PER_PAGE)} value={activePage} onChange={handlePageChange} mt="sm" />
-      </div>
-    </>
+          </Table.Tfoot>
+        </Table>
+      </Table.ScrollContainer>
+    </div>
   );
 };
 export default TableSort;
