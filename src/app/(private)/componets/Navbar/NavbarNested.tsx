@@ -1,4 +1,5 @@
-import { ScrollArea } from "@mantine/core";
+
+import { ScrollArea, Skeleton } from "@mantine/core";
 import { IconStethoscope, IconDisabled, IconGauge } from "@tabler/icons-react";
 import { BiLogInCircle } from "react-icons/bi";
 import { GrSchedule } from "react-icons/gr";
@@ -7,9 +8,11 @@ import { FaUserDoctor } from "react-icons/fa6";
 import { UserButton } from "./UserButton";
 import { LinksGroup } from "./NavbarLinksGroup";
 import classes from "./NavbarNested.module.css";
+import { useSession } from "next-auth/react";
 //import { useState, useEffect } from 'react';
 
-const mockdata = [
+
+const PageLinks = [
   { label: "Dashboard", icon: IconGauge, rootLink: "/dashboard" },
   {
     label: "Appointments",
@@ -35,6 +38,7 @@ const mockdata = [
     links: [
       { label: "All Staff", link: "/dashboard/staffs/all-staff" },
       { label: "Doctors", link: "/dashboard/staffs/doctors" },
+
       { label: "Nurses", link: "/dashboard/staffs/nurses" },
       {
         label: "Administrators and Managers",
@@ -50,20 +54,24 @@ const mockdata = [
 ];
 
 export function NavbarNested() {
-  const links = mockdata.map((item) => (
+
+  const { data, status, update } = useSession();
+  const links = PageLinks.map((item) => (
     <LinksGroup {...item} key={item.label} />
   ));
 
   return (
     <div>
-      <nav className={classes.navbar}>
-        <ScrollArea className={classes.links}>
-          <div className={classes.linksInner}>{links}</div>
-        </ScrollArea>
-        <div className={classes.footer}>
-          <UserButton />
-        </div>
-      </nav>
+      <div>
+        <nav className={classes.navbar}>
+          <ScrollArea className={classes.links}>
+            <div className={classes.linksInner}>{links}</div>
+          </ScrollArea>
+          <div className={classes.footer}>
+            <UserButton />
+          </div>
+        </nav>
+      </div>
     </div>
   );
 }
