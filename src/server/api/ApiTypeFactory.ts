@@ -10,6 +10,28 @@ export type RouterOutput = inferRouterOutputs<AppRouterType>;
 
 
 
+//type of the 'getstaff' procedure
+export type TStaffGet = RouterOutput["manageStaff"]["getStaff"];
+export type TStaffGetInput = RouterInputs["manageStaff"]["getStaff"];
+
+// type of the `createStaff` procedure
+export type TStaffCreate = RouterOutput["manageStaff"]["createStaff"];
+export type TStaffCreateInput = RouterInputs["manageStaff"]["createStaff"];
+
+// type of the `updateStaff` procedure
+export type TStaffUpdate = RouterOutput["manageStaff"]["updatestaff"];
+export type TStaffUpdateInput = RouterInputs["manageStaff"]["updatestaff"];
+
+// type of the `deleteStaff` procedure
+export type TStaffDelete = RouterOutput["manageStaff"]["deleteStaff"];
+export type TStaffDeleteInput = RouterInputs["manageStaff"]["deleteStaff"];
+
+
+
+
+
+
+
 // type of the `getUsers` procedure
 export type TUsersGet = RouterOutput["manageUsers"]["getUsers"];
 export type TUsersGetInput = RouterInputs["manageUsers"]["getUsers"];

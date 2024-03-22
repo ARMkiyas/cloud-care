@@ -51,13 +51,13 @@ const getStaffProceture = protectedProcedure
                     AND: [
                         {
                             doctor: {
-                                isNot: input?.staffType === "doctor" ? null : undefined
+                                isNot: input?.staffType === "doctors" ? null : undefined
                             },
                             nurse: {
-                                isNot: input?.staffType === "nurse" ? null : undefined
+                                isNot: input?.staffType === "nurses" ? null : undefined
                             },
                             admin: {
-                                isNot: input?.staffType === "admin" ? null : undefined
+                                isNot: input?.staffType === "admins" ? null : undefined
                             }
 
                         }

@@ -1,3 +1,4 @@
+
 import { ScrollArea, Skeleton } from "@mantine/core";
 import { IconStethoscope, IconDisabled, IconGauge } from "@tabler/icons-react";
 import { BiLogInCircle } from "react-icons/bi";
@@ -8,8 +9,8 @@ import { UserButton } from "./UserButton";
 import { LinksGroup } from "./NavbarLinksGroup";
 import classes from "./NavbarNested.module.css";
 import { useSession } from "next-auth/react";
-
 //import { useState, useEffect } from 'react';
+
 
 const PageLinks = [
   { label: "Dashboard", icon: IconGauge, rootLink: "/dashboard" },
@@ -37,11 +38,11 @@ const PageLinks = [
     links: [
       { label: "All Staff", link: "/dashboard/staffs/all-staff" },
       { label: "Doctors", link: "/dashboard/staffs/doctors" },
-      { label: "Specialists", link: "/dashboard/staffs/specialists" },
+
       { label: "Nurses", link: "/dashboard/staffs/nurses" },
       {
         label: "Administrators and Managers",
-        link: "/dashboard/staffs/administrators-managers",
+        link: "/dashboard/staffs/admins",
       },
     ],
   },
@@ -53,8 +54,8 @@ const PageLinks = [
 ];
 
 export function NavbarNested() {
-  const { data, status, update } = useSession();
 
+  const { data, status, update } = useSession();
   const links = PageLinks.map((item) => (
     <LinksGroup {...item} key={item.label} />
   ));
