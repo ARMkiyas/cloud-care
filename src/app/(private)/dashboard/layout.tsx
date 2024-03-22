@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Button, AppShell, Burger, Group, Skeleton } from "@mantine/core";
 //import { IconLogout } from '@tabler/icons-react';
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { NavbarNested } from "../componets/Navbar/NavbarNested";
 import myImage from "../componets/Header/assets/logo-inline-qRb.png";
@@ -89,7 +89,13 @@ export default function layout({ children }: { children: React.ReactNode }) {
               <Skeleton key={index} h={28} animate={false} />
             ))}
         </AppShell.Navbar>
-        <AppShell.Main>{children}</AppShell.Main>
+        <AppShell.Main
+          classNames={{
+            main: "h-full w-full",
+          }}
+        >
+          {children}
+        </AppShell.Main>
       </AppShell>
     </>
   );

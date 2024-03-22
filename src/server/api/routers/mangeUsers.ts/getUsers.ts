@@ -28,25 +28,44 @@ const getUsers = protectedProcedure.input(getUserschema).query(async ({ ctx, inp
             take: input.limit + 1,
             where: {
                 id: {
-                    equals: input.userid ? input.userid.trim() : undefined
+                    equals: input.userid ? input.userid?.trim() : undefined
                 },
-                username: {
-                    contains: input.username ? input.username.trim() : undefined
-                },
-                name: {
-                    contains: input.name ? input.name.trim() : undefined
-                },
-                email: {
-                    contains: input.email ? input.email.trim() : undefined
-                },
-                phone: {
-                    contains: input.phone ? input.phone.trim() : undefined
-                },
-                role: {
-                    role: {
-                        equals: input.role
-                    }
-                },
+
+                ...input.name?.trim() || input.username?.trim() || input.email?.trim() || input.phone?.trim() || input.role?.trim() ? {
+                    OR: [
+                        {
+                            username: {
+                                search: input.username ? input.username.trim().split(" ").join("&") : undefined
+                            }
+                        },
+                        {
+                            name: {
+                                search: input.name ? input.name.trim().split(" ").join("&") : undefined
+                            }
+                        },
+                        {
+                            email: {
+                                search: input.email ? input.email.trim().split(" ").join("&") : undefined
+                            }
+                        },
+                        {
+                            phone: {
+                                search: input.phone ? input.phone.trim().split(" ").join("&") : undefined
+                            }
+                        },
+                        {
+                            ...input.role && {
+                                role: {
+                                    role: {
+                                        equals: input.role
+
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                } : {},
+
                 staffid: {
                     equals: input.staffid ? input.staffid.trim() : undefined
                 }

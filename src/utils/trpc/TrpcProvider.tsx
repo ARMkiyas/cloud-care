@@ -21,6 +21,7 @@ import { getUrl, transformer } from "./shared";
 import { useSession } from "next-auth/react";
 import { notifications } from "@mantine/notifications";
 import { ZodError } from "zod";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const errorHander = (error) => {
   if (error instanceof TRPCClientError) {
@@ -100,6 +101,7 @@ export const TrpcProvider: React.FC<{
     <useApiClient.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
         {props.children}
+        <ReactQueryDevtools />
       </QueryClientProvider>
     </useApiClient.Provider>
   );

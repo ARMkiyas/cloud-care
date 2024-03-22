@@ -50,10 +50,11 @@ const PageLinks = [
     links: [
       { label: "All Staff", link: "/dashboard/staffs/all-staff" },
       { label: "Doctors", link: "/dashboard/staffs/doctors" },
+
       { label: "Nurses", link: "/dashboard/staffs/nurses" },
       {
         label: "Administrators and Managers",
-        link: "/dashboard/staffs/administrators-managers",
+        link: "/dashboard/staffs/admins",
       },
     ],
     permission: permissions.STAFF_READ,
@@ -68,7 +69,6 @@ const PageLinks = [
 
 export function NavbarNested() {
   const { data, status, update } = useSession();
-
   const links = PageLinks.map((item) => {
     return (
       <div key={item.label}>

@@ -65,7 +65,7 @@ const ErrorHandler: globalTrpcApiPrismaErrorHandlerType = (error, ctx, action, m
         throw error;
     }
 
-
+    console.log(error);
     throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Something went wrong",
