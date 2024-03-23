@@ -69,6 +69,7 @@ const PageLinks = [
 
 export function NavbarNested() {
   const { data, status, update } = useSession();
+
   const links = PageLinks.map((item) => {
     return (
       <div key={item.label}>

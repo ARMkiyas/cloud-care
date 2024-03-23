@@ -26,7 +26,6 @@ export default function layout({ children }: { children: React.ReactNode }) {
   }
 
   const { data: session, status } = useSession();
-  console.log(session);
 
   return (
     <>
@@ -47,8 +46,16 @@ export default function layout({ children }: { children: React.ReactNode }) {
               hiddenFrom="sm"
               size="sm"
             />
-            <Image src={myImage} alt="cloudCare" className="w-[180px]  h-12 " />
+            <Image
+              src={myImage}
+              alt="cloudCare"
+              className="w-[180px]  h-12 "
+              loading="lazy"
+              placeholder="blur"
+              blurDataURL=""
+            />
           </Group>
+
           {session ? (
             <Button
               className={classes.button}
