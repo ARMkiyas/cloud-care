@@ -3,6 +3,7 @@ import type { AppRouterType } from "./root";
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { inferReactQueryProcedureOptions } from "@trpc/react-query";
 
+
 export type ReactQueryOptions = inferReactQueryProcedureOptions<AppRouterType>;
 
 export type RouterInputs = inferRouterInputs<AppRouterType>

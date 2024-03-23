@@ -1,4 +1,3 @@
-
 import { ScrollArea, Skeleton } from "@mantine/core";
 import { IconStethoscope, IconDisabled, IconGauge } from "@tabler/icons-react";
 import { BiLogInCircle } from "react-icons/bi";
@@ -9,28 +8,41 @@ import { UserButton } from "./UserButton";
 import { LinksGroup } from "./NavbarLinksGroup";
 import classes from "./NavbarNested.module.css";
 import { useSession } from "next-auth/react";
+import permissions from "@/utils/lib/Permissons";
+
 //import { useState, useEffect } from 'react';
 
-
 const PageLinks = [
-  { label: "Dashboard", icon: IconGauge, rootLink: "/dashboard" },
+  {
+    label: "Dashboard",
+    icon: IconGauge,
+    rootLink: "/dashboard",
+    permission: permissions.DASHBOARD_READ,
+  },
   {
     label: "Appointments",
     icon: IconStethoscope,
     rootLink: "/dashboard/appointments",
-
+    permission: permissions.APPOINTMENTS_READ,
     /*initiallyOpened: false,*/
   },
   {
     label: "Shedule",
     icon: GrSchedule,
     rootLink: "/dashboard/shedule",
+    permission: permissions.SCHEDULES_READ,
   },
-  { label: "Patients", icon: IconDisabled, rootLink: "/dashboard/patients" },
+  {
+    label: "Patients",
+    icon: IconDisabled,
+    rootLink: "/dashboard/patients",
+    permission: permissions.PATIENTS_READ,
+  },
   {
     label: "User Management",
     icon: GrUserManager,
     rootLink: "/dashboard/user-management",
+    permission: permissions.USERS_READ,
   },
   {
     label: "Staffs",
@@ -45,20 +57,35 @@ const PageLinks = [
         link: "/dashboard/staffs/admins",
       },
     ],
+    permission: permissions.STAFF_READ,
   },
   {
     label: "System Logs",
     icon: BiLogInCircle,
     rootLink: "/dashboard/system-logs",
+    permission: permissions.LOGS_READ,
   },
 ];
 
 export function NavbarNested() {
-
   const { data, status, update } = useSession();
-  const links = PageLinks.map((item) => (
-    <LinksGroup {...item} key={item.label} />
-  ));
+
+  const links = PageLinks.map((item) => {
+    return (
+      <div key={item.label}>
+        {status === "loading" ? (
+          <div className="flex px-4 py-[10px] space-x-3">
+            <Skeleton height={30} width={40} />
+            <Skeleton height={30} />
+          </div>
+        ) : (
+          data.user.Permissions.includes(item.permission) && (
+            <LinksGroup {...item} />
+          )
+        )}
+      </div>
+    );
+  });
 
   return (
     <div>
