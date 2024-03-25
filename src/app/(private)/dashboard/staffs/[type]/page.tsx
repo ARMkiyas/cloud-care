@@ -1,11 +1,23 @@
+import dayjs from "dayjs";
 import { notFound } from "next/navigation";
 import React from "react";
+import type {
+  TStaffGet,
+  TStaffCreate,
+  TStaffDelete,
+  TStaffUpdate,
+  TStaffUpdateInput,
+} from "@/server/api/ApiTypeFactory";
+import { MantineReactTable } from "mantine-react-table";
+import StaffTable from "@/app/(private)/componets/StaffDataTable/StaffTable";
+import { stafftypes } from "@/utils/comonDatas";
+import { TStaffTypes } from "@/utils/types";
 
-const stafftypes = ["all-staff", "doctors", "nurses", "admins"] as const;
+type staffType = TStaffGet["data"];
 
 type propsType = {
   params: {
-    type: (typeof stafftypes)[number];
+    type: TStaffTypes;
   };
 };
 
@@ -14,5 +26,9 @@ export default function Page({ params }: propsType) {
     notFound();
   }
 
-  return <div>{params.type} staff page</div>;
+  return (
+    <>
+      <StaffTable type={params.type} />
+    </>
+  );
 }

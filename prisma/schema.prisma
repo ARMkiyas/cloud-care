@@ -190,6 +190,7 @@ enum Departments {
     Physical_Therapy
     Nursing
     Public_Relations_Marketing
+    Outpatient_department
 }
 
 model Admin {

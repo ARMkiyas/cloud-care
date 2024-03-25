@@ -6,3 +6,6 @@ export const Appointmentstatus = [
     "Cancelled",
     "Completed",
 ] as const;
+
+
+export const stafftypes = ["all-staff", "doctors", "nurses", "admins"] as const;
