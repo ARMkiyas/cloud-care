@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
-import { useState,ChangeEvent, MouseEvent } from 'react';
+import { useState, ChangeEvent, MouseEvent } from 'react';
+import { format } from 'date-fns';
 import {
   Table,
   ScrollArea,
@@ -13,13 +14,15 @@ import {
   keys,
   Button,
   Modal,
-  Pagination
+  Pagination,
+  Select
 } from '@mantine/core';
-import { IconSelector, IconChevronDown, IconChevronUp, IconSearch,IconPlus, } from '@tabler/icons-react';
+import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconPlus, } from '@tabler/icons-react';
 import classes from './TableSort.module.css';
-import {  IconPencil, IconTrash } from '@tabler/icons-react';
+import { IconPencil, IconTrash } from '@tabler/icons-react';
+import { useApiClient } from "@/utils/trpc/Trpc";
 interface RowData {
-  id: number;
+  id: string;
   doctorName: string;
   specialization: string;
   recurrence: string;
@@ -27,6 +30,35 @@ interface RowData {
   dayOfWeek: string;
   startTime: string;
   endTime: string;
+  endDate: string;
+  every: number;
+  maxAppointments:number
+
+}
+interface ScheduleInput {
+  doctorId: string;
+  recurrence: unknown;
+  maxAppointments: number;
+  once?: {
+    date?: Date | undefined;
+    startTime: string;
+    endTime: string;
+  };
+  weekly?: {
+    startDate?: Date | undefined;
+    endDate?: Date | undefined;
+    day: unknown;
+    startTime: string;
+    endTime: string;
+    every?: number;
+  };
+  monthly?: {
+    date?: Date | undefined;
+    endDate?: Date | undefined;
+    startTime: string;
+    endTime: string;
+    every?: number;
+  }
 }
 
 interface ThProps {
@@ -46,137 +78,49 @@ function Th({ children, onSort }: ThProps) {
   );
 }
 
-const initialData: RowData[] = [
-  {
-    id: 1,
-    doctorName: "Dr. John Doe",
-    specialization: "Cardiology",
-    recurrence: "Weekly",
-    date: "2023.09.09",
-    dayOfWeek: "Monday",
-    startTime: "09:00 AM",
-    endTime: "11:00 AM"
-  },
-  {
-    id: 2,
-    doctorName: "Dr. Alice Smith",
-    specialization: "Orthopedics",
-    recurrence: "Bi-weekly",
-    date: "2023.09.10",
-    dayOfWeek: "Tuesday",
-    startTime: "10:00 AM",
-    endTime: "12:00 PM"
-  },
-  {
-    id: 3,
-    doctorName: "Dr. Michael Johnson",
-    specialization: "Dermatology",
-    recurrence: "Monthly",
-    date: "2023.09.11",
-    dayOfWeek: "Wednesday",
-    startTime: "11:00 AM",
-    endTime: "01:00 PM"
-  },
-  {
-    id: 4,
-    doctorName: "Dr. Emily Brown",
-    specialization: "Pediatrics",
-    recurrence: "Weekly",
-    date: "2023.09.12",
-    dayOfWeek: "Thursday",
-    startTime: "01:00 PM",
-    endTime: "03:00 PM"
-  },
-  {
-    id: 5,
-    doctorName: "Dr. David Wilson",
-    specialization: "Neurology",
-    recurrence: "Bi-weekly",
-    date: "2023.09.13",
-    dayOfWeek: "Friday",
-    startTime: "02:00 PM",
-    endTime: "04:00 PM"
-  },
-  {
-    id: 6,
-    doctorName: "Dr. Sarah Lee",
-    specialization: "Oncology",
-    recurrence: "Monthly",
-    date: "2023.09.14",
-    dayOfWeek: "Saturday",
-    startTime: "03:00 PM",
-    endTime: "05:00 PM"
-  },
-  {
-    id: 7,
-    doctorName: "Dr. Robert Taylor",
-    specialization: "Psychiatry",
-    recurrence: "Weekly",
-    date: "2023.09.15",
-    dayOfWeek: "Sunday",
-    startTime: "04:00 PM",
-    endTime: "06:00 PM"
-  },
-  {
-    id: 8,
-    doctorName: "Dr. Jennifer Martinez",
-    specialization: "Gynecology",
-    recurrence: "Bi-weekly",
-    date: "2023.09.16",
-    dayOfWeek: "Monday",
-    startTime: "05:00 PM",
-    endTime: "07:00 PM"
-  },
-  {
-    id: 9,
-    doctorName: "Dr. Richard Thompson",
-    specialization: "Urology",
-    recurrence: "Monthly",
-    date: "2023.09.17",
-    dayOfWeek: "Tuesday",
-    startTime: "06:00 PM",
-    endTime: "08:00 PM"
-  },
-  {
-    id: 10,
-    doctorName: "Dr. Jessica Garcia",
-    specialization: "Endocrinology",
-    recurrence: "Weekly",
-    date: "2023.09.18",
-    dayOfWeek: "Wednesday",
-    startTime: "07:00 PM",
-    endTime: "09:00 PM"
-  },
-  {
-    id: 11,
-    doctorName: "Dr. Daniel Hernandez",
-    specialization: "Gastroenterology",
-    recurrence: "Bi-weekly",
-    date: "2023.09.19",
-    dayOfWeek: "Thursday",
-    startTime: "08:00 PM",
-    endTime: "10:00 PM"
-  },
-  {
-    id: 12,
-    doctorName: "Dr. Maria Lopez",
-    specialization: "Rheumatology",
-    recurrence: "Monthly",
-    date: "2023.09.20",
-    dayOfWeek: "Friday",
-    startTime: "09:00 PM",
-    endTime: "11:00 PM"
-  }
-  // Add more initial data as needed...
-];
 
 export default function TableSort() {
-  const [data, setData] = useState<RowData[]>(initialData);
+  const itemsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const {
+    "0": scheduleData,
+    "1": {
+      isError: scheduleError,
+      isLoading: scheduleLoading,
+      isFetching: scheduleFetching,
+      refetch: scheduleRefresh,
+    },
+  } = useApiClient.schedule.get.useSuspenseQuery({});
+  const {
+    "0": doctors
+
+  } = useApiClient.manageStaff.getStaff.useSuspenseQuery({ staffType: "doctor" })
+  const handleRefetch = async () => {
+    try {
+      await scheduleRefresh();
+    } catch (error) {
+      console.error("Error refetching user data:", error);
+    }
+  };
+
+  const {
+    mutateAsync: updateAsync,
+    isError: ScheduleUpdateError,
+    isSuccess: scheduleUpdateSuccess,
+  } = useApiClient.schedule.update.useMutation();
+  const {
+    mutateAsync: createAsync,
+    isError: scheduleAddError,
+    isSuccess: scheduleAddSuccess,
+  } = useApiClient.schedule.create.useMutation();
+  const [data, setData] = useState([...scheduleData.data]);
+  const [doctorData, setDoctorData] = useState(doctors.data);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<keyof RowData | null>(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const [modalOpened, setModalOpened] = useState(false);
   const [editModalOpened, setEditModalOpened] = useState(false);
+  const [saveButtonEnabled, setSaveButtonenabled] = useState(true);
   const [newRowData, setNewRowData] = useState<RowData>({
     id: null,
     doctorName: "",
@@ -185,11 +129,16 @@ export default function TableSort() {
     date: "",
     dayOfWeek: "",
     startTime: "",
-    endTime: ""
+    endTime: "",
+    endDate: "",
+    every: 1,
+    maxAppointments:1
+
   });
-  const [editingRowData, setEditingRowData] = useState<RowData | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 7;
+  const [editingRowData, setEditingRowData] = useState(null);
+
+
+
 
   const setSorting = (field: keyof RowData) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
@@ -207,20 +156,97 @@ export default function TableSort() {
 
   const handleModalClose = () => {
     setModalOpened(false);
-    setNewRowData({ id: null, doctorName: "", specialization: "", recurrence: "", date: "", dayOfWeek: "", startTime: "", endTime: "" });
+    setNewRowData({ id: null, doctorName: "", specialization: "", recurrence: "", date: "", dayOfWeek: "", startTime: "", endTime: "", endDate: "", every: 1,maxAppointments:1 });
   };
 
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>, key: keyof RowData) => {
     setNewRowData({ ...newRowData, [key]: event.target.value });
   };
+  const buildInput = (newRowData): ScheduleInput => {
+    let input: ScheduleInput = {
+      recurrence: newRowData.recurrence,
+  //    maxAppointments: parseInt(newRowData.maxAppointments, 10),
+      doctorId: newRowData.doctorName,
+    };
 
-  const handleSaveNewRow = () => {
-    setData([...data, { ...newRowData, id: data.length + 1 }]);
+    if (newRowData.recurrence === "ONCE") {
+      input.once = {
+        date: new Date(newRowData.date),
+        startTime: new Date(`${newRowData.date}T${newRowData.startTime}`).toISOString(),
+        endTime: new Date(`${newRowData.date}T${newRowData.endTime}`).toISOString(),
+      };
+    } else if (newRowData.recurrence === "WEEKLY") {
+      input.weekly = {
+        day: newRowData.dayOfWeek,
+        endDate: new Date(newRowData.endDate),
+        every: parseInt(newRowData.every, 10),
+        startDate: new Date(newRowData.date),
+        startTime: new Date(`${newRowData.date}T${newRowData.startTime}`).toISOString(),
+        endTime: new Date(`${newRowData.date}T${newRowData.endTime}`).toISOString(),
+      };
+    }
+    else {
+      input.monthly = {
+        endDate: new Date(newRowData.endDate),
+        every: parseInt(newRowData.every, 10),
+        date: new Date(newRowData.date),
+        startTime: new Date(`${newRowData.date}T${newRowData.startTime}`).toISOString(),
+        endTime: new Date(`${newRowData.date}T${newRowData.endTime}`).toISOString(),
+      };
+    }
+    return input;
+  };
+  const handleSaveNewRow = async () => {
+
+    setSaveButtonenabled(false)
+    const input = buildInput(newRowData);
+
+
+    const updatedSchedule = await createAsync(input);
+    const selectedDoctor = doctorData.find(doc => doc.doctor.id === updatedSchedule.data.doctorId);
+    const doctorObj = {
+      specialization: selectedDoctor.doctor.specialization,
+      staff: {
+        firstName: selectedDoctor.firstName,
+        lastName: selectedDoctor.lastName
+      }
+    }
+
+
+    const savedData = {
+      id: updatedSchedule.data.id,
+      dayOfWeek: updatedSchedule.data.dayOfWeek,
+      doctor: doctorObj,
+      recurrence: updatedSchedule.data.recurrence,
+      recurringEvery:updatedSchedule.data.recurringEvery,
+      endDate:updatedSchedule.data.endDate,
+      Date: updatedSchedule.data.Date,
+      startTime: updatedSchedule.data.startTime,
+      endTime: updatedSchedule.data.endTime,
+      totalAppointments:updatedSchedule.data?.totalAppointment
+    }
+
+
+    setData([...data, { ...savedData, id: updatedSchedule.data.id }]);
+    setSaveButtonenabled(true)
     handleModalClose();
   };
 
   const handleEditModalOpen = (rowData: RowData) => {
-    setEditingRowData(rowData);
+    const foundRow = displayedRows.find(doc => doc.id === rowData.id);
+    const editData = {
+      id:foundRow.id,
+      doctorName : foundRow.doctor.id,
+      specialization:foundRow.doctor.specialization,
+      recurrence:foundRow.recurrence,
+      every:foundRow.recurringEvery,
+      date: format(foundRow.Date, 'yyyy-MM-dd'),
+      endDate: foundRow.endDate != null ?  format(foundRow.endDate, 'yyyy-MM-dd') :"",
+      dayOfWeek:foundRow.dayOfWeek,
+      startTime: format(foundRow.startTime, 'HH:mm'),
+      endTime:format(foundRow.endTime, 'HH:mm'),
+    }
+    setEditingRowData(editData);
     setEditModalOpened(true);
   };
 
@@ -234,11 +260,41 @@ export default function TableSort() {
     setEditingRowData({ ...editingRowData, [key]: event.target.value });
   };
 
-  const handleSaveEditedRow = () => {
+  const handleSaveEditedRow = async () => {
     if (!editingRowData) return;
+    console.log("edit")
+    setSaveButtonenabled(false)
+    const input = buildInput(editingRowData);
+
+
+    const updatedSchedule = await updateAsync(input)
     const updatedData = data.map((row) => {
+      console.log(row.id,editingRowData)
       if (row.id === editingRowData.id) {
-        return { ...row, ...editingRowData };
+      
+        const selectedDoctor = doctorData.find(doc => doc.doctor.id === editingRowData.doctorName);
+        const doctorObj = {
+          id:selectedDoctor.doctor.id,
+          specialization: selectedDoctor.doctor.specialization,
+          staff: {
+            firstName: selectedDoctor.firstName,
+            lastName: selectedDoctor.lastName
+          }
+        }
+    
+    
+        const savedData = {
+          id: editingRowData.id,
+          dayOfWeek: editingRowData.dayOfWeek,
+          doctor: doctorObj,
+          recurrence: editingRowData.recurrence,
+          recurringEvery:editingRowData.every,
+          endDate:editingRowData.endDate,
+          Date: editingRowData.date,
+       //  startTime: editingRowData.startTime,
+       //   endTime: editingRowData.endTime,
+        }
+        return { ...row, ...savedData };
       }
       return row;
     });
@@ -264,19 +320,36 @@ export default function TableSort() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    //  handleRefetch();
   };
 
   const totalItems = data.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const displayedRows = data.slice(startIndex, endIndex);
+  const displayedRows = data?.slice(startIndex, endIndex);
+  const transformRows = (rows) => rows.map(row => ({
+    id: row.id,
+    doctorName: `${row.doctor.staff.firstName} ${row.doctor.staff.lastName}`,
+    specialization: row.doctor.specialization,
+    recurrence: row.recurrence,
+    date: row.Date ? format(row.Date, 'MM/dd/yyyy') : '-',
+    dayOfWeek: row.dayOfWeek || "-",
+    startTime: row.startTime ? format(row.startTime, 'hh:mm aa') : "-",
+    endTime: row.endTime ? format(row.endTime, 'hh:mm aa') : "-",
+    endDate:  row.endDate ? format(row.endDate, 'MM/dd/yyyy') : '-',// Assuming endDate is already in the correct format or does not need formatting
+    every: row.recurringEvery ?? "-",
+    maxAppointments:row.totalAppointment // Assuming this is directly usable
+  }));
 
-  const rows = displayedRows
-    .filter((row) =>
+  const transformedRows = transformRows(displayedRows);
+
+  // Now, filter the transformed rows
+  const rows = transformedRows
+    .filter(row =>
       Object.values(row)
-        .filter((value) => typeof value === "string")
-        .some((value) => value.toLowerCase().includes(search.toLowerCase()))
+        .filter(value => typeof value === "string")
+        .some(value => value.toLowerCase().includes(search.toLowerCase()))
     )
     .map((row, index) => (
       <Table.Tr key={index}>
@@ -285,9 +358,12 @@ export default function TableSort() {
         <Table.Td>{row.specialization}</Table.Td>
         <Table.Td>{row.recurrence}</Table.Td>
         <Table.Td>{row.date}</Table.Td>
+        <Table.Td>{row.endDate}</Table.Td>
         <Table.Td>{row.dayOfWeek}</Table.Td>
+        <Table.Td>{row.every}</Table.Td>
         <Table.Td>{row.startTime}</Table.Td>
         <Table.Td>{row.endTime}</Table.Td>
+        {/* <Table.Td>{row.maxAppointments}</Table.Td> */}
         <Table.Td>
           <Group style={{ margin: "-8px -4px" }}>
             <IconPencil
@@ -302,7 +378,6 @@ export default function TableSort() {
         </Table.Td>
       </Table.Tr>
     ));
-
   return (
     <div>
       <h1>Schedules</h1>
@@ -325,17 +400,20 @@ export default function TableSort() {
         />
         <Table>
           <Table.Tbody>
-          <Table.Tr>
-    <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Schedule ID</Table.Th>
-    <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Doctor Name</Table.Th>
-    <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Specialization</Table.Th>
-    <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Recurrence</Table.Th>
-    <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Date</Table.Th>
-    <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Day of week</Table.Th>
-    <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Start Time</Table.Th>
-    <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>End Time</Table.Th>
-    <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Actions</Table.Th>
-  </Table.Tr>
+            <Table.Tr>
+              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Schedule ID</Table.Th>
+              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Doctor Name</Table.Th>
+              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Specialization</Table.Th>
+              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Recurrence</Table.Th>
+              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Date</Table.Th>
+              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>End Date</Table.Th>
+              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Day of week</Table.Th>
+              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Every</Table.Th>
+              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Start Time</Table.Th>
+              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>End Time</Table.Th>
+              {/* <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Max Appointments</Table.Th> */}
+              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Actions</Table.Th>
+            </Table.Tr>
             {rows.length > 0 ? (
               rows
             ) : (
@@ -357,23 +435,44 @@ export default function TableSort() {
           style={{ marginBottom: "16px" }}
           type="number"
         />
-        <TextInput
-          label="Doctor Name"
+        <Select
+          label="Doctor"
+          placeholder="Select a doctor"
           value={newRowData.doctorName}
-          onChange={(event) => handleInputChange(event, "doctorName")}
-          style={{ marginBottom: "16px" }}
+          onChange={(event) => {
+            const selectedDoctorId = event;
+            // Find the selected doctor from the doctorData array
+            const selectedDoctor = doctorData.find(doc => doc.doctor.id === selectedDoctorId);
+            // Update newRowData with the selected doctor's name and specialization
+            if (selectedDoctor) {
+              setNewRowData(prevState => ({
+                ...prevState,
+                doctorName: selectedDoctor.doctor.id, // Storing the doctor's ID
+                specialization: selectedDoctor.doctor.specialization, // Assuming you want to store this too
+              }));
+            }
+          }}
+          data={doctorData.map(doc => ({
+            value: doc.doctor.id, // Use doctor's ID for value
+            label: `${doc.title} ${doc.firstName} ${doc.lastName}` // Format the label as needed
+          }))}
+          style={{ marginBottom: '16px' }}
         />
+
         <TextInput
           label="Specialization"
           value={newRowData.specialization}
           onChange={(event) => handleInputChange(event, "specialization")}
           style={{ marginBottom: "16px" }}
         />
-        <TextInput
+        <Select
           label="Recurrence"
           value={newRowData.recurrence}
-          onChange={(event) => handleInputChange(event, "recurrence")}
-          style={{ marginBottom: "16px" }}
+          onChange={(event) => {
+            setNewRowData({ ...newRowData, ["recurrence"]: event });
+          }}
+          data={['ONCE', 'WEEKLY', 'MONTHLY']}
+          style={{ marginBottom: '16px' }}
         />
         <TextInput
           label="Date"
@@ -382,12 +481,46 @@ export default function TableSort() {
           style={{ marginBottom: "16px" }}
           type="date"
         />
-        <TextInput
-          label="Day of Week"
-          value={newRowData.dayOfWeek}
-          onChange={(event) => handleInputChange(event, "dayOfWeek")}
-          style={{ marginBottom: "16px" }}
-        />
+        {['WEEKLY', 'MONTHLY'].includes(newRowData.recurrence) && (
+          <>
+            <TextInput
+              label="End Date"
+              value={newRowData.endDate}
+              onChange={(event) => handleInputChange(event, "endDate")}
+              style={{ marginBottom: "16px" }}
+              type="date"
+            />
+            <Select
+              label="Day of the Week"
+              placeholder="Select a day"
+              value={newRowData.dayOfWeek}
+              onChange={(event) => {
+                setNewRowData({ ...newRowData, ["dayOfWeek"]: event });
+              }}
+              data={[
+                { value: 'SUNDAY', label: 'Sunday' },
+                { value: 'MONDAY', label: 'Monday' },
+                { value: 'TUESDAY', label: 'Tuesday' },
+                { value: 'WEDNESDAY', label: 'Wednesday' },
+                { value: 'THURSDAY', label: 'Thursday' },
+                { value: 'FRIDAY', label: 'Friday' },
+                { value: 'SATURDAY', label: 'Saturday' },
+              ]}
+              style={{ marginBottom: '16px' }}
+            />
+            <TextInput
+              label="Every"
+              type="number"
+              value={newRowData.every}
+              onChange={(event) => handleInputChange(event, "every")}
+              style={{ marginBottom: '16px' }}
+            />
+         
+
+          </>
+        )}
+
+
         <TextInput
           label="Start Time"
           value={newRowData.startTime}
@@ -402,32 +535,62 @@ export default function TableSort() {
           style={{ marginBottom: "32px" }}
           type="time"
         />
-        <Button onClick={handleSaveNewRow} style={{ backgroundColor: "#4CAF50" }}>
-          Save
-        </Button>
+          {/* <TextInput
+          label="Max Appointments"
+          value={newRowData.maxAppointments}
+          onChange={(event) => handleInputChange(event, "maxAppointments")}
+          style={{ marginBottom: "16px" }}
+        /> */}
+      <Button 
+  onClick={handleSaveNewRow} 
+  style={{ backgroundColor: "#4CAF50" }} 
+  disabled={!saveButtonEnabled}
+>
+  Save
+</Button>
       </Modal>
 
       <Modal opened={editModalOpened} onClose={handleEditModalClose} title="Edit Schedule" size="sm">
         {editingRowData && (
           <>
-            <TextInput
-              label="Doctor Name"
-              value={editingRowData.doctorName}
-              onChange={(event) => handleEditInputChange(event, "doctorName")}
-              style={{ marginBottom: "16px" }}
-            />
+              <Select
+          label="Doctor"
+          placeholder="Select a doctor"
+          value={editingRowData.doctorName}
+          onChange={(event) => {
+            const selectedDoctorId = event;
+            // Find the selected doctor from the doctorData array
+            const selectedDoctor = doctorData.find(doc => doc.doctor.id === selectedDoctorId);
+            // Update newRowData with the selected doctor's name and specialization
+            if (selectedDoctor) {
+              setEditingRowData(prevState => ({
+                ...prevState,
+                doctorName: selectedDoctor.doctor.id, // Storing the doctor's ID
+                specialization: selectedDoctor.doctor.specialization, // Assuming you want to store this too
+              }));
+            }
+          }}
+          data={doctorData.map(doc => ({
+            value: doc.doctor.id, // Use doctor's ID for value
+            label: `${doc.title} ${doc.firstName} ${doc.lastName}` // Format the label as needed
+          }))}
+          style={{ marginBottom: '16px' }}
+        />
             <TextInput
               label="Specialization"
               value={editingRowData.specialization}
               onChange={(event) => handleEditInputChange(event, "specialization")}
               style={{ marginBottom: "16px" }}
             />
-            <TextInput
-              label="Recurrence"
-              value={editingRowData.recurrence}
-              onChange={(event) => handleEditInputChange(event, "recurrence")}
-              style={{ marginBottom: "16px" }}
-            />
+            <Select
+          label="Recurrence"
+          value={editingRowData.recurrence}
+          onChange={(event) => {
+            setEditingRowData({ ...editingRowData, ["recurrence"]: event });
+          }}
+          data={['ONCE', 'WEEKLY', 'MONTHLY']}
+          style={{ marginBottom: '16px' }}
+        />
             <TextInput
               label="Date"
               value={editingRowData.date}
@@ -435,12 +598,45 @@ export default function TableSort() {
               style={{ marginBottom: "16px" }}
               type="date"
             />
+              {['WEEKLY', 'MONTHLY'].includes(editingRowData.recurrence) && (
+          <>
             <TextInput
-              label="Day of Week"
-              value={editingRowData.dayOfWeek}
-              onChange={(event) => handleEditInputChange(event, "dayOfWeek")}
+              label="End Date"
+              value={editingRowData.endDate}
+              onChange={(event) => handleEditInputChange(event, "endDate")}
               style={{ marginBottom: "16px" }}
+              type="date"
             />
+            <Select
+              label="Day of the Week"
+              placeholder="Select a day"
+              value={editingRowData.dayOfWeek}
+              onChange={(event) => {
+                setEditingRowData({ ...editingRowData, ["dayOfWeek"]: event });
+              }}
+              data={[
+                { value: 'SUNDAY', label: 'Sunday' },
+                { value: 'MONDAY', label: 'Monday' },
+                { value: 'TUESDAY', label: 'Tuesday' },
+                { value: 'WEDNESDAY', label: 'Wednesday' },
+                { value: 'THURSDAY', label: 'Thursday' },
+                { value: 'FRIDAY', label: 'Friday' },
+                { value: 'SATURDAY', label: 'Saturday' },
+              ]}
+              style={{ marginBottom: '16px' }}
+            />
+            <TextInput
+              label="Every"
+              type="number"
+              value={editingRowData.every}
+              onChange={(event) => handleInputChange(event, "every")}
+              style={{ marginBottom: '16px' }}
+            />
+         
+
+          </>
+        )}
+           
             <TextInput
               label="Start Time"
               value={editingRowData.startTime}
@@ -455,7 +651,7 @@ export default function TableSort() {
               style={{ marginBottom: "32px" }}
               type="time"
             />
-            <Button onClick={handleSaveEditedRow} style={{ backgroundColor: "#4CAF50" }}>
+            <Button disabled={!saveButtonEnabled} onClick={handleSaveEditedRow} style={{ backgroundColor: "#4CAF50" }}>
               Save
             </Button>
           </>

@@ -37,6 +37,7 @@
     "@trpc/server": "^10.45.0",
     "argon2": "^0.31.2",
     "clsx": "^2.1.0",
+    "date-fns": "^3.5.0",
     "dayjs": "^1.11.10",
     "jose": "^5.2.0",
     "mantine-contextmenu": "^7.6.2",
