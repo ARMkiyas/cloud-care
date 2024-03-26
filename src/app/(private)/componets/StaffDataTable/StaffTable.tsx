@@ -86,15 +86,19 @@ export default function StaffTable({ type }: TstaffTableProps) {
             : row.doctor
             ? type === "doctors"
               ? row.doctor.specialization.split("_").join(" ")
-              : "Doctor"
-            : "Nurse",
+              : row.doctor.departments.split("_").join(" ")
+            : row.nurse && row.nurse.departments.split("_").join(" "),
         header: `${
-          type === "all-staff" || type === "admins"
+          type === "all-staff" || type === "admins" || type === "nurses"
             ? "Department"
-            : type === "doctors"
-            ? "specialization"
-            : "Job Title"
+            : type === "doctors" && "Specialization"
         }`,
+      },
+      {
+        id: "jobTitle",
+        accessorFn: (row) =>
+          row.admin && row.admin.jobTitle.split("_").join(" "),
+        header: "Job Title",
       },
     ],
     [],
@@ -145,6 +149,11 @@ export default function StaffTable({ type }: TstaffTableProps) {
     state: {
       isLoading: staffGetLoading,
       showProgressBars: staffGetFetching,
+    },
+    initialState: {
+      columnVisibility: {
+        jobTitle: !!(type === "admins"),
+      },
     },
   });
 
