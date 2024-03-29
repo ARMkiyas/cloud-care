@@ -1,3 +1,4 @@
+
 .mainContainer1 {
   background-image: url("/img/publicPagesIMG/bgimg.jpg");
   display: flex;
@@ -6,6 +7,7 @@
   margin: auto;
   display: flex;
   padding: 48px 300px;
+
 }
 
 .containerMiddle {
