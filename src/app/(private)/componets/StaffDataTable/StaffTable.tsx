@@ -7,7 +7,6 @@ import {
 } from "mantine-react-table";
 import React, { useCallback, useMemo, useRef, UIEvent } from "react";
 
-import { Tempdata } from "../../dashboard/staffs/[type]/tempData";
 import type { TStaffGet } from "@/server/api/ApiTypeFactory";
 import { Avatar, Box, Button, Text, Title } from "@mantine/core";
 import { useApiClient } from "@/utils/trpc/Trpc";
