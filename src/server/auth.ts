@@ -21,6 +21,18 @@ import { PrismaClient, Permissions, UserRoles } from "@prisma/client";
 import { JWT } from "next-auth/jwt";
 import { EncryptJWT, SignJWT, base64url, jwtVerify, jwtDecrypt } from "jose";
 
+
+
+
+const profileUpdateSchema = z.object({
+  name: z.string().min(1, "name Requred"),
+  email: z.string().email(),
+  image: z.string(),
+  username: z.string().min(1, "username Requred"),
+  twoFactorEnabled: z.boolean(),
+
+
+})
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -266,10 +278,26 @@ export const authOptions: NextAuthOptions = {
       return true
     },
 
-    async jwt({ token, user, account, profile, isNewUser }) {
+    async jwt({ token, user, account, profile, isNewUser, trigger, session }) {
 
 
+      if (trigger === "update") {
+        console.log(session && profileUpdateSchema.safeParse(session).success);
+        if (session && profileUpdateSchema.safeParse(session).success) {
+          return {
+            ...token,
+            name: session.name,
+            email: session.email,
+            image: session.image,
+            username: session.username,
+            picture: session.image,
+            twoFactorEnabled: session.twoFactorEnabled,
+          }
+        }
 
+
+        return token
+      }
 
       if (user && account) {
         const access_token = account.provider === "2fa" && await getaccesstoken({
