@@ -43,7 +43,7 @@ const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, i
 
         const user = await ctx.db.user.create({
             data: {
-                name: `${staff.title}.${staff.firstName} ${staff.firstName}`,
+                name: `${staff.title}.${staff.firstName} ${staff.lastName}`,
                 email: staff.email.trim(),
                 phone: staff.phone.trim(),
                 Log: {
@@ -68,6 +68,14 @@ const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, i
                     }
                 }
 
+            },
+            include: {
+                role: true,
+                _count: {
+                    select: {
+                        Log: true
+                    }
+                }
             }
         })
 
@@ -81,6 +89,10 @@ const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, i
                 name: user.name,
                 email: user.email,
                 staffid: user.staffid,
+                phone: user.phone,
+                role: user.role,
+                twoFactorEnabled: user.twoFactorEnabled,
+                _count: user._count
 
             }
         }

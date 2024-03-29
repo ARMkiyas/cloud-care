@@ -27,7 +27,7 @@ export const deleteUserSchema = z.object({
 export const getUserschema = z.object({
     userid: z.string().optional(),
     username: z.string().optional(),
-    email: z.string().email().optional(),
+    email: z.string().optional(),
     phone: z.string().optional(),
     role: z.enum([UserRoles.ADMIN, UserRoles.ROOTUSER, UserRoles.STAFF, UserRoles.DOCTOR, UserRoles.NURSE, UserRoles.GUEST]).optional(),
     staffid: z.string().optional(),

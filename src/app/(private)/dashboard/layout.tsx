@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Button, AppShell, Burger, Group, Skeleton } from "@mantine/core";
 //import { IconLogout } from '@tabler/icons-react';
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { NavbarNested } from "../componets/Navbar/NavbarNested";
 import myImage from "../componets/Header/assets/logo-inline-qRb.png";
@@ -26,7 +26,6 @@ export default function layout({ children }: { children: React.ReactNode }) {
   }
 
   const { data: session, status } = useSession();
-  console.log(session);
 
   return (
     <>
@@ -47,8 +46,16 @@ export default function layout({ children }: { children: React.ReactNode }) {
               hiddenFrom="sm"
               size="sm"
             />
-            <Image src={myImage} alt="cloudCare" className="w-[180px]  h-12 " />
+            <Image
+              src={myImage}
+              alt="cloudCare"
+              className="w-[180px]  h-12 "
+              loading="lazy"
+              placeholder="blur"
+              blurDataURL=""
+            />
           </Group>
+
           {session ? (
             <Button
               className={classes.button}
@@ -63,11 +70,11 @@ export default function layout({ children }: { children: React.ReactNode }) {
                 width="22"
                 height="22"
                 viewBox="0 0 22 22"
-                stroke-width="2"
+                strokeWidth="2"
                 stroke="currentColor"
                 fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
                 <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                 <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
@@ -89,7 +96,13 @@ export default function layout({ children }: { children: React.ReactNode }) {
               <Skeleton key={index} h={28} animate={false} />
             ))}
         </AppShell.Navbar>
-        <AppShell.Main>{children}</AppShell.Main>
+        <AppShell.Main
+          classNames={{
+            main: "h-full w-full",
+          }}
+        >
+          {children}
+        </AppShell.Main>
       </AppShell>
     </>
   );

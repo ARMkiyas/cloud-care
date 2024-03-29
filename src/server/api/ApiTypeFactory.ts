@@ -3,10 +3,33 @@ import type { AppRouterType } from "./root";
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server';
 import { inferReactQueryProcedureOptions } from "@trpc/react-query";
 
+
 export type ReactQueryOptions = inferReactQueryProcedureOptions<AppRouterType>;
 
 export type RouterInputs = inferRouterInputs<AppRouterType>
 export type RouterOutput = inferRouterOutputs<AppRouterType>;
+
+
+
+//type of the 'getstaff' procedure
+export type TStaffGet = RouterOutput["manageStaff"]["getStaff"];
+export type TStaffGetInput = RouterInputs["manageStaff"]["getStaff"];
+
+// type of the `createStaff` procedure
+export type TStaffCreate = RouterOutput["manageStaff"]["createStaff"];
+export type TStaffCreateInput = RouterInputs["manageStaff"]["createStaff"];
+
+// type of the `updateStaff` procedure
+export type TStaffUpdate = RouterOutput["manageStaff"]["updatestaff"];
+export type TStaffUpdateInput = RouterInputs["manageStaff"]["updatestaff"];
+
+// type of the `deleteStaff` procedure
+export type TStaffDelete = RouterOutput["manageStaff"]["deleteStaff"];
+export type TStaffDeleteInput = RouterInputs["manageStaff"]["deleteStaff"];
+
+
+
+
 
 
 

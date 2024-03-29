@@ -16,7 +16,7 @@ export const getStaffschema = z.object({
     getdoctors: z.boolean().optional(),
     getnurses: z.boolean().optional(),
     getadmins: z.boolean().optional(),
-    staffType: z.enum(["doctor", "nurse", "admin"]).optional(),
+    staffType: z.enum(["doctors", "nurses", "admins"]).optional(),
 
 }).merge(pagenationSchema)
 

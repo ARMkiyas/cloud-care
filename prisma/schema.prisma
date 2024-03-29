@@ -53,11 +53,28 @@ enum UserRoles {
 }
 
 enum Permissions {
-    ALL
-    DASH
-    MANAGEUSERS_READ
-    MANAGEUSERS_WRITE
-    MANAGEUSERS_DELETE
+    DASHBOARD_READ
+    APPOINTMENTS_READ
+    APPOINTMENTS_WRITE
+    APPOINTMENTS_EDIT
+    APPOINTMENTS_DELETE
+    SCHEDULES_READ
+    SCHEDULES_WRITE
+    SCHEDULES_EDIT
+    SCHEDULES_DELETE
+    PATIENTS_READ
+    PATIENTS_WRITE
+    PATIENTS_EDIT
+    PATIENTS_DELETE
+    USERS_READ
+    USERS_WRITE
+    USERS_EDIT
+    USERS_DELETE
+    STAFF_READ
+    STAFF_WRITE
+    STAFF_EDIT
+    STAFF_DELETE
+    LOGS_READ
 }
 
 model Permission {
@@ -72,6 +89,8 @@ model UserRole {
     id    Int       @id @default(autoincrement())
     role  UserRoles @unique @default(GUEST)
     users User[]
+
+    permissions Permissions[] @default([DASHBOARD_READ])
 }
 
 model User {

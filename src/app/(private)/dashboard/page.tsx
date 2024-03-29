@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   //Button,
@@ -9,22 +9,22 @@ import {
   PaperProps,
   Stack,
   Text,
-} from '@mantine/core';
+} from "@mantine/core";
 //import { IconChevronRight } from '@tabler/icons-react';
 import {
   DieasesSummary,
   RevenueChart,
   StatsGrid,
   TotalBooking,
-} from '@/components/dash_AnaliticalComponets'
+} from "@/components/dash_AnaliticalComponets";
 //import Link from 'next/link';
-import { TableScrollArea } from '@/utils/lib/TableScrollArea/TableScrollArea';
+import { TableScrollArea } from "@/components/TableScrollArea/TableScrollArea";
 
 const PAPER_PROPS: PaperProps = {
-  p: 'md',
-  shadow: 'md',
-  radius: 'md',
-  style: { height: '100%' },
+  p: "md",
+  shadow: "md",
+  radius: "md",
+  style: { height: "100%" },
 };
 
 function Page() {
@@ -39,16 +39,12 @@ function Page() {
     loading: statsLoading,
   } = useFetchData('/mocks/StatsGrid.json');*/
 
-
-  
-
   return (
     <>
-  
       <Container fluid>
         <Stack gap="lg">
-          <StatsGrid/>
-          <Grid gutter={{ base: 5, xs: 'md', md: 'xl', xl: 50 }}>
+          <StatsGrid />
+          <Grid gutter={{ base: 5, xs: "md", md: "xl", xl: 50 }}>
             <Grid.Col>
               <RevenueChart {...PAPER_PROPS} />
             </Grid.Col>
@@ -65,7 +61,7 @@ function Page() {
                     Appointment Activity
                   </Text>
                 </Group>
-                <TableScrollArea/>
+                <TableScrollArea />
               </Paper>
             </Grid.Col>
           </Grid>
