@@ -25,6 +25,9 @@ const getStaffProceture = protectedProcedure
             const staffquery = {
                 skip: input.page > 1 ? (input.page - 1) * input.limit : 0,
                 take: input.limit + 1,
+                cursor: input.cursor ? {
+                    id: input.cursor
+                } : undefined,
                 where: {
                     email: {
                         equals: input?.email

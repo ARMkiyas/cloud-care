@@ -1,6 +1,6 @@
 import "server-only";
 import { protectedProcedure } from "../../trpc"
-import { UserRoles } from "@prisma/client"
+import { adminDepartment, AdminJobTitle, MedicalDepartments, OtherJobTitles, UserRoles } from "@prisma/client"
 import { TRPCError } from "@trpc/server"
 import { userImageUploader } from "@/utils/fileuploadhandler/userimageuploder"
 import { getAvatar } from "@/utils/getavatar"
@@ -38,23 +38,33 @@ const createStaffProceture = protectedProcedure.input(createStaffSchema).mutatio
                 ...input.staffType === "admin" ? {
                     admin: {
                         create: {
-                            department: input.department
+                            department: input.department as adminDepartment,
+                            jobTitle: input.jobtitle as AdminJobTitle
                         }
                     }
 
                 } : input.staffType === "doctor" ? {
                     doctor: {
                         create: {
-                            specialization: input.specialization
+                            specialization: input.specialization,
+                            departments: input.department as MedicalDepartments
+
                         }
                     }
                 } : input.staffType === "nurse" ? {
                     nurse: {
                         create: {
-
+                            departments: input.department as MedicalDepartments
                         }
                     }
-                } : {},
+                } : input.staffType === "others" && {
+                    OtherStaffs: {
+                        create: {
+                            departments: input.department as MedicalDepartments,
+                            jobTitle: input.jobtitle as OtherJobTitles
+                        }
+                    }
+                },
 
                 ...input.withUserAccount ? {
                     user: {
