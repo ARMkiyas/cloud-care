@@ -37,8 +37,9 @@ interface RowData {
 }
 interface ScheduleInput {
   doctorId: string;
+  scheduleId?:string;
   recurrence: unknown;
-  maxAppointments: number;
+  maxAppointments?: number;
   once?: {
     date?: Date | undefined;
     startTime: string;
@@ -109,9 +110,15 @@ export default function TableSort() {
     isSuccess: scheduleUpdateSuccess,
   } = useApiClient.schedule.update.useMutation();
   const {
+    mutateAsync: deleteAsync,
+    isError: ScheduleDeleteError,
+    isSuccess: scheduleDeleteSuccess,
+  } = useApiClient.schedule.delete.useMutation();
+  const {
     mutateAsync: createAsync,
     isError: scheduleAddError,
     isSuccess: scheduleAddSuccess,
+    error:createError
   } = useApiClient.schedule.create.useMutation();
   const [data, setData] = useState([...scheduleData.data]);
   const [doctorData, setDoctorData] = useState(doctors.data);
@@ -121,6 +128,8 @@ export default function TableSort() {
   const [modalOpened, setModalOpened] = useState(false);
   const [editModalOpened, setEditModalOpened] = useState(false);
   const [saveButtonEnabled, setSaveButtonenabled] = useState(true);
+  const[opened,setOpened]= useState(false);
+  const[deleteRow,setDeleteRow] = useState(null)
   const [newRowData, setNewRowData] = useState<RowData>({
     id: null,
     doctorName: "",
@@ -136,9 +145,6 @@ export default function TableSort() {
 
   });
   const [editingRowData, setEditingRowData] = useState(null);
-
-
-
 
   const setSorting = (field: keyof RowData) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
@@ -159,13 +165,19 @@ export default function TableSort() {
     setNewRowData({ id: null, doctorName: "", specialization: "", recurrence: "", date: "", dayOfWeek: "", startTime: "", endTime: "", endDate: "", every: 1,maxAppointments:1 });
   };
 
+  React.useEffect(() => {
+    if (scheduleAddError && createError) {
+      console.log( createError.message || 'An error occurred while deleting the schedule.');
+    }
+  }, [scheduleAddError, createError]);
   const handleInputChange = (event: ChangeEvent<HTMLInputElement>, key: keyof RowData) => {
     setNewRowData({ ...newRowData, [key]: event.target.value });
   };
   const buildInput = (newRowData): ScheduleInput => {
+   
     let input: ScheduleInput = {
       recurrence: newRowData.recurrence,
-  //    maxAppointments: parseInt(newRowData.maxAppointments, 10),
+    
       doctorId: newRowData.doctorName,
     };
 
@@ -198,7 +210,7 @@ export default function TableSort() {
   };
   const handleSaveNewRow = async () => {
 
-    setSaveButtonenabled(false)
+   // setSaveButtonenabled(false)
     const input = buildInput(newRowData);
 
 
@@ -245,6 +257,11 @@ export default function TableSort() {
       dayOfWeek:foundRow.dayOfWeek,
       startTime: format(foundRow.startTime, 'HH:mm'),
       endTime:format(foundRow.endTime, 'HH:mm'),
+      OptRoomsid:foundRow?.OptRoomsid,
+      maxAppointments:foundRow?.totalAppointment,
+     noOfSlots:foundRow?._count?.Slot,
+     appointments:foundRow?._count?.Appointment
+   
     }
     setEditingRowData(editData);
     setEditModalOpened(true);
@@ -262,14 +279,21 @@ export default function TableSort() {
 
   const handleSaveEditedRow = async () => {
     if (!editingRowData) return;
-    console.log("edit")
-    setSaveButtonenabled(false)
-    const input = buildInput(editingRowData);
+ //   setSaveButtonenabled(false)
+    const input = {
+      scheduleId: editingRowData.id,
+      date: new Date(editingRowData.date),
+      startTime: new Date(`${editingRowData.date}T${editingRowData.startTime}`).toISOString(),
+      endTime: new Date(`${editingRowData.date}T${editingRowData.endTime}`).toISOString(),
+      dayOfWeek: editingRowData.dayOfWeek,
+      // maxAppointments: editingRowData.maxAppointments,
+      // noOfSlots: editingRowData.noOfSlots,
+     // opdRoomid: editingRowData.OptRoomsid
+    }
 
-
-    const updatedSchedule = await updateAsync(input)
+   const updatedSchedule = await updateAsync(input)
     const updatedData = data.map((row) => {
-      console.log(row.id,editingRowData)
+    
       if (row.id === editingRowData.id) {
       
         const selectedDoctor = doctorData.find(doc => doc.doctor.id === editingRowData.doctorName);
@@ -281,29 +305,43 @@ export default function TableSort() {
             lastName: selectedDoctor.lastName
           }
         }
-    
-    
+        // const counts = {
+        //   Slot:editingRowData.Slot,
+        //   Appointment:editingRowData.appointments
+        // }
         const savedData = {
+          // totalAppointment:editingRowData.maxAppointments,
+          // OptRoomsid:editingRowData.OptRoomsid,
           id: editingRowData.id,
           dayOfWeek: editingRowData.dayOfWeek,
           doctor: doctorObj,
           recurrence: editingRowData.recurrence,
           recurringEvery:editingRowData.every,
-          endDate:editingRowData.endDate,
-          Date: editingRowData.date,
-       //  startTime: editingRowData.startTime,
-       //   endTime: editingRowData.endTime,
+          endDate: editingRowData.endDate ? new Date(editingRowData.endDate) : null,
+          Date: new Date(editingRowData.date),
+          // _count:counts,
+          startTime: new Date(`${editingRowData.date}T${editingRowData.startTime}`).toISOString(),
+          endTime: new Date(`${editingRowData.date}T${editingRowData.endTime}`).toISOString(),
         }
         return { ...row, ...savedData };
       }
       return row;
     });
     setData(updatedData);
+    setSaveButtonenabled(true)
     handleEditModalClose();
   };
 
-  const handleDeleteRow = (rowToDelete: RowData) => {
-    const updatedData = data.filter((row) => row !== rowToDelete);
+  const handleDeleteRowConfirm =  (rowToDelete: RowData) => {
+    setDeleteRow(rowToDelete);
+setOpened(true)
+  }
+  const handleDeleteRow = async (rowToDelete: RowData) => {
+const input ={
+scheduleId:rowToDelete.id,
+}
+    await deleteAsync(input)
+    const updatedData = data.filter((row) => row.id !== rowToDelete.id);
     setData(updatedData);
   };
 
@@ -339,7 +377,11 @@ export default function TableSort() {
     endTime: row.endTime ? format(row.endTime, 'hh:mm aa') : "-",
     endDate:  row.endDate ? format(row.endDate, 'MM/dd/yyyy') : '-',// Assuming endDate is already in the correct format or does not need formatting
     every: row.recurringEvery ?? "-",
-    maxAppointments:row.totalAppointment // Assuming this is directly usable
+    maxAppointments:row?.totalAppointment,
+    noOfSlots:row?._count?.Slot,
+    OptRoomsid:row?.OptRoomsid,
+    appointments:row?._count?.Appointment
+     // Assuming this is directly usable
   }));
 
   const transformedRows = transformRows(displayedRows);
@@ -372,7 +414,7 @@ export default function TableSort() {
             />
             <IconTrash
               style={{ width: rem(20), height: rem(20), color: "red", cursor: "pointer" }}
-              onClick={() => handleDeleteRow(row)}
+              onClick={() => handleDeleteRowConfirm(row)}
             />
           </Group>
         </Table.Td>
@@ -428,13 +470,13 @@ export default function TableSort() {
       </ScrollArea>
 
       <Modal opened={modalOpened} onClose={handleModalClose} title="Add New Schedule" size="sm">
-        <TextInput
+        {/* <TextInput
           label="Schedule ID"
           value={newRowData.id !== null ? String(newRowData.id) : ""}
           onChange={(event) => handleInputChange(event, "id")}
           style={{ marginBottom: "16px" }}
           type="number"
-        />
+        /> */}
         <Select
           label="Doctor"
           placeholder="Select a doctor"
@@ -555,6 +597,7 @@ export default function TableSort() {
           <>
               <Select
           label="Doctor"
+          disabled={true}
           placeholder="Select a doctor"
           value={editingRowData.doctorName}
           onChange={(event) => {
@@ -577,12 +620,14 @@ export default function TableSort() {
           style={{ marginBottom: '16px' }}
         />
             <TextInput
+              disabled={true}
               label="Specialization"
               value={editingRowData.specialization}
               onChange={(event) => handleEditInputChange(event, "specialization")}
               style={{ marginBottom: "16px" }}
             />
             <Select
+            disabled={true}
           label="Recurrence"
           value={editingRowData.recurrence}
           onChange={(event) => {
@@ -629,11 +674,10 @@ export default function TableSort() {
               label="Every"
               type="number"
               value={editingRowData.every}
-              onChange={(event) => handleInputChange(event, "every")}
+              onChange={(event) => handleEditInputChange(event, "every")}
               style={{ marginBottom: '16px' }}
             />
          
-
           </>
         )}
            
@@ -651,13 +695,56 @@ export default function TableSort() {
               style={{ marginBottom: "32px" }}
               type="time"
             />
-            <Button disabled={!saveButtonEnabled} onClick={handleSaveEditedRow} style={{ backgroundColor: "#4CAF50" }}>
+             {/* <TextInput
+              label="Room Id"
+              type="text"
+              value={editingRowData?.OptRoomsid}
+              onChange={(event) => handleEditInputChange(event, "OptRoomsid")}
+              style={{ marginBottom: '16px' }}
+            /> */}
+        <TextInput
+              disabled={true}
+              label="No of Appointments"
+              type="number"
+              value={editingRowData.appointments}
+              style={{ marginBottom: '16px' }}
+            />
+             {/* <TextInput
+              label="Total Appointments"
+              type="number"
+              value={editingRowData.maxAppointments}
+              onChange={(event) => handleEditInputChange(event, "maxAppointments")}
+              style={{ marginBottom: '16px' }}
+            />
+             <TextInput
+              label="No of Slots"
+              type="number"
+              value={editingRowData.noOfSlots}
+              onChange={(event) => handleEditInputChange(event, "noOfSlots")}
+              style={{ marginBottom: '16px' }}
+            /> */}
+
+            <Button disabled={!saveButtonEnabled || editingRowData.appointments > 0} onClick={handleSaveEditedRow} style={{ backgroundColor: "#4CAF50" }}>
               Save
             </Button>
           </>
         )}
       </Modal>
-
+      <Modal
+        opened={opened}
+        onClose={() => setOpened(false)}
+        title="Confirm Deletion"
+      >
+        <p>Are you sure you want to delete this schedule?</p>
+        <Group align="right" mt="md">
+          <Button variant="default" onClick={() => setOpened(false)}>
+            Cancel
+          </Button>
+          <Button color="red" onClick={() => handleDeleteRow(deleteRow)}>
+            Delete
+          </Button>
+        </Group>
+      </Modal>
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
         <Pagination
           total={totalPages}
