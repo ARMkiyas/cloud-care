@@ -1,0 +1,11 @@
+.mainBodyContainer{
+    display: flex;
+    width: 1296px;
+    max-width: 1320px;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    margin: auto;
+    margin-top: 96px;
+}
+
