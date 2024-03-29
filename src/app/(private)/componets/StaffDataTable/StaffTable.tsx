@@ -9,9 +9,10 @@ import React, { useCallback, useMemo, useRef, UIEvent } from "react";
 
 import { Tempdata } from "../../dashboard/staffs/[type]/tempData";
 import type { TStaffGet } from "@/server/api/ApiTypeFactory";
-import { Avatar, Box, Button } from "@mantine/core";
+import { Avatar, Box, Button, Text, Title } from "@mantine/core";
 import { useApiClient } from "@/utils/trpc/Trpc";
 import { TStaffTypes } from "@/utils/types";
+import { IconCodePlus, IconCopyPlus, IconUserPlus } from "@tabler/icons-react";
 
 type staffType = TStaffGet["data"][0];
 
@@ -30,7 +31,7 @@ export default function StaffTable({ type }: TstaffTableProps) {
   } = useApiClient.manageStaff.getStaff.useInfiniteQuery(
     {
       limit: PAGE_SIZE,
-      staffType: type === "all-staff" ? undefined : type,
+      staffType: type === "all-staffs" ? undefined : type,
     },
     {
       getNextPageParam: (lastPage, allPages) => lastPage.pagenation.nextCursor,
@@ -89,7 +90,7 @@ export default function StaffTable({ type }: TstaffTableProps) {
               : row.doctor.departments.split("_").join(" ")
             : row.nurse && row.nurse.departments.split("_").join(" "),
         header: `${
-          type === "all-staff" || type === "admins" || type === "nurses"
+          type === "all-staffs" || type === "admins" || type === "nurses"
             ? "Department"
             : type === "doctors" && "Specialization"
         }`,
