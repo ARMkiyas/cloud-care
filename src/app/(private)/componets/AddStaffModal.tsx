@@ -16,13 +16,13 @@ import {
   ACCEPTED_IMAGE_TYPES,
   imageSchema,
 } from "@/utils/ValidationSchemas/commonSc";
+import { createStaffSchema } from "@/utils/ValidationSchemas/FrontendValidation";
 import {
   AutocompleteFactory,
   Button,
   ClassNames,
   FileInput,
   FileInputFactory,
-  Group,
   InputBase,
   Modal,
   NativeSelect,
@@ -35,15 +35,16 @@ import {
 import { DateInput, DateInputFactory } from "@mantine/dates";
 import { useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
-import { IconImageInPicture, IconPictureInPicture } from "@tabler/icons-react";
+import { IconPictureInPicture } from "@tabler/icons-react";
 import { zodResolver } from "mantine-form-zod-resolver";
-import React, { HTMLAttributes } from "react";
+import React, { HTMLAttributes, useEffect } from "react";
 import { IMaskInput } from "react-imask";
-import { z } from "zod";
 
 type AddstaffPropsType = {
   opened: boolean;
   close: () => void;
+  edit?: boolean;
+  editdata?: editFormValue;
 };
 
 type staffType = "doctor" | "nurse" | "admin" | "others";
@@ -61,22 +62,27 @@ const staffType = [
   { value: "others", label: "Others" },
 ];
 
-type TformValue = {
+export type TformValue = {
   title: Ttitle;
-  firstName: "";
-  lastName: "";
-  picture: File | null;
+  firstName: string;
+  lastName: string;
+  picture?: File | null;
   idType: "NIC" | "Passport";
-  GovtId: "";
+  GovtId: string;
   dob: Date;
   gender: (typeof gender)[number];
-  phone: "";
-  email: "";
-  idNumber: "";
+  phone: string;
+  email: string;
+  idNumber: string;
   staffType: staffType;
   department: TadminDepartment | TMedicalDepartments | "";
-  jobtitle: TAdminJobTitle | TOtherJobTitles | "";
-  DoctorSpecialization: TDoctorSpecialization | "";
+  jobtitle?: TAdminJobTitle | TOtherJobTitles | "";
+  DoctorSpecialization?: TDoctorSpecialization | "";
+};
+
+export type editFormValue = {
+  id: string;
+  data: TformValue;
 };
 
 const TextInputClasses: ClassNames<
@@ -92,100 +98,47 @@ const TextInputClasses: ClassNames<
   root: "w-full",
 };
 
-const createStaffSchema = z
-  .object({
-    title: z.enum(title),
-    firstName: z.string().min(1, "First Name is Required"),
-    lastName: z.string().min(1, "Last Name is Required"),
-    idType: z.enum(["NIC", "Passport"]),
-    GovtId: z.string().min(1, "GovtId is Required").min(10, "Invalid GovtId"),
-    idNumber: z.string().min(1, "Worker Id Number is Required"),
-    dob: z.date(),
-    email: z
-      .string()
-      .email({
-        message: "Invalid Email Address",
-      })
-      .min(1, "Email is Required"),
-    phone: z
-      .string()
-
-      .regex(
-        /^\+94 \(\d{3}\) \d{3}-\d{4}$/,
-        "Invalid Phone Number, please provide it in international format +94 (123) 456-7890",
-      )
-      .min(1, "phone is Required"),
-    gender: z.enum(gender),
-
-    picture: imageSchema.nullable().optional(),
-    department: z.union([z.enum(adminDepartment), z.enum(MedicalDepartments)], {
-      required_error: "Department is required",
-      invalid_type_error: "Invalid Department",
-    }),
-    jobtitle: z
-      .union([z.enum(AdminJobTitle), z.enum(OtherJobTitles)])
-      .nullish()
-      .optional(),
-    DoctorSpecialization: z.enum(DoctorSpecialization).nullish().optional(),
-
-    staffType: z.enum(["doctor", "nurse", "admin", "others"], {
-      required_error: "Staff Type is required",
-      invalid_type_error: "staff Type is required",
-    }),
-  })
-  .superRefine((data, ctx) => {
-    if (data.staffType === "doctor" && !data.DoctorSpecialization) {
-      ctx.addIssue({
-        message: "Doctor Specialization is required",
-        code: "custom",
-        fatal: true,
-        path: ["DoctorSpecialization"],
-      });
-    }
-    if (
-      (data.staffType === "admin" || data.staffType === "others") &&
-      !data.jobtitle
-    ) {
-      ctx.addIssue({
-        message: "Job Title is required",
-        code: "custom",
-        path: ["jobtitle"],
-      });
-    }
-
-    if (data.idType === "NIC" && data.GovtId.length > 12) {
-      ctx.addIssue({
-        message: "NIC Number is Invalid",
-        code: "custom",
-        path: ["GovtId"],
-      });
-    }
-  });
-
 const FormGroupStyles: HTMLAttributes<HTMLDivElement>["className"] =
   "flex items-stretch justify-between gap-4 mt-5 max-md:max-w-full max-md:flex-wrap";
 
-export default function AddStaffModal({ opened, close }: AddstaffPropsType) {
+export default function AddStaffModal({
+  opened,
+  close,
+  edit,
+  editdata,
+}: AddstaffPropsType) {
+  const initData: TformValue = {
+    title: "Mr",
+    firstName: "",
+    lastName: "",
+    dob: null,
+    email: "",
+    gender: "Male",
+    GovtId: "",
+    idNumber: "",
+    idType: "NIC",
+    phone: "",
+    staffType: "doctor",
+    department: null,
+    jobtitle: null,
+    DoctorSpecialization: null,
+    picture: null,
+  };
+
   const form = useForm<TformValue>({
-    initialValues: {
-      title: "Mr",
-      firstName: "",
-      lastName: "",
-      dob: null,
-      email: "",
-      gender: "Male",
-      GovtId: "",
-      idNumber: "",
-      idType: "NIC",
-      phone: "",
-      staffType: "doctor",
-      department: null,
-      jobtitle: null,
-      DoctorSpecialization: null,
-      picture: null,
-    },
+    initialValues: initData,
     validate: zodResolver(createStaffSchema),
   });
+
+  useEffect(() => {
+    if (edit && editdata?.data) {
+      form.setValues(editdata?.data);
+    }
+
+    return () => form.setValues(initData);
+  }, [editdata?.data]);
+
+  console.log(editdata);
 
   const { mutateAsync, isLoading } =
     useApiClient.manageStaff.createStaff.useMutation({
@@ -202,7 +155,7 @@ export default function AddStaffModal({ opened, close }: AddstaffPropsType) {
 
   const CreateHanlder = async (val: TformValue) => {
     try {
-      const create = mutateAsync({
+      const create = await mutateAsync({
         ...val,
         ...(val.idType === "NIC"
           ? {
@@ -222,20 +175,65 @@ export default function AddStaffModal({ opened, close }: AddstaffPropsType) {
       });
     } catch {}
   };
-  console.log(form.errors);
+
+  const {
+    mutateAsync: updateAsy,
+    isLoading: updating,
+    data,
+  } = useApiClient.manageStaff.updatestaff.useMutation({
+    onSuccess(data, variables, context) {
+      utils.manageStaff.getStaff.invalidate();
+      notifications.show({
+        title: `updated staff Details`,
+        message: ` ${data.data.title}.${data.data.firstName}  ${data.data.lastName} Updated successfully`,
+      });
+      close();
+    },
+  });
+
+  const editHandler = async (val: TformValue) => {
+    try {
+      console.log(editdata);
+      const update = await updateAsy({
+        staffID: editdata.id,
+        data: {
+          ...val,
+          ...(val.idType === "NIC"
+            ? {
+                NIC: val.GovtId,
+              }
+            : {
+                Passport: val.GovtId,
+              }),
+          ...(val.staffType === "doctor" && {
+            specialization: val.DoctorSpecialization as TDoctorSpecialization,
+          }),
+          jobtitle: val.jobtitle as TAdminJobTitle | TOtherJobTitles,
+          dateOfBirth: val.dob,
+          staffType: val.staffType,
+          department: val.department as TadminDepartment | TMedicalDepartments,
+          gender: val.gender === "Male" ? "male" : "female",
+        },
+      });
+    } catch (error) {}
+  };
+
   return (
     <div>
       <Modal
         opened={opened}
         onClose={() => {
-          utils.manageStaff.getStaff.invalidate();
+          !edit && utils.manageStaff.getStaff.invalidate();
           close();
         }}
         title="Create An Staff"
         centered
         size={"xl"}
       >
-        <form className="space-y-3" onSubmit={form.onSubmit(CreateHanlder)}>
+        <form
+          className="space-y-3"
+          onSubmit={form.onSubmit(!edit ? CreateHanlder : editHandler)}
+        >
           <div className={FormGroupStyles}>
             <NativeSelect
               size="md"
@@ -396,27 +394,42 @@ export default function AddStaffModal({ opened, close }: AddstaffPropsType) {
             )}
           </div>
           <div className="flex space-x-3">
-            <Button
-              fullWidth
-              size="lg"
-              type="reset"
-              variant="gradient"
-              gradient={{ from: "lime", to: "teal", deg: 90 }}
-              disabled={isLoading}
-              onClick={form.reset}
-            >
-              Reset
-            </Button>
-            <Button
-              fullWidth
-              size="lg"
-              type="submit"
-              variant="gradient"
-              gradient={{ from: "lime", to: "teal", deg: 90 }}
-              loading={isLoading}
-            >
-              Create an New Staff
-            </Button>
+            {!edit ? (
+              <>
+                <Button
+                  fullWidth
+                  size="lg"
+                  type="reset"
+                  variant="gradient"
+                  gradient={{ from: "lime", to: "teal", deg: 90 }}
+                  disabled={isLoading}
+                  onClick={form.reset}
+                >
+                  Reset
+                </Button>
+                <Button
+                  fullWidth
+                  size="lg"
+                  type="submit"
+                  variant="gradient"
+                  gradient={{ from: "lime", to: "teal", deg: 90 }}
+                  loading={isLoading}
+                >
+                  Create an New Staff
+                </Button>
+              </>
+            ) : (
+              <Button
+                fullWidth
+                size="lg"
+                type="submit"
+                variant="gradient"
+                gradient={{ from: "lime", to: "teal", deg: 90 }}
+                loading={updating}
+              >
+                Edit Staff
+              </Button>
+            )}
           </div>
         </form>
       </Modal>

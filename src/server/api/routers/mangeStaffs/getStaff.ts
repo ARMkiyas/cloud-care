@@ -61,6 +61,9 @@ const getStaffProceture = protectedProcedure
                             },
                             admin: {
                                 isNot: input?.staffType === "admins" ? null : undefined
+                            },
+                            OtherStaffs: {
+                                isNot: input?.staffType === "others" ? null : undefined
                             }
 
                         }
@@ -70,6 +73,7 @@ const getStaffProceture = protectedProcedure
                     admin: true,
                     nurse: true,
                     doctor: true,
+                    OtherStaffs: true
 
                 },
                 orderBy: {
