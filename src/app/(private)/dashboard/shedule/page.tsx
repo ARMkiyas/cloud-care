@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
-import { useState, ChangeEvent, MouseEvent } from 'react';
-import { format } from 'date-fns';
+import { useState, ChangeEvent, MouseEvent } from "react";
+import { format } from "date-fns";
 import {
   Table,
   ScrollArea,
@@ -15,12 +15,19 @@ import {
   Button,
   Modal,
   Pagination,
-  Select
-} from '@mantine/core';
-import { IconSelector, IconChevronDown, IconChevronUp, IconSearch, IconPlus, } from '@tabler/icons-react';
-import classes from './TableSort.module.css';
-import { IconPencil, IconTrash } from '@tabler/icons-react';
+  Select,
+} from "@mantine/core";
+import {
+  IconSelector,
+  IconChevronDown,
+  IconChevronUp,
+  IconSearch,
+  IconPlus,
+} from "@tabler/icons-react";
+import classes from "./TableSort.module.css";
+import { IconPencil, IconTrash } from "@tabler/icons-react";
 import { useApiClient } from "@/utils/trpc/Trpc";
+import { TScheduleGet } from "@/server/api/ApiTypeFactory";
 interface RowData {
   id: string;
   doctorName: string;
@@ -32,13 +39,12 @@ interface RowData {
   endTime: string;
   endDate: string;
   every: number;
-  maxAppointments:number
-
+  maxAppointments: number;
 }
 interface ScheduleInput {
   doctorId: string;
-  scheduleId?:string;
-  recurrence: unknown;
+  scheduleId?: string;
+  recurrence: "ONCE" | "WEEKLY" | "MONTHLY";
   maxAppointments?: number;
   once?: {
     date?: Date | undefined;
@@ -48,7 +54,7 @@ interface ScheduleInput {
   weekly?: {
     startDate?: Date | undefined;
     endDate?: Date | undefined;
-    day: unknown;
+    day: "SUNDAY" | "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY";
     startTime: string;
     endTime: string;
     every?: number;
@@ -59,7 +65,7 @@ interface ScheduleInput {
     startTime: string;
     endTime: string;
     every?: number;
-  }
+  };
 }
 
 interface ThProps {
@@ -79,7 +85,6 @@ function Th({ children, onSort }: ThProps) {
   );
 }
 
-
 export default function TableSort() {
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
@@ -92,10 +97,9 @@ export default function TableSort() {
       refetch: scheduleRefresh,
     },
   } = useApiClient.schedule.get.useSuspenseQuery({});
-  const {
-    "0": doctors
-
-  } = useApiClient.manageStaff.getStaff.useSuspenseQuery({ staffType: "doctor" })
+  const { "0": doctors } = useApiClient.manageStaff.getStaff.useSuspenseQuery({
+    staffType: "doctors",
+  });
   const handleRefetch = async () => {
     try {
       await scheduleRefresh();
@@ -118,9 +122,11 @@ export default function TableSort() {
     mutateAsync: createAsync,
     isError: scheduleAddError,
     isSuccess: scheduleAddSuccess,
-    error:createError
+    error: createError,
   } = useApiClient.schedule.create.useMutation();
-  const [data, setData] = useState([...scheduleData.data]);
+  const [data, setData] = useState<TScheduleGet["data"]>([
+    ...scheduleData.data,
+  ]);
   const [doctorData, setDoctorData] = useState(doctors.data);
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<keyof RowData | null>(null);
@@ -128,8 +134,8 @@ export default function TableSort() {
   const [modalOpened, setModalOpened] = useState(false);
   const [editModalOpened, setEditModalOpened] = useState(false);
   const [saveButtonEnabled, setSaveButtonenabled] = useState(true);
-  const[opened,setOpened]= useState(false);
-  const[deleteRow,setDeleteRow] = useState(null)
+  const [opened, setOpened] = useState(false);
+  const [deleteRow, setDeleteRow] = useState(null);
   const [newRowData, setNewRowData] = useState<RowData>({
     id: null,
     doctorName: "",
@@ -141,8 +147,7 @@ export default function TableSort() {
     endTime: "",
     endDate: "",
     every: 1,
-    maxAppointments:1
-
+    maxAppointments: 1,
   });
   const [editingRowData, setEditingRowData] = useState(null);
 
@@ -162,30 +167,50 @@ export default function TableSort() {
 
   const handleModalClose = () => {
     setModalOpened(false);
-    setNewRowData({ id: null, doctorName: "", specialization: "", recurrence: "", date: "", dayOfWeek: "", startTime: "", endTime: "", endDate: "", every: 1,maxAppointments:1 });
+    setNewRowData({
+      id: null,
+      doctorName: "",
+      specialization: "",
+      recurrence: "",
+      date: "",
+      dayOfWeek: "",
+      startTime: "",
+      endTime: "",
+      endDate: "",
+      every: 1,
+      maxAppointments: 1,
+    });
   };
 
   React.useEffect(() => {
     if (scheduleAddError && createError) {
-      console.log( createError.message || 'An error occurred while deleting the schedule.');
+      console.log(
+        createError.message || "An error occurred while deleting the schedule.",
+      );
     }
   }, [scheduleAddError, createError]);
-  const handleInputChange = (event: ChangeEvent<HTMLInputElement>, key: keyof RowData) => {
+  const handleInputChange = (
+    event: ChangeEvent<HTMLInputElement>,
+    key: keyof RowData,
+  ) => {
     setNewRowData({ ...newRowData, [key]: event.target.value });
   };
   const buildInput = (newRowData): ScheduleInput => {
-   
     let input: ScheduleInput = {
       recurrence: newRowData.recurrence,
-    
+
       doctorId: newRowData.doctorName,
     };
 
     if (newRowData.recurrence === "ONCE") {
       input.once = {
         date: new Date(newRowData.date),
-        startTime: new Date(`${newRowData.date}T${newRowData.startTime}`).toISOString(),
-        endTime: new Date(`${newRowData.date}T${newRowData.endTime}`).toISOString(),
+        startTime: new Date(
+          `${newRowData.date}T${newRowData.startTime}`,
+        ).toISOString(),
+        endTime: new Date(
+          `${newRowData.date}T${newRowData.endTime}`,
+        ).toISOString(),
       };
     } else if (newRowData.recurrence === "WEEKLY") {
       input.weekly = {
@@ -193,76 +218,84 @@ export default function TableSort() {
         endDate: new Date(newRowData.endDate),
         every: parseInt(newRowData.every, 10),
         startDate: new Date(newRowData.date),
-        startTime: new Date(`${newRowData.date}T${newRowData.startTime}`).toISOString(),
-        endTime: new Date(`${newRowData.date}T${newRowData.endTime}`).toISOString(),
+        startTime: new Date(
+          `${newRowData.date}T${newRowData.startTime}`,
+        ).toISOString(),
+        endTime: new Date(
+          `${newRowData.date}T${newRowData.endTime}`,
+        ).toISOString(),
       };
-    }
-    else {
+    } else {
       input.monthly = {
         endDate: new Date(newRowData.endDate),
         every: parseInt(newRowData.every, 10),
         date: new Date(newRowData.date),
-        startTime: new Date(`${newRowData.date}T${newRowData.startTime}`).toISOString(),
-        endTime: new Date(`${newRowData.date}T${newRowData.endTime}`).toISOString(),
+        startTime: new Date(
+          `${newRowData.date}T${newRowData.startTime}`,
+        ).toISOString(),
+        endTime: new Date(
+          `${newRowData.date}T${newRowData.endTime}`,
+        ).toISOString(),
       };
     }
     return input;
   };
   const handleSaveNewRow = async () => {
-
-   // setSaveButtonenabled(false)
+    // setSaveButtonenabled(false)
     const input = buildInput(newRowData);
 
-
     const updatedSchedule = await createAsync(input);
-    const selectedDoctor = doctorData.find(doc => doc.doctor.id === updatedSchedule.data.doctorId);
+    const selectedDoctor = doctorData.find(
+      (doc) => doc.doctor.id === updatedSchedule.data.doctorId,
+    );
     const doctorObj = {
       specialization: selectedDoctor.doctor.specialization,
       staff: {
         firstName: selectedDoctor.firstName,
-        lastName: selectedDoctor.lastName
-      }
-    }
-
+        lastName: selectedDoctor.lastName,
+      },
+    };
 
     const savedData = {
       id: updatedSchedule.data.id,
       dayOfWeek: updatedSchedule.data.dayOfWeek,
       doctor: doctorObj,
       recurrence: updatedSchedule.data.recurrence,
-      recurringEvery:updatedSchedule.data.recurringEvery,
-      endDate:updatedSchedule.data.endDate,
+      recurringEvery: updatedSchedule.data.recurringEvery,
+      endDate: updatedSchedule.data.endDate,
       Date: updatedSchedule.data.Date,
       startTime: updatedSchedule.data.startTime,
       endTime: updatedSchedule.data.endTime,
-      totalAppointments:updatedSchedule.data?.totalAppointment
-    }
+      totalAppointments: updatedSchedule.data?.totalAppointment,
+    };
 
-
-    setData([...data, { ...savedData, id: updatedSchedule.data.id }]);
-    setSaveButtonenabled(true)
+    setData([
+      ...data,
+      { ...savedData, id: updatedSchedule.data.id },
+    ] as TScheduleGet["data"]);
+    setSaveButtonenabled(true);
     handleModalClose();
   };
 
   const handleEditModalOpen = (rowData: RowData) => {
-    const foundRow = displayedRows.find(doc => doc.id === rowData.id);
+    const foundRow = displayedRows.find((doc) => doc.id === rowData.id);
     const editData = {
-      id:foundRow.id,
-      doctorName : foundRow.doctor.id,
-      specialization:foundRow.doctor.specialization,
-      recurrence:foundRow.recurrence,
-      every:foundRow.recurringEvery,
-      date: format(foundRow.Date, 'yyyy-MM-dd'),
-      endDate: foundRow.endDate != null ?  format(foundRow.endDate, 'yyyy-MM-dd') :"",
-      dayOfWeek:foundRow.dayOfWeek,
-      startTime: format(foundRow.startTime, 'HH:mm'),
-      endTime:format(foundRow.endTime, 'HH:mm'),
-      OptRoomsid:foundRow?.OptRoomsid,
-      maxAppointments:foundRow?.totalAppointment,
-     noOfSlots:foundRow?._count?.Slot,
-     appointments:foundRow?._count?.Appointment
-   
-    }
+      id: foundRow.id,
+      doctorName: foundRow.doctor.id,
+      specialization: foundRow.doctor.specialization,
+      recurrence: foundRow.recurrence,
+      every: foundRow.recurringEvery,
+      date: format(foundRow.Date, "yyyy-MM-dd"),
+      endDate:
+        foundRow.endDate != null ? format(foundRow.endDate, "yyyy-MM-dd") : "",
+      dayOfWeek: foundRow.dayOfWeek,
+      startTime: format(foundRow.startTime, "HH:mm"),
+      endTime: format(foundRow.endTime, "HH:mm"),
+      OptRoomsid: foundRow?.OptRoomsid,
+      maxAppointments: foundRow?.totalAppointment,
+      noOfSlots: foundRow?._count?.Slot,
+      appointments: foundRow?._count?.Appointment,
+    };
     setEditingRowData(editData);
     setEditModalOpened(true);
   };
@@ -272,39 +305,46 @@ export default function TableSort() {
     setEditingRowData(null);
   };
 
-  const handleEditInputChange = (event: ChangeEvent<HTMLInputElement>, key: keyof RowData) => {
+  const handleEditInputChange = (
+    event: ChangeEvent<HTMLInputElement>,
+    key: keyof RowData,
+  ) => {
     if (!editingRowData) return;
     setEditingRowData({ ...editingRowData, [key]: event.target.value });
   };
 
   const handleSaveEditedRow = async () => {
     if (!editingRowData) return;
- //   setSaveButtonenabled(false)
+    //   setSaveButtonenabled(false)
     const input = {
       scheduleId: editingRowData.id,
       date: new Date(editingRowData.date),
-      startTime: new Date(`${editingRowData.date}T${editingRowData.startTime}`).toISOString(),
-      endTime: new Date(`${editingRowData.date}T${editingRowData.endTime}`).toISOString(),
+      startTime: new Date(
+        `${editingRowData.date}T${editingRowData.startTime}`,
+      ).toISOString(),
+      endTime: new Date(
+        `${editingRowData.date}T${editingRowData.endTime}`,
+      ).toISOString(),
       dayOfWeek: editingRowData.dayOfWeek,
       // maxAppointments: editingRowData.maxAppointments,
       // noOfSlots: editingRowData.noOfSlots,
-     // opdRoomid: editingRowData.OptRoomsid
-    }
+      // opdRoomid: editingRowData.OptRoomsid
+    };
 
-   const updatedSchedule = await updateAsync(input)
+    const updatedSchedule = await updateAsync(input);
     const updatedData = data.map((row) => {
-    
       if (row.id === editingRowData.id) {
-      
-        const selectedDoctor = doctorData.find(doc => doc.doctor.id === editingRowData.doctorName);
+        const selectedDoctor = doctorData.find(
+          (doc) => doc.doctor.id === editingRowData.doctorName,
+        );
         const doctorObj = {
-          id:selectedDoctor.doctor.id,
+          id: selectedDoctor.doctor.id,
           specialization: selectedDoctor.doctor.specialization,
           staff: {
             firstName: selectedDoctor.firstName,
-            lastName: selectedDoctor.lastName
-          }
-        }
+            lastName: selectedDoctor.lastName,
+          },
+        };
         // const counts = {
         //   Slot:editingRowData.Slot,
         //   Appointment:editingRowData.appointments
@@ -316,31 +356,37 @@ export default function TableSort() {
           dayOfWeek: editingRowData.dayOfWeek,
           doctor: doctorObj,
           recurrence: editingRowData.recurrence,
-          recurringEvery:editingRowData.every,
-          endDate: editingRowData.endDate ? new Date(editingRowData.endDate) : null,
+          recurringEvery: editingRowData.every,
+          endDate: editingRowData.endDate
+            ? new Date(editingRowData.endDate)
+            : null,
           Date: new Date(editingRowData.date),
           // _count:counts,
-          startTime: new Date(`${editingRowData.date}T${editingRowData.startTime}`).toISOString(),
-          endTime: new Date(`${editingRowData.date}T${editingRowData.endTime}`).toISOString(),
-        }
+          startTime: new Date(
+            `${editingRowData.date}T${editingRowData.startTime}`,
+          ).toISOString(),
+          endTime: new Date(
+            `${editingRowData.date}T${editingRowData.endTime}`,
+          ).toISOString(),
+        };
         return { ...row, ...savedData };
       }
       return row;
     });
-    setData(updatedData);
-    setSaveButtonenabled(true)
+    setData(updatedData as TScheduleGet["data"]);
+    setSaveButtonenabled(true);
     handleEditModalClose();
   };
 
-  const handleDeleteRowConfirm =  (rowToDelete: RowData) => {
+  const handleDeleteRowConfirm = (rowToDelete: RowData) => {
     setDeleteRow(rowToDelete);
-setOpened(true)
-  }
+    setOpened(true);
+  };
   const handleDeleteRow = async (rowToDelete: RowData) => {
-const input ={
-scheduleId:rowToDelete.id,
-}
-    await deleteAsync(input)
+    const input = {
+      scheduleId: rowToDelete.id,
+    };
+    await deleteAsync(input);
     const updatedData = data.filter((row) => row.id !== rowToDelete.id);
     setData(updatedData);
   };
@@ -366,32 +412,33 @@ scheduleId:rowToDelete.id,
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const displayedRows = data?.slice(startIndex, endIndex);
-  const transformRows = (rows) => rows.map(row => ({
-    id: row.id,
-    doctorName: `${row.doctor.staff.firstName} ${row.doctor.staff.lastName}`,
-    specialization: row.doctor.specialization,
-    recurrence: row.recurrence,
-    date: row.Date ? format(row.Date, 'MM/dd/yyyy') : '-',
-    dayOfWeek: row.dayOfWeek || "-",
-    startTime: row.startTime ? format(row.startTime, 'hh:mm aa') : "-",
-    endTime: row.endTime ? format(row.endTime, 'hh:mm aa') : "-",
-    endDate:  row.endDate ? format(row.endDate, 'MM/dd/yyyy') : '-',// Assuming endDate is already in the correct format or does not need formatting
-    every: row.recurringEvery ?? "-",
-    maxAppointments:row?.totalAppointment,
-    noOfSlots:row?._count?.Slot,
-    OptRoomsid:row?.OptRoomsid,
-    appointments:row?._count?.Appointment
-     // Assuming this is directly usable
-  }));
+  const transformRows = (rows) =>
+    rows.map((row) => ({
+      id: row.id,
+      doctorName: `${row.doctor.staff.firstName} ${row.doctor.staff.lastName}`,
+      specialization: row.doctor.specialization,
+      recurrence: row.recurrence,
+      date: row.Date ? format(row.Date, "MM/dd/yyyy") : "-",
+      dayOfWeek: row.dayOfWeek || "-",
+      startTime: row.startTime ? format(row.startTime, "hh:mm aa") : "-",
+      endTime: row.endTime ? format(row.endTime, "hh:mm aa") : "-",
+      endDate: row.endDate ? format(row.endDate, "MM/dd/yyyy") : "-", // Assuming endDate is already in the correct format or does not need formatting
+      every: row.recurringEvery ?? "-",
+      maxAppointments: row?.totalAppointment,
+      noOfSlots: row?._count?.Slot,
+      OptRoomsid: row?.OptRoomsid,
+      appointments: row?._count?.Appointment,
+      // Assuming this is directly usable
+    }));
 
   const transformedRows = transformRows(displayedRows);
 
   // Now, filter the transformed rows
   const rows = transformedRows
-    .filter(row =>
+    .filter((row) =>
       Object.values(row)
-        .filter(value => typeof value === "string")
-        .some(value => value.toLowerCase().includes(search.toLowerCase()))
+        .filter((value) => typeof value === "string")
+        .some((value) => value.toLowerCase().includes(search.toLowerCase())),
     )
     .map((row, index) => (
       <Table.Tr key={index}>
@@ -409,11 +456,21 @@ scheduleId:rowToDelete.id,
         <Table.Td>
           <Group style={{ margin: "-8px -4px" }}>
             <IconPencil
-              style={{ width: rem(20), height: rem(20), color: "green", cursor: "pointer" }}
+              style={{
+                width: rem(20),
+                height: rem(20),
+                color: "green",
+                cursor: "pointer",
+              }}
               onClick={() => handleEditModalOpen(row)}
             />
             <IconTrash
-              style={{ width: rem(20), height: rem(20), color: "red", cursor: "pointer" }}
+              style={{
+                width: rem(20),
+                height: rem(20),
+                color: "red",
+                cursor: "pointer",
+              }}
               onClick={() => handleDeleteRowConfirm(row)}
             />
           </Group>
@@ -423,8 +480,18 @@ scheduleId:rowToDelete.id,
   return (
     <div>
       <h1>Schedules</h1>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '20px', marginRight: '3px' }}>
-        <Button onClick={handleModalOpen} style={{ backgroundColor: "#4CAF50" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginBottom: "20px",
+          marginRight: "3px",
+        }}
+      >
+        <Button
+          onClick={handleModalOpen}
+          style={{ backgroundColor: "#4CAF50" }}
+        >
           <Group>
             <IconPlus />
             <span style={{ color: "white" }}>Add New Schedule</span>
@@ -436,32 +503,149 @@ scheduleId:rowToDelete.id,
         <TextInput
           placeholder="Search by any field"
           mb="md"
-          leftSection={<IconSearch style={{ width: rem(16), height: rem(16) }} stroke={1.5} />}
+          leftSection={
+            <IconSearch
+              style={{ width: rem(16), height: rem(16) }}
+              stroke={1.5}
+            />
+          }
           value={search}
           onChange={handleSearchChange}
         />
         <Table>
           <Table.Tbody>
             <Table.Tr>
-              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Schedule ID</Table.Th>
-              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Doctor Name</Table.Th>
-              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Specialization</Table.Th>
-              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Recurrence</Table.Th>
-              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Date</Table.Th>
-              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>End Date</Table.Th>
-              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Day of week</Table.Th>
-              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Every</Table.Th>
-              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Start Time</Table.Th>
-              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>End Time</Table.Th>
+              <Table.Th
+                style={{
+                  display: "table-cell",
+                  textAlign: "left",
+                  fontWeight: 500,
+                  borderBottom: "2px solid #ddd",
+                  backgroundColor: "#E6F4EA",
+                }}
+              >
+                Schedule ID
+              </Table.Th>
+              <Table.Th
+                style={{
+                  display: "table-cell",
+                  textAlign: "left",
+                  fontWeight: 500,
+                  borderBottom: "2px solid #ddd",
+                  backgroundColor: "#E6F4EA",
+                }}
+              >
+                Doctor Name
+              </Table.Th>
+              <Table.Th
+                style={{
+                  display: "table-cell",
+                  textAlign: "left",
+                  fontWeight: 500,
+                  borderBottom: "2px solid #ddd",
+                  backgroundColor: "#E6F4EA",
+                }}
+              >
+                Specialization
+              </Table.Th>
+              <Table.Th
+                style={{
+                  display: "table-cell",
+                  textAlign: "left",
+                  fontWeight: 500,
+                  borderBottom: "2px solid #ddd",
+                  backgroundColor: "#E6F4EA",
+                }}
+              >
+                Recurrence
+              </Table.Th>
+              <Table.Th
+                style={{
+                  display: "table-cell",
+                  textAlign: "left",
+                  fontWeight: 500,
+                  borderBottom: "2px solid #ddd",
+                  backgroundColor: "#E6F4EA",
+                }}
+              >
+                Date
+              </Table.Th>
+              <Table.Th
+                style={{
+                  display: "table-cell",
+                  textAlign: "left",
+                  fontWeight: 500,
+                  borderBottom: "2px solid #ddd",
+                  backgroundColor: "#E6F4EA",
+                }}
+              >
+                End Date
+              </Table.Th>
+              <Table.Th
+                style={{
+                  display: "table-cell",
+                  textAlign: "left",
+                  fontWeight: 500,
+                  borderBottom: "2px solid #ddd",
+                  backgroundColor: "#E6F4EA",
+                }}
+              >
+                Day of week
+              </Table.Th>
+              <Table.Th
+                style={{
+                  display: "table-cell",
+                  textAlign: "left",
+                  fontWeight: 500,
+                  borderBottom: "2px solid #ddd",
+                  backgroundColor: "#E6F4EA",
+                }}
+              >
+                Every
+              </Table.Th>
+              <Table.Th
+                style={{
+                  display: "table-cell",
+                  textAlign: "left",
+                  fontWeight: 500,
+                  borderBottom: "2px solid #ddd",
+                  backgroundColor: "#E6F4EA",
+                }}
+              >
+                Start Time
+              </Table.Th>
+              <Table.Th
+                style={{
+                  display: "table-cell",
+                  textAlign: "left",
+                  fontWeight: 500,
+                  borderBottom: "2px solid #ddd",
+                  backgroundColor: "#E6F4EA",
+                }}
+              >
+                End Time
+              </Table.Th>
               {/* <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Max Appointments</Table.Th> */}
-              <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Actions</Table.Th>
+              <Table.Th
+                style={{
+                  display: "table-cell",
+                  textAlign: "left",
+                  fontWeight: 500,
+                  borderBottom: "2px solid #ddd",
+                  backgroundColor: "#E6F4EA",
+                }}
+              >
+                Actions
+              </Table.Th>
             </Table.Tr>
             {rows.length > 0 ? (
               rows
             ) : (
               <Table.Tr>
                 <Table.Td colSpan={Object.keys(data[0]).length}>
-                  <Text style={{ fontWeight: 500, textAlign: "center" }}>Nothing found</Text>
+                  <Text style={{ fontWeight: 500, textAlign: "center" }}>
+                    Nothing found
+                  </Text>
                 </Table.Td>
               </Table.Tr>
             )}
@@ -469,7 +653,12 @@ scheduleId:rowToDelete.id,
         </Table>
       </ScrollArea>
 
-      <Modal opened={modalOpened} onClose={handleModalClose} title="Add New Schedule" size="sm">
+      <Modal
+        opened={modalOpened}
+        onClose={handleModalClose}
+        title="Add New Schedule"
+        size="sm"
+      >
         {/* <TextInput
           label="Schedule ID"
           value={newRowData.id !== null ? String(newRowData.id) : ""}
@@ -484,21 +673,23 @@ scheduleId:rowToDelete.id,
           onChange={(event) => {
             const selectedDoctorId = event;
             // Find the selected doctor from the doctorData array
-            const selectedDoctor = doctorData.find(doc => doc.doctor.id === selectedDoctorId);
+            const selectedDoctor = doctorData.find(
+              (doc) => doc.doctor.id === selectedDoctorId,
+            );
             // Update newRowData with the selected doctor's name and specialization
             if (selectedDoctor) {
-              setNewRowData(prevState => ({
+              setNewRowData((prevState) => ({
                 ...prevState,
                 doctorName: selectedDoctor.doctor.id, // Storing the doctor's ID
                 specialization: selectedDoctor.doctor.specialization, // Assuming you want to store this too
               }));
             }
           }}
-          data={doctorData.map(doc => ({
+          data={doctorData.map((doc) => ({
             value: doc.doctor.id, // Use doctor's ID for value
-            label: `${doc.title} ${doc.firstName} ${doc.lastName}` // Format the label as needed
+            label: `${doc.title} ${doc.firstName} ${doc.lastName}`, // Format the label as needed
           }))}
-          style={{ marginBottom: '16px' }}
+          style={{ marginBottom: "16px" }}
         />
 
         <TextInput
@@ -513,8 +704,8 @@ scheduleId:rowToDelete.id,
           onChange={(event) => {
             setNewRowData({ ...newRowData, ["recurrence"]: event });
           }}
-          data={['ONCE', 'WEEKLY', 'MONTHLY']}
-          style={{ marginBottom: '16px' }}
+          data={["ONCE", "WEEKLY", "MONTHLY"]}
+          style={{ marginBottom: "16px" }}
         />
         <TextInput
           label="Date"
@@ -523,7 +714,7 @@ scheduleId:rowToDelete.id,
           style={{ marginBottom: "16px" }}
           type="date"
         />
-        {['WEEKLY', 'MONTHLY'].includes(newRowData.recurrence) && (
+        {["WEEKLY", "MONTHLY"].includes(newRowData.recurrence) && (
           <>
             <TextInput
               label="End Date"
@@ -540,28 +731,25 @@ scheduleId:rowToDelete.id,
                 setNewRowData({ ...newRowData, ["dayOfWeek"]: event });
               }}
               data={[
-                { value: 'SUNDAY', label: 'Sunday' },
-                { value: 'MONDAY', label: 'Monday' },
-                { value: 'TUESDAY', label: 'Tuesday' },
-                { value: 'WEDNESDAY', label: 'Wednesday' },
-                { value: 'THURSDAY', label: 'Thursday' },
-                { value: 'FRIDAY', label: 'Friday' },
-                { value: 'SATURDAY', label: 'Saturday' },
+                { value: "SUNDAY", label: "Sunday" },
+                { value: "MONDAY", label: "Monday" },
+                { value: "TUESDAY", label: "Tuesday" },
+                { value: "WEDNESDAY", label: "Wednesday" },
+                { value: "THURSDAY", label: "Thursday" },
+                { value: "FRIDAY", label: "Friday" },
+                { value: "SATURDAY", label: "Saturday" },
               ]}
-              style={{ marginBottom: '16px' }}
+              style={{ marginBottom: "16px" }}
             />
             <TextInput
               label="Every"
               type="number"
               value={newRowData.every}
               onChange={(event) => handleInputChange(event, "every")}
-              style={{ marginBottom: '16px' }}
+              style={{ marginBottom: "16px" }}
             />
-         
-
           </>
         )}
-
 
         <TextInput
           label="Start Time"
@@ -577,65 +765,74 @@ scheduleId:rowToDelete.id,
           style={{ marginBottom: "32px" }}
           type="time"
         />
-          {/* <TextInput
+        {/* <TextInput
           label="Max Appointments"
           value={newRowData.maxAppointments}
           onChange={(event) => handleInputChange(event, "maxAppointments")}
           style={{ marginBottom: "16px" }}
         /> */}
-      <Button 
-  onClick={handleSaveNewRow} 
-  style={{ backgroundColor: "#4CAF50" }} 
-  disabled={!saveButtonEnabled}
->
-  Save
-</Button>
+        <Button
+          onClick={handleSaveNewRow}
+          style={{ backgroundColor: "#4CAF50" }}
+          disabled={!saveButtonEnabled}
+        >
+          Save
+        </Button>
       </Modal>
 
-      <Modal opened={editModalOpened} onClose={handleEditModalClose} title="Edit Schedule" size="sm">
+      <Modal
+        opened={editModalOpened}
+        onClose={handleEditModalClose}
+        title="Edit Schedule"
+        size="sm"
+      >
         {editingRowData && (
           <>
-              <Select
-          label="Doctor"
-          disabled={true}
-          placeholder="Select a doctor"
-          value={editingRowData.doctorName}
-          onChange={(event) => {
-            const selectedDoctorId = event;
-            // Find the selected doctor from the doctorData array
-            const selectedDoctor = doctorData.find(doc => doc.doctor.id === selectedDoctorId);
-            // Update newRowData with the selected doctor's name and specialization
-            if (selectedDoctor) {
-              setEditingRowData(prevState => ({
-                ...prevState,
-                doctorName: selectedDoctor.doctor.id, // Storing the doctor's ID
-                specialization: selectedDoctor.doctor.specialization, // Assuming you want to store this too
-              }));
-            }
-          }}
-          data={doctorData.map(doc => ({
-            value: doc.doctor.id, // Use doctor's ID for value
-            label: `${doc.title} ${doc.firstName} ${doc.lastName}` // Format the label as needed
-          }))}
-          style={{ marginBottom: '16px' }}
-        />
+            <Select
+              label="Doctor"
+              disabled={true}
+              placeholder="Select a doctor"
+              value={editingRowData.doctorName}
+              onChange={(event) => {
+                const selectedDoctorId = event;
+                // Find the selected doctor from the doctorData array
+                const selectedDoctor = doctorData.find(
+                  (doc) => doc.doctor.id === selectedDoctorId,
+                );
+                // Update newRowData with the selected doctor's name and specialization
+                if (selectedDoctor) {
+                  setEditingRowData((prevState) => ({
+                    ...prevState,
+                    doctorName: selectedDoctor.doctor.id, // Storing the doctor's ID
+                    specialization: selectedDoctor.doctor.specialization, // Assuming you want to store this too
+                  }));
+                }
+              }}
+              data={doctorData.map((doc) => ({
+                value: doc.doctor.id, // Use doctor's ID for value
+                label: `${doc.title} ${doc.firstName} ${doc.lastName}`, // Format the label as needed
+              }))}
+              style={{ marginBottom: "16px" }}
+            />
             <TextInput
               disabled={true}
               label="Specialization"
               value={editingRowData.specialization}
-              onChange={(event) => handleEditInputChange(event, "specialization")}
+              onChange={(event) =>
+                handleEditInputChange(event, "specialization")
+              }
               style={{ marginBottom: "16px" }}
             />
             <Select
-            disabled={true}
-          label="Recurrence"
-          value={editingRowData.recurrence}
-          onChange={(event) => {
-            setEditingRowData({ ...editingRowData, ["recurrence"]: event });
-          }}
-          data={['ONCE', 'WEEKLY', 'MONTHLY']}
-          style={{ marginBottom: '16px' }}
-        />
+              disabled={true}
+              label="Recurrence"
+              value={editingRowData.recurrence}
+              onChange={(event) => {
+                setEditingRowData({ ...editingRowData, ["recurrence"]: event });
+              }}
+              data={["ONCE", "WEEKLY", "MONTHLY"]}
+              style={{ marginBottom: "16px" }}
+            />
             <TextInput
               label="Date"
               value={editingRowData.date}
@@ -643,44 +840,46 @@ scheduleId:rowToDelete.id,
               style={{ marginBottom: "16px" }}
               type="date"
             />
-              {['WEEKLY', 'MONTHLY'].includes(editingRowData.recurrence) && (
-          <>
-            <TextInput
-              label="End Date"
-              value={editingRowData.endDate}
-              onChange={(event) => handleEditInputChange(event, "endDate")}
-              style={{ marginBottom: "16px" }}
-              type="date"
-            />
-            <Select
-              label="Day of the Week"
-              placeholder="Select a day"
-              value={editingRowData.dayOfWeek}
-              onChange={(event) => {
-                setEditingRowData({ ...editingRowData, ["dayOfWeek"]: event });
-              }}
-              data={[
-                { value: 'SUNDAY', label: 'Sunday' },
-                { value: 'MONDAY', label: 'Monday' },
-                { value: 'TUESDAY', label: 'Tuesday' },
-                { value: 'WEDNESDAY', label: 'Wednesday' },
-                { value: 'THURSDAY', label: 'Thursday' },
-                { value: 'FRIDAY', label: 'Friday' },
-                { value: 'SATURDAY', label: 'Saturday' },
-              ]}
-              style={{ marginBottom: '16px' }}
-            />
-            <TextInput
-              label="Every"
-              type="number"
-              value={editingRowData.every}
-              onChange={(event) => handleEditInputChange(event, "every")}
-              style={{ marginBottom: '16px' }}
-            />
-         
-          </>
-        )}
-           
+            {["WEEKLY", "MONTHLY"].includes(editingRowData.recurrence) && (
+              <>
+                <TextInput
+                  label="End Date"
+                  value={editingRowData.endDate}
+                  onChange={(event) => handleEditInputChange(event, "endDate")}
+                  style={{ marginBottom: "16px" }}
+                  type="date"
+                />
+                <Select
+                  label="Day of the Week"
+                  placeholder="Select a day"
+                  value={editingRowData.dayOfWeek}
+                  onChange={(event) => {
+                    setEditingRowData({
+                      ...editingRowData,
+                      ["dayOfWeek"]: event,
+                    });
+                  }}
+                  data={[
+                    { value: "SUNDAY", label: "Sunday" },
+                    { value: "MONDAY", label: "Monday" },
+                    { value: "TUESDAY", label: "Tuesday" },
+                    { value: "WEDNESDAY", label: "Wednesday" },
+                    { value: "THURSDAY", label: "Thursday" },
+                    { value: "FRIDAY", label: "Friday" },
+                    { value: "SATURDAY", label: "Saturday" },
+                  ]}
+                  style={{ marginBottom: "16px" }}
+                />
+                <TextInput
+                  label="Every"
+                  type="number"
+                  value={editingRowData.every}
+                  onChange={(event) => handleEditInputChange(event, "every")}
+                  style={{ marginBottom: "16px" }}
+                />
+              </>
+            )}
+
             <TextInput
               label="Start Time"
               value={editingRowData.startTime}
@@ -695,21 +894,21 @@ scheduleId:rowToDelete.id,
               style={{ marginBottom: "32px" }}
               type="time"
             />
-             {/* <TextInput
+            {/* <TextInput
               label="Room Id"
               type="text"
               value={editingRowData?.OptRoomsid}
               onChange={(event) => handleEditInputChange(event, "OptRoomsid")}
               style={{ marginBottom: '16px' }}
             /> */}
-        <TextInput
+            <TextInput
               disabled={true}
               label="No of Appointments"
               type="number"
               value={editingRowData.appointments}
-              style={{ marginBottom: '16px' }}
+              style={{ marginBottom: "16px" }}
             />
-             {/* <TextInput
+            {/* <TextInput
               label="Total Appointments"
               type="number"
               value={editingRowData.maxAppointments}
@@ -724,7 +923,11 @@ scheduleId:rowToDelete.id,
               style={{ marginBottom: '16px' }}
             /> */}
 
-            <Button disabled={!saveButtonEnabled || editingRowData.appointments > 0} onClick={handleSaveEditedRow} style={{ backgroundColor: "#4CAF50" }}>
+            <Button
+              disabled={!saveButtonEnabled || editingRowData.appointments > 0}
+              onClick={handleSaveEditedRow}
+              style={{ backgroundColor: "#4CAF50" }}
+            >
               Save
             </Button>
           </>
@@ -745,7 +948,13 @@ scheduleId:rowToDelete.id,
           </Button>
         </Group>
       </Modal>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          marginTop: "20px",
+        }}
+      >
         <Pagination
           total={totalPages}
           value={currentPage}
