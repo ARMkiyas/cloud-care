@@ -6,12 +6,13 @@ import {
   type MRT_RowVirtualizer,
   useMantineReactTable,
 } from "mantine-react-table";
-import React, { useCallback, useMemo, useRef, UIEvent } from "react";
+import React, { useCallback, useMemo, useRef, UIEvent, useState } from "react";
 
 import type { TStaffGet } from "@/server/api/ApiTypeFactory";
 import {
   ActionIcon,
   Avatar,
+  Badge,
   Box,
   Button,
   Flex,
@@ -30,10 +31,18 @@ import {
 } from "@tabler/icons-react";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
+import AddStaffModal, { editFormValue, TformValue } from "../AddStaffModal";
+import { useDisclosure } from "@mantine/hooks";
+import {
+  TadminDepartment,
+  TDoctorSpecialization,
+  TMedicalDepartments,
+} from "@/utils/comonDatas";
+import dayjs from "dayjs";
 
 type staffType = TStaffGet["data"][0];
 
-const PAGE_SIZE = 10;
+// const PAGE_SIZE = 16;
 
 type TstaffTableProps = {
   type: TStaffTypes;
@@ -47,7 +56,6 @@ export default function StaffTable({ type }: TstaffTableProps) {
     fetchNextPage: staffNextPage,
   } = useApiClient.manageStaff.getStaff.useInfiniteQuery(
     {
-      limit: PAGE_SIZE,
       staffType: type === "all-staffs" ? undefined : type,
     },
     {
@@ -208,23 +216,96 @@ export default function StaffTable({ type }: TstaffTableProps) {
       onConfirm: () => deleteStaffHandler(row.original.id),
     });
 
+  type editDataType = {
+    opened: boolean;
+    editdata: editFormValue;
+    open: (data: editFormValue) => void;
+    close: () => void;
+  };
+
+  const [editModel, setEditModel] = useState<editDataType | null>({
+    opened: false,
+    editdata: null,
+    open: (data) =>
+      setEditModel((prev) => ({ ...prev, editdata: data, opened: true })),
+    close: () =>
+      setEditModel((prev) => ({ ...prev, editdata: null, opened: false })),
+  });
+
+  const EditBtnHandler = (editData: staffType) => {
+    const {
+      NIC,
+      OtherStaffs,
+      Passport,
+      admin,
+      dateOfBirth,
+      doctor,
+      image,
+      nurse,
+      id,
+      ...newdata
+    } = editData;
+
+    const editabledata: editFormValue["data"] = {
+      ...newdata,
+      idType: editData.NIC ? "NIC" : "Passport",
+      GovtId: editData.NIC ? editData.NIC : editData.Passport,
+      dob: editData.dateOfBirth,
+      ...(editData.doctor
+        ? {
+            staffType: "doctor",
+            department: editData?.doctor.departments as TMedicalDepartments,
+            DoctorSpecialization: editData?.doctor
+              .specialization as TDoctorSpecialization,
+          }
+        : editData.admin
+        ? {
+            staffType: "admin",
+            department: editData?.admin.department as TadminDepartment,
+            jobtitle: editData?.admin.jobTitle,
+          }
+        : editData.nurse
+        ? {
+            staffType: "nurse",
+            department: editData?.nurse.departments as TMedicalDepartments,
+          }
+        : {
+            staffType: "others",
+            department: editData.OtherStaffs.departments as TMedicalDepartments,
+            jobtitle: editData?.OtherStaffs.jobTitle,
+          }),
+      gender: editData.gender === "male" ? "Male" : "Female",
+    };
+
+    console.log(editabledata);
+    editModel.open({
+      id: editData.id,
+      data: editabledata,
+    });
+  };
+
   const table = useMantineReactTable({
     columns,
     data: flatStaffData,
+    enableBottomToolbar: false,
+    enableColumnResizing: true,
     enablePagination: false,
     enableRowVirtualization: true,
+    enableRowNumbers: true,
     rowVirtualizerInstanceRef,
-    rowVirtualizerOptions: { overscan: 10 },
+    rowVirtualizerOptions: { overscan: 12 },
+    columnVirtualizerOptions: { overscan: 6 },
+
     mantineToolbarAlertBannerProps: {
       color: "red",
       children: "Error loading data",
     },
     mantineTableContainerProps: {
       ref: tableContainerRef, //get access to the table container element
-      style: { maxHeight: "600px" }, //give the table a max height
-      onScroll: (
-        event: UIEvent<HTMLDivElement>, //add an event listener to the table container element
-      ) => fetchMoreOnBottomReached(event.target as HTMLDivElement),
+      style: { maxHeight: "800px", minHeight: "800px" }, //give the table a max height
+      // onScroll: (
+      //   event: UIEvent<HTMLDivElement>, //add an event listener to the table container element
+      // ) => fetchMoreOnBottomReached(event.target as HTMLDivElement),
     },
     enableRowActions: true,
     renderDetailPanel: ({ row }) => (
@@ -240,15 +321,60 @@ export default function StaffTable({ type }: TstaffTableProps) {
         <Avatar src={row.original.image} radius="xl" size={"xl"} />
 
         <Box>
-          <Title>{`${row.original.title}.${row.original.firstName} ${row.original.lastName}`}</Title>
-          <Text>&quot;{row.original.NIC}&quot;</Text>
+          {}
+          <div className="flex items-center space-x-1">
+            <Badge color="green" variant="filled">
+              {row.original?.doctor
+                ? "Doctor"
+                : row.original?.admin
+                ? row.original?.admin.jobTitle.split("_").join(" ")
+                : row.original.nurse
+                ? "Nurse"
+                : row.original?.OtherStaffs.jobTitle.split("_").join(" ")}
+            </Badge>
+            {row.original?.doctor && (
+              <Badge color="blue" variant="filled">
+                {row.original.doctor.specialization.split("_").join(" ")}
+              </Badge>
+            )}
+          </div>
+          <Title>
+            {`${row.original.title}.${row.original.firstName} ${row.original.lastName}`}
+          </Title>
+          <Text>Worker ID : {row.original.idNumber}</Text>
+          {row.original.NIC && <Text>NIC : {row.original.NIC}</Text>}
+          {row.original.Passport && (
+            <Text>Passport : {row.original.Passport}</Text>
+          )}
+          <Text>
+            {" "}
+            Date Of Birth :{" "}
+            {dayjs(row.original.dateOfBirth)
+              .format("DD/MM/YYYY")
+              .toString()}{" "}
+          </Text>
+          <Text>Email : {row.original.email}</Text>
+          <Text>Phone : {row.original.phone}</Text>
+          <Text>
+            Department :{" "}
+            {row.original.doctor?.departments.split("_").join(" ") ||
+              row.original.admin?.department.split("_").join(" ") ||
+              row.original.nurse?.departments.split("_").join(" ") ||
+              row.original.OtherStaffs?.departments.split("_").join(" ")}
+          </Text>
+          {row.original.doctor?.specialization && (
+            <Text>
+              Specialization :{" "}
+              {row.original.doctor.specialization.split("_").join(" ")}
+            </Text>
+          )}
         </Box>
       </Box>
     ),
     renderRowActions: ({ row, table }) => (
       <Flex gap="md">
         <Tooltip label="Edit">
-          <ActionIcon onClick={() => table.setEditingRow(row)}>
+          <ActionIcon onClick={() => EditBtnHandler(row.original)}>
             <IconEdit size={14} />
           </ActionIcon>
         </Tooltip>
@@ -274,6 +400,7 @@ export default function StaffTable({ type }: TstaffTableProps) {
 
   return (
     <>
+      <AddStaffModal {...editModel} edit={true} />
       <MantineReactTable table={table} />
     </>
   );

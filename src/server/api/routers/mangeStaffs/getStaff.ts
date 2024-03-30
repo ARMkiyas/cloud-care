@@ -73,6 +73,7 @@ const getStaffProceture = protectedProcedure
                     admin: true,
                     nurse: true,
                     doctor: true,
+                    OtherStaffs: true
 
                 },
                 orderBy: {

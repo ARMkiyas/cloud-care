@@ -8,6 +8,7 @@ import { hashPwd } from "@/utils/hashPwdHelper"
 import { generate2FASecret } from "@/utils/OtpHelper"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error"
 import { createStaffSchema } from "./validation/schema"
+import dayjs from "dayjs";
 
 
 
@@ -28,7 +29,7 @@ const createStaffProceture = protectedProcedure.input(createStaffSchema).mutatio
                 firstName: input.firstName,
                 lastName: input.lastName,
                 email: input.email,
-                dateOfBirth: input.dateOfBirth,
+                dateOfBirth: new Date(dayjs(input.dateOfBirth).format("YYYY-MM-DD")).toISOString(),
                 gender: input.gender,
                 phone: input.phone,
                 NIC: input.NIC,
