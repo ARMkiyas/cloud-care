@@ -26,7 +26,7 @@ export const imageSchema = z
 
 
 export const pagenationSchema = z.object({
-    limit: z.number().default(50),
+    limit: z.number().default(100),
     page: z.number().default(1),
     cursor: z.string().optional(),
     skip: z.number().optional(),

@@ -99,6 +99,7 @@ export const deleteStaffSchema = z.object({
 
 
 export const updatestaffSchema = z.object({
+
     staffID: z.string(),
     data: z.object({
         title: z.nativeEnum(title),
@@ -116,3 +117,11 @@ export const updatestaffSchema = z.object({
     })
 })
 
+export const GetPubProcedureSchema = z.object({
+
+    name: z.string().optional(),
+    specialization: z.nativeEnum(DoctorSpecialization).optional(),
+    department: z.nativeEnum(MedicalDepartments).optional(),
+
+
+}).merge(pagenationSchema)

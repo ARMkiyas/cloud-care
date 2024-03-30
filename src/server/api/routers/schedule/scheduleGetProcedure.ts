@@ -45,10 +45,10 @@ const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema
                 doctor: {
                     staff: {
                         lastName: {
-                            search: input.doctorname
+                            search: input.doctorname.trim().split(" ").join("&")
                         },
                         firstName: {
-                            search: input.doctorname
+                            search: input.doctorname.trim().split(" ").join("&")
                         }
                     }
                 }
