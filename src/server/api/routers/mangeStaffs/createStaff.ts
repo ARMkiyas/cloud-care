@@ -34,7 +34,7 @@ const createStaffProceture = protectedProcedure.input(createStaffSchema).mutatio
                 NIC: input.NIC,
                 Passport: input.Passport,
                 idNumber: input.idNumber,
-                image: input.image ? await userImageUploader(input.image) : getAvatar("person", input.gender),
+                image: input.image ? await userImageUploader(input.image) : getAvatar(input.staffType === "doctor" ? "doctor" : input.staffType === "nurse" ? "nurse" : "person", input.gender),
                 ...input.staffType === "admin" ? {
                     admin: {
                         create: {

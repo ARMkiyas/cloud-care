@@ -56,6 +56,10 @@ const PageLinks = [
         label: "Administrators and Managers",
         link: "/dashboard/staffs/admins",
       },
+      {
+        label: "Other Staffs",
+        link: "/dashboard/staffs/others",
+      },
     ],
     permission: permissions.STAFF_READ,
   },

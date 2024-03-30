@@ -2,16 +2,34 @@
 import {
   MantineReactTable,
   type MRT_ColumnDef,
+  MRT_Row,
   type MRT_RowVirtualizer,
   useMantineReactTable,
 } from "mantine-react-table";
 import React, { useCallback, useMemo, useRef, UIEvent } from "react";
 
 import type { TStaffGet } from "@/server/api/ApiTypeFactory";
-import { Avatar, Box, Button, Text, Title } from "@mantine/core";
+import {
+  ActionIcon,
+  Avatar,
+  Box,
+  Button,
+  Flex,
+  Text,
+  Title,
+  Tooltip,
+} from "@mantine/core";
 import { useApiClient } from "@/utils/trpc/Trpc";
 import { TStaffTypes } from "@/utils/types";
-import { IconCodePlus, IconCopyPlus, IconUserPlus } from "@tabler/icons-react";
+import {
+  IconCodePlus,
+  IconCopyPlus,
+  IconEdit,
+  IconTrash,
+  IconUserPlus,
+} from "@tabler/icons-react";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
 
 type staffType = TStaffGet["data"][0];
 
@@ -36,6 +54,8 @@ export default function StaffTable({ type }: TstaffTableProps) {
       getNextPageParam: (lastPage, allPages) => lastPage.pagenation.nextCursor,
     },
   );
+
+  const utils = useApiClient.useUtils();
 
   const flatStaffData = useMemo(
     () => staffData?.pages.flatMap((page) => page.data) ?? [],
@@ -127,6 +147,67 @@ export default function StaffTable({ type }: TstaffTableProps) {
     [staffNextPage, staffGetFetching, totalFetched, totalDBRowCount],
   );
 
+  const { mutateAsync: deleteStaff, isLoading } =
+    useApiClient.manageStaff.deleteStaff.useMutation({
+      onSuccess: () => {
+        utils.manageStaff.getStaff.invalidate();
+      },
+    });
+
+  const deleteStaffHandler = async (staffId: string) => {
+    const id = notifications.show({
+      title: "Deleting",
+      message: "Deleting the user Account....",
+      autoClose: false,
+      withCloseButton: false,
+      loading: true,
+    });
+
+    try {
+      const deleteuserdata = await deleteStaff({ staffID: staffId });
+      // utils.manageUsers.getUsers.invalidate();
+      notifications.update({
+        id,
+        title: "Deleted",
+        message: "User Account deleted successfully",
+        loading: false,
+        autoClose: 5000,
+        withCloseButton: true,
+        color: "green",
+      });
+    } catch (error) {
+      notifications.update({
+        id,
+        title: "Error",
+        message: "Error while deleting the User Account",
+        loading: false,
+        autoClose: 5000,
+        withCloseButton: true,
+        color: "red",
+      });
+    }
+  };
+
+  const openDeleteConfirmModal = (row: MRT_Row<staffType>) =>
+    modals.openConfirmModal({
+      title: "Are you sure you want to delete this user?",
+
+      children: (
+        <Text>
+          Are you sure you want to delete {row.original.title}
+          {"."}
+          {row.original.firstName} {row.original.lastName}? This action cannot
+          be undone.
+        </Text>
+      ),
+
+      labels: { confirm: "Delete", cancel: "Cancel" },
+
+      confirmProps: { color: "red" },
+
+      onConfirm: () => deleteStaffHandler(row.original.id),
+    });
+
   const table = useMantineReactTable({
     columns,
     data: flatStaffData,
@@ -145,6 +226,40 @@ export default function StaffTable({ type }: TstaffTableProps) {
         event: UIEvent<HTMLDivElement>, //add an event listener to the table container element
       ) => fetchMoreOnBottomReached(event.target as HTMLDivElement),
     },
+    enableRowActions: true,
+    renderDetailPanel: ({ row }) => (
+      <Box
+        style={{
+          display: "flex",
+          justifyContent: "flex-start",
+          alignItems: "center",
+          gap: "16px",
+          padding: "16px",
+        }}
+      >
+        <Avatar src={row.original.image} radius="xl" size={"xl"} />
+
+        <Box>
+          <Title>{`${row.original.title}.${row.original.firstName} ${row.original.lastName}`}</Title>
+          <Text>&quot;{row.original.NIC}&quot;</Text>
+        </Box>
+      </Box>
+    ),
+    renderRowActions: ({ row, table }) => (
+      <Flex gap="md">
+        <Tooltip label="Edit">
+          <ActionIcon onClick={() => table.setEditingRow(row)}>
+            <IconEdit size={14} />
+          </ActionIcon>
+        </Tooltip>
+
+        <Tooltip label="Delete">
+          <ActionIcon color="red" onClick={() => openDeleteConfirmModal(row)}>
+            <IconTrash size={14} />
+          </ActionIcon>
+        </Tooltip>
+      </Flex>
+    ),
 
     state: {
       isLoading: staffGetLoading,

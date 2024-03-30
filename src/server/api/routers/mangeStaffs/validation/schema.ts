@@ -16,7 +16,7 @@ export const getStaffschema = z.object({
     getdoctors: z.boolean().optional(),
     getnurses: z.boolean().optional(),
     getadmins: z.boolean().optional(),
-    staffType: z.enum(["doctors", "nurses", "admins"]).optional(),
+    staffType: z.enum(["doctors", "nurses", "admins", "others"]).optional(),
 
 }).merge(pagenationSchema)
 
@@ -100,19 +100,6 @@ export const deleteStaffSchema = z.object({
 
 export const updatestaffSchema = z.object({
     staffID: z.string(),
-    data: z.object({
-        title: z.nativeEnum(title),
-        firstName: z.string().min(2).max(50),
-        lastName: z.string().min(2).max(50),
-        email: z.string().email(),
-        dateOfBirth: z.date(),
-        gender: z.nativeEnum(gender),
-        phone: z.string().min(10).max(15),
-        NIC: z.string().min(10).max(12).optional(),
-        Passport: z.string().min(10).max(12).optional(),
-        idNumber: z.string().optional(),
-        image: imageSchema.optional(),
-
-    })
+    data: createStaffSchema.optional()
 })
 
