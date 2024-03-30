@@ -438,7 +438,7 @@ export default function TableSort() {
     .filter((row) =>
       Object.values(row)
         .filter((value) => typeof value === "string")
-        .some((value) => value.toLowerCase().includes(search.toLowerCase())),
+        .some((value) => value?.toLowerCase()?.includes(search.toLowerCase())),
     )
     .map((row, index) => (
       <Table.Tr key={index}>
