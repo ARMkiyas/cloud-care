@@ -1,9 +1,9 @@
 import "server-only"
 
 import { withAuth, NextRequestWithAuth } from "next-auth/middleware"
-import { decode } from "next-auth/jwt"
 import { NextResponse } from "next/server"
-import { apiedge } from "@/utils/trpc/TrpcEdgeApi"
+import permissions from "./utils/lib/Permissons"
+
 
 
 export default withAuth(
@@ -19,8 +19,6 @@ export default withAuth(
 
         // })
 
-
-
         if (!req.nextauth.token._2fa_valid && req.nextUrl.pathname !== "/auth/confirmation-otp") {
             // If the token is not valid, redirect to the 2FA page.
             console.log("2FA is not valid, redirecting to 2FA page")
@@ -30,6 +28,30 @@ export default withAuth(
         if (req.nextauth.token._2fa_valid && req.nextUrl.pathname === "/auth/confirmation-otp") {
             return NextResponse.redirect(new URL("/dashboard", req.nextUrl.origin))
         }
+
+        if (req.nextUrl.pathname === "/dashboard" && !req.nextauth.token.Permissions.includes(permissions.DASHBOARD_READ)) {
+
+            return NextResponse.rewrite(new URL("/dashboard/ErrorPages/401", req.url))
+        }
+        if (req.nextUrl.pathname === "/dashboard/appointments" && !req.nextauth.token.Permissions.includes(permissions.APPOINTMENTS_READ)) {
+            return NextResponse.rewrite(new URL("/dashboard/ErrorPages/401", req.url))
+        }
+        if (req.nextUrl.pathname === "/dashboard/shedule" && !req.nextauth.token.Permissions.includes(permissions.SCHEDULES_READ)) {
+            return NextResponse.rewrite(new URL("/dashboard/ErrorPages/401", req.url))
+        }
+        if (req.nextUrl.pathname === "/dashboard/patients" && !req.nextauth.token.Permissions.includes(permissions.PATIENTS_READ)) {
+            return NextResponse.rewrite(new URL("/dashboard/ErrorPages/401", req.url))
+        }
+        if (req.nextUrl.pathname === "/dashboard/user-management" && !req.nextauth.token.Permissions.includes(permissions.USERS_READ)) {
+            return NextResponse.rewrite(new URL("/dashboard/ErrorPages/401", req.url))
+        }
+        if (req.nextUrl.pathname === "/dashboard/staffs/" && !req.nextauth.token.Permissions.includes(permissions.STAFF_READ)) {
+            return NextResponse.rewrite(new URL("/dashboard/ErrorPages/401", req.url))
+        }
+
+
+
+
 
     },
     {

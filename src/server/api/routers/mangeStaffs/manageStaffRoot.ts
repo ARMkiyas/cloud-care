@@ -5,6 +5,7 @@ import getStaffProceture from "./getStaff";
 import createStaffProceture from "./createStaff";
 import deleteStaffProceture from "./deleteStaff";
 import updatestaffProceture from "./updatestaff";
+import GetPubProcedure from "./pubProcedures/GetpubStaffs";
 
 
 const manageStaffRouter = createTRPCRouter({
@@ -12,7 +13,8 @@ const manageStaffRouter = createTRPCRouter({
     getStaff: getStaffProceture,
     createStaff: createStaffProceture,
     deleteStaff: deleteStaffProceture,
-    updatestaff: updatestaffProceture
+    updatestaff: updatestaffProceture,
+    GetPubDoctors: GetPubProcedure,
 
 
 })

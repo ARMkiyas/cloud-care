@@ -17,10 +17,22 @@ import { hashPwd, verifyPwd } from "@utils/hashPwdHelper";
 
 import { generateOTP, verifyOtp } from "@utils/OtpHelper"
 import { date, z } from "zod";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Permissions, UserRoles } from "@prisma/client";
 import { JWT } from "next-auth/jwt";
 import { EncryptJWT, SignJWT, base64url, jwtVerify, jwtDecrypt } from "jose";
 
+
+
+
+const profileUpdateSchema = z.object({
+  name: z.string().min(1, "name Requred"),
+  email: z.string().email(),
+  image: z.string(),
+  username: z.string().min(1, "username Requred"),
+  twoFactorEnabled: z.boolean(),
+
+
+})
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -38,7 +50,8 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      role: string;
+      role: UserRoles;
+      Permissions: Permissions,
       username: string;
       _2fa_valid: boolean;
       twoFactorEnabled: boolean;
@@ -51,7 +64,8 @@ declare module "next-auth" {
 
   interface User extends DefaultUser {
     id: string;
-    role: string;
+    role: UserRoles;
+    Permissions: Permissions,
     username: string;
     _2fa_valid: boolean;
     twoFactorEnabled: boolean;
@@ -69,7 +83,8 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
-    role: string;
+    role: UserRoles;
+    Permissions: Permissions,
     username: string;
     _2fa_valid: boolean;
     twoFactorEnabled: boolean;
@@ -82,7 +97,8 @@ declare module "next-auth/jwt" {
 
 interface accesstokenpayload {
   usserid: string;
-  role: string;
+  role: UserRoles;
+  Permissions: Permissions,
   username: string;
   email: string;
 
@@ -166,6 +182,7 @@ export const authOptions: NextAuthOptions = {
               role: {
                 select: {
                   role: true,
+                  permissions: true
                 }
               }
             }
@@ -192,9 +209,12 @@ export const authOptions: NextAuthOptions = {
             }
 
 
+
+
             return {
               ...user,
               role: user.role.role,
+              Permissions: user.role.permissions,
               _2fa_valid: user.twoFactorEnabled ? false : true,
             } as any
 
@@ -258,17 +278,34 @@ export const authOptions: NextAuthOptions = {
       return true
     },
 
-    async jwt({ token, user, account, profile, isNewUser }) {
+    async jwt({ token, user, account, profile, isNewUser, trigger, session }) {
 
 
+      if (trigger === "update") {
+        console.log(session && profileUpdateSchema.safeParse(session).success);
+        if (session && profileUpdateSchema.safeParse(session).success) {
+          return {
+            ...token,
+            name: session.name,
+            email: session.email,
+            image: session.image,
+            username: session.username,
+            picture: session.image,
+            twoFactorEnabled: session.twoFactorEnabled,
+          }
+        }
 
+
+        return token
+      }
 
       if (user && account) {
         const access_token = account.provider === "2fa" && await getaccesstoken({
           email: user.email,
           role: user.role,
           usserid: user.id,
-          username: user.username
+          username: user.username,
+          Permissions: user.Permissions
         })
 
 
@@ -277,6 +314,7 @@ export const authOptions: NextAuthOptions = {
           ...token,
           id: user.id,
           role: user.role,
+          Permissions: user.Permissions,
           username: user.username,
           _2fa_valid: user._2fa_valid,
           twoFactorEnabled: user.twoFactorEnabled,
@@ -303,7 +341,8 @@ export const authOptions: NextAuthOptions = {
             email: token.email,
             role: token.role,
             usserid: token.id,
-            username: token.username
+            username: token.username,
+            Permissions: token.Permissions
           })
 
           const newtoken = {
@@ -329,6 +368,7 @@ export const authOptions: NextAuthOptions = {
         user: {
           ...session.user,
           role: token?.role,
+          Permissions: token?.Permissions,
           id: token?.id,
           username: token?.username,
           _2fa_valid: token?._2fa_valid,
