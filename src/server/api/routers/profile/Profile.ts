@@ -24,7 +24,7 @@ export const profileRouter = createTRPCRouter({
     profileUpdate: protectedProcedure.input(profileUpdateSchema).mutation(async ({ ctx, input }) => {
         console.log("input", input);
         try {
-            if (input.username?.trim() || input.email?.trim() || input.phone?.trim()) {
+            if (input.username?.trim() !== ctx.session.user.username || input.email?.trim() !== ctx.session.user.email || input.phone?.trim() !== ctx.session.user.phone) {
                 const alreadyUserName = await ctx.db.user.findFirst({
                     where: {
                         ...input.username && { username: input.username.trim() },
