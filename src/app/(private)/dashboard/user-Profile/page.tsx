@@ -1,6 +1,6 @@
 "use client";
 import React,{useState,useEffect, use} from 'react'
-import { Image, Text, Badge, Button, Group,Table,TextInput,Switch } from '@mantine/core';
+import { Image, Text, Badge, Button, Group,Table,TextInput,Switch,Alert } from '@mantine/core';
 import {useSession } from "next-auth/react";
 import { useApiClient } from '@/utils/trpc/Trpc';
 
@@ -9,7 +9,25 @@ import { useApiClient } from '@/utils/trpc/Trpc';
 export default function page() {
   const { data: session,update, status } = useSession();
   console.log(session);
+  const [successMessage, setSuccessMessage] = useState(null);
 
+  const{
+    mutateAsync,isLoading,isSuccess
+  }=useApiClient.profile.profileUpdate.useMutation({
+    onSuccess:async(val)=>{
+      const session = await update({
+        name:val.data.name,
+        email:val.data.email,
+        image:val.data.image,
+        username:val.data.username,
+        phone:val.data.phone,
+        twoFactorEnabled:val.data.twoFactorEnabled,
+      });
+      if(session){
+        window && window.location.reload();
+      }
+    }
+  });
 
   const [editing, setEditing] = useState(false);
   const [editedData, setEditedData] = useState(null);
@@ -20,7 +38,6 @@ export default function page() {
         name: session.user.name,
         username: session.user.username,
         email: session.user.email,
-        iat: session.user.iat,
         twoFactorEnabled: session.user.twoFactorEnabled
       });
     }
@@ -30,9 +47,9 @@ export default function page() {
     setEditing(true);
   };
 
-  const handleSaveClick = () => {
-    // Handle saving edited data, for simplicity, let's just log it for now
-    console.log("Edited Data:", editedData);
+  const handleSaveClick = async () => {
+   console.log("Edited Data:", editedData);
+    await mutateAsync(editedData);
     setEditing(false);
   };
 
@@ -47,7 +64,40 @@ export default function page() {
       [name]: value,
     }));
   };
+  const handleTwoFactorToggle = async (event) => {
+    const checked = event.target.checked; 
+    if (!session || !session.user || !editedData) {
+      console.error("Session, user, or editedData is undefined");
+      return;
+    }
+  
+    try {
+      const updatedData = {
+        ...editedData,
+        twoFactorEnabled: checked,
+      };
+  
+      console.log("Original editedData:", editedData);
+      console.log("Updated twoFactorEnabled:", checked);
+      console.log("Updating user data:", updatedData);
+      
+      await mutateAsync(updatedData);
+    } catch (error) {
+      console.error("Error updating user data:", error);
+    }
+  };
 
+  const handleResetPassword = async () => {
+    try {
+      // Implement the logic to send the password reset request to your API here
+      console.log('Sending password reset request...');
+      setSuccessMessage("Password reset request sent successfully!");
+      // await apiClient.sendPasswordResetRequest();
+    } catch (error) {
+      console.error('Error resetting password:', error);
+    }
+  };  
+  
   if (status === 'loading') {
     return <div>Loading...</div>;
   }
@@ -56,6 +106,7 @@ export default function page() {
     return <div>No user session found.</div>;
   }
   return (
+    <>
     <div className="shadow-lg rounded-md p-5 flex" style={{ border: '1px solid #ccc' }} >
       <div className='flex-none w-1/3'>
         <div className="flex-none">
@@ -74,9 +125,7 @@ export default function page() {
             </Group>
 
              <Text className="text-center"size="sm" c="dimmed">
-                Email: {session.user.email}
-              <br />
-              Phone: {session.user.iat}
+                {session.user.email}
                </Text>
                <div className="p-3 pr-5">
                 {!editing?(
@@ -148,20 +197,6 @@ export default function page() {
               </Table.Td>
             </Table.Tr>
             <Table.Tr>
-              <Table.Td>Phone Number</Table.Td>
-              <Table.Td>
-              {editing ? (
-                  <TextInput
-                    value={editedData.iat}
-                    onChange={handleInputChange}
-                    name="iat"
-                  />
-                ) : (
-                  session.user.iat
-                )}
-              </Table.Td>
-            </Table.Tr>
-            <Table.Tr>
               <Table.Td>Two Factor Enabled</Table.Td>
               <Table.Td>{session.user.twoFactorEnabled ? 'True' : 'False'}</Table.Td>
             </Table.Tr>
@@ -173,20 +208,22 @@ export default function page() {
               </Table.Td>
               <Table.Td>
               <Switch size="lg" onLabel="Enable" offLabel="Disable" 
-                defaultChecked={session.user.twoFactorEnabled}         
+                defaultChecked={session.user.twoFactorEnabled}
+                onChange={handleTwoFactorToggle}         
               />
               </Table.Td>
             </Table.Tr>
             <Table.Tr>
               <Table.Td>Do you want to reset your password?</Table.Td>
               <Table.Td>
-                <Button className="bg-yellow-200 text-gray-800">Reset Password</Button>
+                <Button className="bg-yellow-200 text-gray-800" onClick={handleResetPassword}>Reset Password</Button>
               </Table.Td>
             </Table.Tr>
           </Table.Tbody>
         </Table>
           </div>
           </div>
+          </>
      
   )
 }
