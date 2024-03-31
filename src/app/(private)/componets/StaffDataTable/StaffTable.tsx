@@ -110,14 +110,19 @@ export default function StaffTable({ type }: TstaffTableProps) {
       {
         accessorFn: (row) =>
           row.admin
-            ? row.admin.department
-            : row.doctor
+            ? row.admin?.department
+            : row?.doctor
             ? type === "doctors"
-              ? row.doctor.specialization.split("_").join(" ")
-              : row.doctor.departments.split("_").join(" ")
-            : row.nurse && row.nurse.departments.split("_").join(" "),
+              ? row.doctor?.specialization.split("_").join(" ")
+              : row.doctor?.departments.split("_").join(" ")
+            : row.nurse
+            ? row.nurse?.departments.split("_").join(" ")
+            : row.OtherStaffs?.departments.split("_").join(" "),
         header: `${
-          type === "all-staffs" || type === "admins" || type === "nurses"
+          type === "all-staffs" ||
+          type === "admins" ||
+          type === "nurses" ||
+          type === "others"
             ? "Department"
             : type === "doctors" && "Specialization"
         }`,
@@ -125,7 +130,9 @@ export default function StaffTable({ type }: TstaffTableProps) {
       {
         id: "jobTitle",
         accessorFn: (row) =>
-          row.admin && row.admin.jobTitle.split("_").join(" "),
+          row.admin
+            ? row.admin?.jobTitle.split("_").join(" ")
+            : row.OtherStaffs?.jobTitle.split("_").join(" "),
         header: "Job Title",
       },
     ],
@@ -248,13 +255,13 @@ export default function StaffTable({ type }: TstaffTableProps) {
 
     const editabledata: editFormValue["data"] = {
       ...newdata,
-      idType: editData.NIC ? "NIC" : "Passport",
-      GovtId: editData.NIC ? editData.NIC : editData.Passport,
-      dob: editData.dateOfBirth,
-      ...(editData.doctor
+      idType: editData?.NIC ? "NIC" : "Passport",
+      GovtId: editData?.NIC ? editData.NIC : editData?.Passport,
+      dob: editData?.dateOfBirth,
+      ...(editData?.doctor
         ? {
             staffType: "doctor",
-            department: editData?.doctor.departments as TMedicalDepartments,
+            department: editData?.doctor?.departments as TMedicalDepartments,
             DoctorSpecialization: editData?.doctor
               .specialization as TDoctorSpecialization,
           }
@@ -262,17 +269,18 @@ export default function StaffTable({ type }: TstaffTableProps) {
         ? {
             staffType: "admin",
             department: editData?.admin.department as TadminDepartment,
-            jobtitle: editData?.admin.jobTitle,
+            jobtitle: editData?.admin?.jobTitle,
           }
         : editData.nurse
         ? {
             staffType: "nurse",
-            department: editData?.nurse.departments as TMedicalDepartments,
+            department: editData?.nurse?.departments as TMedicalDepartments,
           }
         : {
             staffType: "others",
-            department: editData.OtherStaffs.departments as TMedicalDepartments,
-            jobtitle: editData?.OtherStaffs.jobTitle,
+            department: editData.OtherStaffs
+              ?.departments as TMedicalDepartments,
+            jobtitle: editData?.OtherStaffs?.jobTitle,
           }),
       gender: editData.gender === "male" ? "Male" : "Female",
     };
@@ -318,7 +326,7 @@ export default function StaffTable({ type }: TstaffTableProps) {
           padding: "16px",
         }}
       >
-        <Avatar src={row.original.image} radius="xl" size={"xl"} />
+        <Avatar src={row?.original?.image} radius="xl" size={"xl"} />
 
         <Box>
           {}
@@ -330,21 +338,21 @@ export default function StaffTable({ type }: TstaffTableProps) {
                 ? row.original?.admin.jobTitle.split("_").join(" ")
                 : row.original.nurse
                 ? "Nurse"
-                : row.original?.OtherStaffs.jobTitle.split("_").join(" ")}
+                : row.original?.OtherStaffs?.jobTitle.split("_").join(" ")}
             </Badge>
             {row.original?.doctor && (
               <Badge color="blue" variant="filled">
-                {row.original.doctor.specialization.split("_").join(" ")}
+                {row.original.doctor?.specialization.split("_").join(" ")}
               </Badge>
             )}
           </div>
           <Title>
-            {`${row.original.title}.${row.original.firstName} ${row.original.lastName}`}
+            {`${row.original?.title}.${row.original?.firstName} ${row.original?.lastName}`}
           </Title>
           <Text>Worker ID : {row.original.idNumber}</Text>
           {row.original.NIC && <Text>NIC : {row.original.NIC}</Text>}
-          {row.original.Passport && (
-            <Text>Passport : {row.original.Passport}</Text>
+          {row.original?.Passport && (
+            <Text>Passport : {row.original?.Passport}</Text>
           )}
           <Text>
             {" "}
@@ -365,7 +373,7 @@ export default function StaffTable({ type }: TstaffTableProps) {
           {row.original.doctor?.specialization && (
             <Text>
               Specialization :{" "}
-              {row.original.doctor.specialization.split("_").join(" ")}
+              {row.original.doctor?.specialization.split("_").join(" ")}
             </Text>
           )}
         </Box>
@@ -393,7 +401,7 @@ export default function StaffTable({ type }: TstaffTableProps) {
     },
     initialState: {
       columnVisibility: {
-        jobTitle: !!(type === "admins"),
+        jobTitle: !!(type === "admins") || !!(type === "others"),
       },
     },
   });
