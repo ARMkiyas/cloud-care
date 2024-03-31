@@ -1,0 +1,21 @@
+.th {
+    padding: 0;
+    margin-left: 80px;
+  }
+  
+  .control {
+    width: 100%;
+    padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  
+    
+  }
+  
+  .icon {
+    width: rem(21px);
+    height: rem(21px);
+    border-radius: rem(21px);
+  }
+  .container {
+    margin-right: 70px; /* Adjust this value as needed */
+  }
+  
