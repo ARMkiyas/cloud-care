@@ -41,6 +41,7 @@ interface RowData {
   every: number;
   maxAppointments: number;
 }
+
 interface ScheduleInput {
   doctorId: string;
   scheduleId?: string;
@@ -112,16 +113,24 @@ export default function TableSort() {
     mutateAsync: updateAsync,
     isError: ScheduleUpdateError,
     isSuccess: scheduleUpdateSuccess,
-  } = useApiClient.schedule.update.useMutation();
+    isLoading: scheduleUpdateLoading,
+  } = useApiClient.schedule.update.useMutation({
+    onSuccess() {
+      handleEditModalClose();
+      handleRefetch();
+    },
+  });
   const {
     mutateAsync: deleteAsync,
     isError: ScheduleDeleteError,
     isSuccess: scheduleDeleteSuccess,
+    isLoading: scheduleDeleteLoading,
   } = useApiClient.schedule.delete.useMutation();
   const {
     mutateAsync: createAsync,
     isError: scheduleAddError,
     isSuccess: scheduleAddSuccess,
+    isLoading: scheduleCreateLoading,
     error: createError,
   } = useApiClient.schedule.create.useMutation();
   const [data, setData] = useState<TScheduleGet["data"]>([
@@ -265,7 +274,9 @@ export default function TableSort() {
       endDate: updatedSchedule.data.endDate,
       Date: updatedSchedule.data.Date,
       startTime: updatedSchedule.data.startTime,
-      endTime: updatedSchedule.data.endTime,
+      endTime: updatedSchedule.data.endTime
+        ? updatedSchedule.data.endTime
+        : undefined,
       totalAppointments: updatedSchedule.data?.totalAppointment,
     };
 
@@ -389,6 +400,7 @@ export default function TableSort() {
     await deleteAsync(input);
     const updatedData = data.filter((row) => row.id !== rowToDelete.id);
     setData(updatedData);
+    setOpened(false);
   };
 
   const handleSort = (field: keyof RowData) => {
@@ -413,7 +425,7 @@ export default function TableSort() {
   const endIndex = startIndex + itemsPerPage;
   const displayedRows = data?.slice(startIndex, endIndex);
   const transformRows = (rows) =>
-    rows.map((row) => ({
+    rows.map((row: TScheduleGet["data"][0]) => ({
       id: row.id,
       doctorName: `${row.doctor.staff.firstName} ${row.doctor.staff.lastName}`,
       specialization: row.doctor.specialization,
@@ -428,6 +440,7 @@ export default function TableSort() {
       noOfSlots: row?._count?.Slot,
       OptRoomsid: row?.OptRoomsid,
       appointments: row?._count?.Appointment,
+
       // Assuming this is directly usable
     }));
 
@@ -438,7 +451,9 @@ export default function TableSort() {
     .filter((row) =>
       Object.values(row)
         .filter((value) => typeof value === "string")
-        .some((value) => value?.toLowerCase()?.includes(search.toLowerCase())),
+        .some((value: string) =>
+          value?.toLowerCase()?.includes(search.toLowerCase()),
+        ),
     )
     .map((row, index) => (
       <Table.Tr key={index}>
@@ -452,6 +467,7 @@ export default function TableSort() {
         <Table.Td>{row.every}</Table.Td>
         <Table.Td>{row.startTime}</Table.Td>
         <Table.Td>{row.endTime}</Table.Td>
+
         {/* <Table.Td>{row.maxAppointments}</Table.Td> */}
         <Table.Td>
           <Group style={{ margin: "-8px -4px" }}>
@@ -692,12 +708,6 @@ export default function TableSort() {
           style={{ marginBottom: "16px" }}
         />
 
-        <TextInput
-          label="Specialization"
-          value={newRowData.specialization}
-          onChange={(event) => handleInputChange(event, "specialization")}
-          style={{ marginBottom: "16px" }}
-        />
         <Select
           label="Recurrence"
           value={newRowData.recurrence}
@@ -775,6 +785,8 @@ export default function TableSort() {
           onClick={handleSaveNewRow}
           style={{ backgroundColor: "#4CAF50" }}
           disabled={!saveButtonEnabled}
+          fullWidth
+          loading={scheduleCreateLoading}
         >
           Save
         </Button>
@@ -926,7 +938,9 @@ export default function TableSort() {
             <Button
               disabled={!saveButtonEnabled || editingRowData.appointments > 0}
               onClick={handleSaveEditedRow}
+              loading={scheduleUpdateLoading}
               style={{ backgroundColor: "#4CAF50" }}
+              fullWidth
             >
               Save
             </Button>
@@ -943,7 +957,11 @@ export default function TableSort() {
           <Button variant="default" onClick={() => setOpened(false)}>
             Cancel
           </Button>
-          <Button color="red" onClick={() => handleDeleteRow(deleteRow)}>
+          <Button
+            color="red"
+            onClick={() => handleDeleteRow(deleteRow)}
+            loading={scheduleDeleteLoading}
+          >
             Delete
           </Button>
         </Group>
