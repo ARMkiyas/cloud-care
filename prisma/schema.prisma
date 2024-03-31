@@ -288,18 +288,18 @@ model Appointment {
     updatedat         DateTime          @updatedAt
     patientNote       String?
     status            Appointmentstatus @default(Pending)
-    patientId         String
-    doctorId          String
+    patientId         String?
+    doctorId          String?
     nurseId           String?
     oPDId             Int?
-    scheduleId        String
-    doctor            Doctor            @relation(fields: [doctorId], references: [id])
+    scheduleId        String?
+    doctor            Doctor?           @relation(fields: [doctorId], references: [id])
     Nurse             Nurse?            @relation(fields: [nurseId], references: [id])
     OPD               OPD?              @relation(fields: [oPDId], references: [id])
-    patient           Patient           @relation(fields: [patientId], references: [id])
-    schedule          Schedule          @relation(fields: [scheduleId], references: [id])
-    slotId            String
-    Slot              Slot              @relation(fields: [slotId], references: [id])
+    patient           Patient?          @relation(fields: [patientId], references: [id])
+    schedule          Schedule?         @relation(fields: [scheduleId], references: [id])
+    slotId            String?
+    Slot              Slot?             @relation(fields: [slotId], references: [id])
 }
 
 enum RecurrencePattern {
