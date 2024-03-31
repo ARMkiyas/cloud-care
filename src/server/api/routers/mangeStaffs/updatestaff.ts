@@ -2,10 +2,11 @@ import "server-only";
 import { TRPCError } from "@trpc/server"
 import { protectedProcedure } from "../../trpc"
 
-import { Prisma, UserRoles } from "@prisma/client"
+import { adminDepartment, AdminJobTitle, MedicalDepartments, OtherJobTitles, Prisma, UserRoles } from "@prisma/client"
 import { userImageUploader } from "@/utils/fileuploadhandler/userimageuploder"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error"
 import { updatestaffSchema } from "./validation/schema"
+import dayjs from "dayjs";
 
 const updatestaffProceture = protectedProcedure.input(updatestaffSchema).mutation(async ({ ctx, input }) => {
 
@@ -48,12 +49,43 @@ const updatestaffProceture = protectedProcedure.input(updatestaffSchema).mutatio
                         firstName: input.data.firstName,
                         lastName: input.data.lastName,
                         email: input.data.email,
-                        dateOfBirth: input.data.dateOfBirth,
+                        dateOfBirth: new Date(dayjs(input.data.dateOfBirth).format("YYYY-MM-DD")).toISOString(),
                         idNumber: input.data.idNumber,
                         NIC: input.data.NIC,
                         Passport: input.data.Passport,
                         phone: input.data.phone,
-                        image: input.data.image ? await userImageUploader(input.data.image, staff.image) : staff.image
+                        image: input.data.image ? await userImageUploader(input.data.image, staff.image) : staff.image,
+                        ...input.data.staffType === "admin" ? {
+                            admin: {
+                                update: {
+                                    department: input.data.department as adminDepartment,
+                                    jobTitle: input.data.jobtitle as AdminJobTitle
+                                }
+                            }
+
+                        } : input.data.staffType === "doctor" ? {
+                            doctor: {
+                                update: {
+                                    specialization: input.data.specialization,
+                                    departments: input.data.department as MedicalDepartments
+
+                                }
+                            }
+                        } : input.data.staffType === "nurse" ? {
+                            nurse: {
+                                update: {
+                                    departments: input.data.department as MedicalDepartments
+                                }
+                            }
+                        } : input.data.staffType === "others" && {
+                            OtherStaffs: {
+                                update: {
+                                    departments: input.data.department as MedicalDepartments,
+                                    jobTitle: input.data.jobtitle as OtherJobTitles
+                                }
+                            }
+                        },
+
                     },
                     include: {
                         admin: true,
@@ -82,8 +114,8 @@ const updatestaffProceture = protectedProcedure.input(updatestaffSchema).mutatio
                 return update;
             },
             {
-                maxWait: 5000, // default: 2000
-                timeout: 10000, // default: 5000
+                maxWait: 7000, // default: 2000
+                timeout: 50000, // default: 5000
                 isolationLevel: Prisma.TransactionIsolationLevel.Serializable, // optional, default defined by database configuration
             }
         )

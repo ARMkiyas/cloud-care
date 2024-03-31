@@ -1,6 +1,6 @@
 import "server-only";
 import { protectedProcedure } from "../../trpc"
-import { UserRoles } from "@prisma/client"
+import { adminDepartment, AdminJobTitle, MedicalDepartments, OtherJobTitles, UserRoles } from "@prisma/client"
 import { TRPCError } from "@trpc/server"
 import { userImageUploader } from "@/utils/fileuploadhandler/userimageuploder"
 import { getAvatar } from "@/utils/getavatar"
@@ -8,6 +8,7 @@ import { hashPwd } from "@/utils/hashPwdHelper"
 import { generate2FASecret } from "@/utils/OtpHelper"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error"
 import { createStaffSchema } from "./validation/schema"
+import dayjs from "dayjs";
 
 
 
@@ -28,33 +29,43 @@ const createStaffProceture = protectedProcedure.input(createStaffSchema).mutatio
                 firstName: input.firstName,
                 lastName: input.lastName,
                 email: input.email,
-                dateOfBirth: input.dateOfBirth,
+                dateOfBirth: new Date(dayjs(input.dateOfBirth).format("YYYY-MM-DD")).toISOString(),
                 gender: input.gender,
                 phone: input.phone,
                 NIC: input.NIC,
                 Passport: input.Passport,
                 idNumber: input.idNumber,
-                image: input.image ? await userImageUploader(input.image) : getAvatar("person", input.gender),
+                image: input.image ? await userImageUploader(input.image) : getAvatar(input.staffType === "doctor" ? "doctor" : input.staffType === "nurse" ? "nurse" : "person", input.gender),
                 ...input.staffType === "admin" ? {
                     admin: {
                         create: {
-                            department: input.department
+                            department: input.department as adminDepartment,
+                            jobTitle: input.jobtitle as AdminJobTitle
                         }
                     }
 
                 } : input.staffType === "doctor" ? {
                     doctor: {
                         create: {
-                            specialization: input.specialization
+                            specialization: input.specialization,
+                            departments: input.department as MedicalDepartments
+
                         }
                     }
                 } : input.staffType === "nurse" ? {
                     nurse: {
                         create: {
-
+                            departments: input.department as MedicalDepartments
                         }
                     }
-                } : {},
+                } : input.staffType === "others" && {
+                    OtherStaffs: {
+                        create: {
+                            departments: input.department as MedicalDepartments,
+                            jobTitle: input.jobtitle as OtherJobTitles
+                        }
+                    }
+                },
 
                 ...input.withUserAccount ? {
                     user: {

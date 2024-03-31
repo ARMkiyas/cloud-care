@@ -43,6 +43,14 @@ model VerificationToken {
     @@unique([identifier, token])
 }
 
+model userinvite {
+    id        Int      @id @default(autoincrement())
+    email     String
+    staffid   String
+    token     String   @unique
+    createdAt DateTime @default(now())
+}
+
 enum UserRoles {
     ROOTUSER
     ADMIN
@@ -153,10 +161,11 @@ model Staff {
     Passport    String?  @unique
     idNumber    String?  @unique
 
-    doctor Doctor?
-    nurse  Nurse?
-    user   User?
-    admin  Admin?
+    doctor      Doctor?
+    nurse       Nurse?
+    user        User?
+    admin       Admin?
+    OtherStaffs OtherStaffs?
 }
 
 enum adminDepartment {
@@ -165,10 +174,37 @@ enum adminDepartment {
     IT
     Maintenance
     Security
-    Other
 }
 
-enum Departments {
+enum AdminJobTitle {
+    OPD_Manager
+    OPD_Nurse_Manager
+    Director_Admissions
+    Patient_Services_Representative
+    Medical_Records_Technician
+    Unit_Secretary
+    Switchboard_Operator
+    HR_Representative
+    Human_Resources_Manager
+    Recruiter
+    Benefits_Coordinator
+    Training_And_Development_Specialist
+    Employee_Relations_Specialist
+    Health_Information_Management_Director
+    IT_Support_Specialist
+    Network_Administrator
+    Cybersecurity_Analyst
+    Applications_Analyst
+    Facilities_Manager
+    Biomedical_Equipment_Technician
+    HVAC_Technician
+    Carpenter
+    Electrician
+    Security_Director
+    Security_Officer
+}
+
+enum MedicalDepartments {
     Emergency
     Internal_Medicine
     Pediatrics
@@ -190,12 +226,37 @@ enum Departments {
     Physical_Therapy
     Nursing
     Public_Relations_Marketing
+    Outpatient_department
+}
+
+enum MedicalJobTitles {
+    Nurse
+    Doctor
+    Chief_of_Medicine
+    Chief_Nursing_Officer
+    Chief_Resident
+}
+
+enum OtherJobTitles {
+    Imaging_Technician
+    Medical_Assistant
+    Medical_Laboratory_Technician
+    Medical_Laboratory_Scientist
+    Medical_Transcriptionist
+    Medical_Records_Clerk
+    Medical_Records_Technician
+    Medical_Secretary
+    Medical_Services_Manager
+    Medical_Social_Worker
+    Medical_Technologist
+    Patient_Safety_Specialist
+    Emergency_Preparedness_Coordinator
 }
 
 model Admin {
-    id String @id @default(cuid())
-
+    id         String          @id @default(cuid())
     department adminDepartment
+    jobTitle   AdminJobTitle?
     staffId    String          @unique
     staff      Staff           @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
@@ -235,18 +296,18 @@ model Appointment {
     updatedat         DateTime          @updatedAt
     patientNote       String?
     status            Appointmentstatus @default(Pending)
-    patientId         String
-    doctorId          String
+    patientId         String?
+    doctorId          String?
     nurseId           String?
     oPDId             Int?
-    scheduleId        String
-    doctor            Doctor            @relation(fields: [doctorId], references: [id])
+    scheduleId        String?
+    doctor            Doctor?           @relation(fields: [doctorId], references: [id])
     Nurse             Nurse?            @relation(fields: [nurseId], references: [id])
     OPD               OPD?              @relation(fields: [oPDId], references: [id])
-    patient           Patient           @relation(fields: [patientId], references: [id])
-    schedule          Schedule          @relation(fields: [scheduleId], references: [id])
-    slotId            String
-    Slot              Slot              @relation(fields: [slotId], references: [id])
+    patient           Patient?          @relation(fields: [patientId], references: [id])
+    schedule          Schedule?         @relation(fields: [scheduleId], references: [id])
+    slotId            String?
+    Slot              Slot?             @relation(fields: [slotId], references: [id])
 }
 
 enum RecurrencePattern {
@@ -306,6 +367,7 @@ model OptRooms {
 
 enum DoctorSpecialization {
     GENERAL_PRACTITIONER
+    Surgeon
     CARDIOLOGIST
     ORTHOPEDIC_SURGEON
     PEDIATRICIAN
@@ -340,26 +402,25 @@ model Doctor {
     schedules      Schedule[]
     staffId        String               @unique
     staff          Staff                @relation(fields: [staffId], references: [id], onDelete: Cascade)
-    departments    Department[]         @relation("DepartmentToDoctor")
+    departments    MedicalDepartments?
 }
 
 model Nurse {
-    id String @id @default(cuid())
-
+    id           String              @id @default(cuid())
+    departments  MedicalDepartments?
     appointments Appointment[]
-    staffId      String        @unique
-    staff        Staff         @relation(fields: [staffId], references: [id], onDelete: Cascade)
-    departments  Department[]  @relation("DepartmentToNurse")
+    staffId      String              @unique
+    staff        Staff               @relation(fields: [staffId], references: [id], onDelete: Cascade)
     OptRoomsid   String?
-    OptRooms     OptRooms?     @relation(fields: [OptRoomsid], references: [id])
+    OptRooms     OptRooms?           @relation(fields: [OptRoomsid], references: [id])
 }
 
-model Department {
-    id      Int         @id @default(autoincrement())
-    name    Departments
-    opds    OPD[]
-    doctors Doctor[]    @relation("DepartmentToDoctor")
-    nurses  Nurse[]     @relation("DepartmentToNurse")
+model OtherStaffs {
+    id          String             @id @default(cuid())
+    departments MedicalDepartments
+    jobTitle    OtherJobTitles
+    staffId     String             @unique
+    staff       Staff              @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 model Clinic {
@@ -373,14 +434,14 @@ model Clinic {
 }
 
 model OPD {
-    id           Int           @id @default(autoincrement())
+    id           Int                 @id @default(autoincrement())
     name         String
     description  String
     departmentId Int
     clinicId     Int
     appointments Appointment[]
-    clinic       Clinic        @relation(fields: [clinicId], references: [id])
-    department   Department    @relation(fields: [departmentId], references: [id])
+    clinic       Clinic              @relation(fields: [clinicId], references: [id])
+    department   MedicalDepartments?
 }
 
 model OtherHospital {

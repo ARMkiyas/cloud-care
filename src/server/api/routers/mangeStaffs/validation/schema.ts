@@ -1,6 +1,6 @@
 import "server-only"
 
-import { DoctorSpecialization, UserRoles, adminDepartment, gender, title } from "@prisma/client"
+import { DoctorSpecialization, UserRoles, adminDepartment, gender, title, AdminJobTitle, MedicalDepartments, OtherJobTitles } from "@prisma/client"
 import { z } from "zod"
 import { imageSchema, pagenationSchema } from "@/utils/ValidationSchemas/commonSc"
 
@@ -16,7 +16,7 @@ export const getStaffschema = z.object({
     getdoctors: z.boolean().optional(),
     getnurses: z.boolean().optional(),
     getadmins: z.boolean().optional(),
-    staffType: z.enum(["doctors", "nurses", "admins"]).optional(),
+    staffType: z.enum(["doctors", "nurses", "admins", "others"]).optional(),
 
 }).merge(pagenationSchema)
 
@@ -38,34 +38,58 @@ export const createStaffSchema = z.object({
     email: z.string().email(),
     dateOfBirth: z.date(),
     gender: z.nativeEnum(gender),
-    phone: z.string().min(10).max(15),
+    phone:
+        z.string()
+            .regex(
+                /^\+\d{1,2}\s\(\d{3}\)\s\d{3}-\d{4}$|^\+\d{1,2}\s\(\d{3}\)\s\d{9}$/,
+                "Invalid Phone Number, please provide it in international format +94 (123) 456-7890",
+            )
+            .min(1, "phone is Required"),
     NIC: z.string().min(10).max(12).optional(),
-    Passport: z.string().min(10).max(12).optional(),
-    idNumber: z.string().optional(),
+    Passport: z.string().min(7).optional(),
+    idNumber: z.string(),
     image: imageSchema.optional(),
-    staffType: z.enum(["doctor", "nurse", "admin"]),
-    department: z.nativeEnum(adminDepartment).optional(),
+    staffType: z.enum(["doctor", "nurse", "admin", "others"]),
+    department: z.union([z.nativeEnum(adminDepartment), z.nativeEnum(MedicalDepartments)], {
+        required_error: "Department is required",
+        invalid_type_error: "Invalid Department",
+    }),
     specialization: z.nativeEnum(DoctorSpecialization).optional(),
+
+    jobtitle: z
+        .union([z.nativeEnum(AdminJobTitle), z.nativeEnum(OtherJobTitles)])
+        .nullable()
+        .optional(),
     // schema for create user account with staff
     withUserAccount: userAccSchema.optional(),
 
 }).superRefine((sch, ctx) => {
 
-    if (sch.staffType === "admin" && sch.department === undefined) {
+    if (sch.staffType === "admin" && sch.department === undefined && sch.jobtitle === undefined) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: "Department is required for admin"
+            message: "There is no department or job title for admin"
         })
     }
 
-    if (sch.staffType === "doctor" && sch.specialization === undefined) {
+    if (sch.staffType === "doctor" && sch.specialization === undefined && sch.department === undefined) {
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
-            message: "specialization is required for doctor"
+            message: "There is no specialization or department for doctor"
+        })
+    }
+
+    // nic or passport is required 
+    if (sch.NIC === undefined && sch.Passport === undefined) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "NIC or Passport is required for nurse or other staff"
         })
     }
 
 })
+
+
 
 
 export const deleteStaffSchema = z.object({
@@ -75,20 +99,16 @@ export const deleteStaffSchema = z.object({
 
 
 export const updatestaffSchema = z.object({
-    staffID: z.string(),
-    data: z.object({
-        title: z.nativeEnum(title),
-        firstName: z.string().min(2).max(50),
-        lastName: z.string().min(2).max(50),
-        email: z.string().email(),
-        dateOfBirth: z.date(),
-        gender: z.nativeEnum(gender),
-        phone: z.string().min(10).max(15),
-        NIC: z.string().min(10).max(12).optional(),
-        Passport: z.string().min(10).max(12).optional(),
-        idNumber: z.string().optional(),
-        image: imageSchema.optional(),
 
-    })
+    staffID: z.string(),
+    data: createStaffSchema.optional()
 })
 
+export const GetPubProcedureSchema = z.object({
+
+    name: z.string().optional(),
+    specialization: z.nativeEnum(DoctorSpecialization).optional(),
+    department: z.nativeEnum(MedicalDepartments).optional(),
+
+
+}).merge(pagenationSchema)

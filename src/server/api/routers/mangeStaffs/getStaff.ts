@@ -25,6 +25,9 @@ const getStaffProceture = protectedProcedure
             const staffquery = {
                 skip: input.page > 1 ? (input.page - 1) * input.limit : 0,
                 take: input.limit + 1,
+                cursor: input.cursor ? {
+                    id: input.cursor
+                } : undefined,
                 where: {
                     email: {
                         equals: input?.email
@@ -58,6 +61,9 @@ const getStaffProceture = protectedProcedure
                             },
                             admin: {
                                 isNot: input?.staffType === "admins" ? null : undefined
+                            },
+                            OtherStaffs: {
+                                isNot: input?.staffType === "others" ? null : undefined
                             }
 
                         }
@@ -67,6 +73,7 @@ const getStaffProceture = protectedProcedure
                     admin: true,
                     nurse: true,
                     doctor: true,
+                    OtherStaffs: true
 
                 },
                 orderBy: {
