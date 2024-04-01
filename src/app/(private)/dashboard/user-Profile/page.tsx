@@ -1,15 +1,17 @@
 "use client";
 import React,{useState,useEffect, use} from 'react'
-import { Image, Text, Badge, Button, Group,Table,TextInput,Switch,Alert } from '@mantine/core';
+import { Text, Badge, Button, Group,Table,TextInput,Switch,LoadingOverlay,Box } from '@mantine/core';
 import {useSession } from "next-auth/react";
 import { useApiClient } from '@/utils/trpc/Trpc';
-
+import Image from 'next/image';
 
 
 export default function page() {
   const { data: session,update, status } = useSession();
   console.log(session);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [saving, setSaving] = useState(false);
+
 
   const{
     mutateAsync,isLoading,isSuccess
@@ -38,6 +40,7 @@ export default function page() {
         name: session.user.name,
         username: session.user.username,
         email: session.user.email,
+        phone:session.user.phone,
         twoFactorEnabled: session.user.twoFactorEnabled
       });
     }
@@ -48,9 +51,17 @@ export default function page() {
   };
 
   const handleSaveClick = async () => {
-   console.log("Edited Data:", editedData);
-    await mutateAsync(editedData);
-    setEditing(false);
+    try{
+      setSaving(true);
+      console.log("Edited Data:", editedData);
+       await mutateAsync(editedData);
+       setEditing(false);
+    }catch(error){
+      console.error("Error saving data: ",error)
+    } finally{
+      setSaving(false);
+    }
+
   };
 
   const handleCancelClick = () => {
@@ -64,6 +75,7 @@ export default function page() {
       [name]: value,
     }));
   };
+
   const handleTwoFactorToggle = async (event) => {
     const checked = event.target.checked; 
     if (!session || !session.user || !editedData) {
@@ -72,20 +84,22 @@ export default function page() {
     }
   
     try {
+      // Update the editedData state with the new value of twoFactorEnabled
       const updatedData = {
         ...editedData,
         twoFactorEnabled: checked,
       };
-  
-      console.log("Original editedData:", editedData);
-      console.log("Updated twoFactorEnabled:", checked);
-      console.log("Updating user data:", updatedData);
-      
+    
+      // Update the editedData state
+      setEditedData(updatedData);
+    
+      // Send the updated data to the API
       await mutateAsync(updatedData);
     } catch (error) {
       console.error("Error updating user data:", error);
     }
   };
+  
 
   const handleResetPassword = async () => {
     try {
@@ -113,7 +127,8 @@ export default function page() {
           <div className="flex justify-center items-center ">
             <Image className='w-1/3 m-2 mt-5'
               src={session.user.image}
-              height={120}
+              height={180}
+              width={130}
               alt="Profile Image"
               style={{ borderRadius: '50%' }} 
              />
@@ -125,7 +140,8 @@ export default function page() {
             </Group>
 
              <Text className="text-center"size="sm" c="dimmed">
-                {session.user.email}
+                {session.user.email}<br/>
+                {session.user.phone}
                </Text>
                <div className="p-3 pr-5">
                 {!editing?(
@@ -143,6 +159,9 @@ export default function page() {
  
       </div>
       <div className='w-full' style={{ borderLeft: '1px solid #ccc' }}>
+      <Box pos="relative">
+        <LoadingOverlay visible={saving} zIndex={1000} overlayProps={{ radius: "sm", blur: 2 }} />
+        
         <Table horizontalSpacing="lg" verticalSpacing="md">
           <Table.Tbody>
             <Table.Tr>
@@ -197,6 +216,20 @@ export default function page() {
               </Table.Td>
             </Table.Tr>
             <Table.Tr>
+              <Table.Td>Phone Number</Table.Td>
+              <Table.Td>
+              {editing ? (
+                  <TextInput
+                    value={editedData.phone}
+                    onChange={handleInputChange}
+                    name="email"
+                  />
+                ) : (
+                  session.user.phone
+                )}
+              </Table.Td>
+            </Table.Tr>
+            <Table.Tr>
               <Table.Td>Two Factor Enabled</Table.Td>
               <Table.Td>{session.user.twoFactorEnabled ? 'True' : 'False'}</Table.Td>
             </Table.Tr>
@@ -213,7 +246,7 @@ export default function page() {
               />
               </Table.Td>
             </Table.Tr>
-            <Table.Tr>
+            <Table.Tr> 
               <Table.Td>Do you want to reset your password?</Table.Td>
               <Table.Td>
                 <Button className="bg-yellow-200 text-gray-800" onClick={handleResetPassword}>Reset Password</Button>
@@ -221,6 +254,7 @@ export default function page() {
             </Table.Tr>
           </Table.Tbody>
         </Table>
+        </Box>
           </div>
           </div>
           </>

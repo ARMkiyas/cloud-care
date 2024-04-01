@@ -4,15 +4,18 @@ import Header from "../components/navbar/Header";
 import Footer from "../components/footer/Footer";
 import "../appointment/book/page";
 import "./DoctorPageStyles.css";
-import { Pagination,TextInput,Card, Image, Text, Badge, Button, Group} from '@mantine/core';
-import { IconSearch } from "@tabler/icons-react";
+import { Pagination,TextInput,Menu,NavLink} from '@mantine/core';
+import { IconSearch,IconFilter, IconGauge, IconFingerprint } from "@tabler/icons-react";
 import { useApiClient } from "@/utils/trpc/Trpc";
 
 
 export default function page() {
   const{data:userdata,isLoading,error}=useApiClient.manageStaff.GetPubDoctors.useQuery({});
   const [searchQuery, setSearchQuery] = useState('');
+  const [menuOpened, setMenuOpened] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   
+
   if (!userdata) return null;
   // Filter doctors based on search query
   const filteredDoctors = userdata?.data.filter(doctor => {
@@ -27,7 +30,15 @@ export default function page() {
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
+  const startIndex = (currentPage - 1) * 8;
+  const endIndex = startIndex + 8;
+  const doctorsPerPage = filteredDoctors.slice(startIndex, endIndex);
+
   const renderDoctors = filteredDoctors.concat(userdata.data.filter(doctor => !filteredDoctors.includes(doctor)));
+  const handleNavLinkClick = (label) => {
+    // Update search query with the selected label value
+    setSearchQuery(label);
+  };
 
   return (
     <div>
@@ -50,7 +61,7 @@ export default function page() {
         </div>
       </div>
       <div className="mainBodyContainer">
-        <div className="max-w-[1320px] items-center flex flex-col px-3 max-md:max-w-full">
+        <div className="max-w-[1320px] min-w-[1320px] items-center flex flex-col px-3 max-md:max-w-full">
           <div className="max-w-full items-center flex w-[600px] flex-col px-20 max-md:px-5">
             <div className="text-blue-950 text-center text-4xl font-bold leading-10 self-stretch mt-4 max-md:max-w-full max-md:mr-2">
               Our Experience Doctors
@@ -63,41 +74,72 @@ export default function page() {
             leftSection={<IconSearch />}
             value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
+              rightSection={
+              <Menu shadow="md" width={200}>
+              <Menu.Target>
+                <IconFilter size={23} style={{ strokeWidth: '2' }}/>
+              </Menu.Target>
+              <Menu.Dropdown>
+                <NavLink label="Departments"
+                 childrenOffset={28}>
+                  <NavLink label="OPD" onClick={() => handleNavLinkClick("Outpatient")}/>
+                  <NavLink label="Dermatology" onClick={() => handleNavLinkClick("Dermatology")}/>
+                  <NavLink label="Radiology" onClick={() => handleNavLinkClick("Radiology")}/>
+                  <NavLink label="Internal Medicine" onClick={() => handleNavLinkClick("Internal Medicine")}/>
+                </NavLink>
+                <NavLink label="Specialization"
+                childrenOffset={28}>
+                  <NavLink label="General Practitioner" onClick={() => handleNavLinkClick("General Practitioner")}/>
+                  <NavLink label="Cardiologist" onClick={() => handleNavLinkClick("Cardiologist")}/>
+                  <NavLink label="Neurologist" onClick={() => handleNavLinkClick("Neurologist")}/>
+                  <NavLink label="Orthopedic Surgen" onClick={() => handleNavLinkClick("Orthopedic Surgeon")}/>
+                  <NavLink label="Surgeon" onClick={() => handleNavLinkClick("Surgeon")}/>
+                </NavLink>
+              </Menu.Dropdown>
+            </Menu>}
             />
           </div>
-          <div className="flex space-x-10 flex-wrap justify-center place-items-center " >
-          {renderDoctors.map((doctor,index)=>(
-            <div className="flex flex-col items-stretch w-3/12 max-md:w-full max-md:ml-0 justify-center mt-5" key={index}>
+          <div className="flex space-x-5 flex-wrap justify-center place-items-center w-full" >
+          {filteredDoctors.length > 0 ? (
+              doctorsPerPage.map((doctor, index) => (
+            <div className="flex flex-col w-1/5 justify-center mt-5" key={index}>
                 <div className="items-stretch self-stretch flex grow flex-col rounded-lg max-md:mt-6">
                   <img
                       src={doctor.image}
-                      height={160}
+                      height={200}
                      alt={doctor.name}
                     className="aspect-[0.83] object-contain object-center w-full overflow-hidden"
                   />
-                  <div className="items-center bg-blue-50 flex flex-col px-20 py-6 max-md:px-5">
+                  <div className="items-center max-w-fit bg-blue-50 flex flex-col px-20 py-4 max-md:px-5">
                     <div className="text-blue-950 text-center text-xl font-bold leading-6 whitespace-nowrap">
                       {doctor.name}
                     </div>
                     <div className="text-blue-600 text-center text-base leading-6 whitespace-nowrap mt-2">
-                      Department: {doctor.departments}
+                      {doctor.departments}
                     </div>
-                    <div className="text-blue-600 text-center text-base leading-6 whitespace-nowrap mt-2">
-                      Specialization: {doctor.specialization}
+                    <div className="text-blue-600 text-center text-base leading-6 whitespace-nowrap mt-1">
+                      {doctor.specialization}
                     </div>
-                    <div className="text-blue-600 text-center text-base leading-6 whitespace-nowrap mt-2">
-                      Total Schedule: {doctor.totalSchedules}
+                    <div className="text-blue-600 text-center text-base leading-6 whitespace-nowrap mt-1">
+                      {doctor.totalSchedules} Schedules
                     </div>
                   </div>
                 </div>
               </div>
            
-          ))}
+          ))
+          ):(
+            <div className="text-red-500 text-lg">
+                No doctors found matching the search query.
+              </div>
+          )
+        }
           </div>
         </div>
         <div className="flex items-start gap-3.5 mr-2.5 mt-9 self-end">
+          
           <Pagination
-            total={10} // Total number of pages
+            total={Math.ceil(filteredDoctors.length / 8)} // Total number of pages
             size="sm" // Size of pagination component (optional)
             color="#1b2c51" // Color of pagination component (optional)
           />
