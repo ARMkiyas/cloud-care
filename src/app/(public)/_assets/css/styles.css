@@ -1,3 +1,32 @@
-.bg {
-  color: blue;
+
+
+.all{
+  align-items: center;
+
+}
+
+.about{
+  margin-left: 120px;
+}
+
+
+.service{
+  margin-left: 110px;
+  
+}
+
+.features{
+  align-content: center;
+  margin-bottom: 50px;
+  
+  
+}
+
+.doc{
+  margin-left: 90px;
+}
+
+.appointment {
+  margin-top: 90px;
+  margin-left: 50px;
 }

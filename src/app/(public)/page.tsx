@@ -28,7 +28,7 @@ export default async function Home() {
   const data = await callapi();
 
   return (
-    <div className="">
+    <div className="all">
       <div className="items-stretch bg-blue-600 flex w-full flex-col justify-center max-md:max-w-full">
         <div className="content-center flex-wrap w-full max-md:max-w-full">
           <div className="gap-5 flex max-md:flex-col max-md:items-stretch max-md:gap-0">
@@ -96,8 +96,8 @@ export default async function Home() {
         </div>
       </div>
 
-
-      <div className="self-center max-w-full mt-20 pt-12 max-md:mt-10 max-md:pl-5">
+      <div className="about">
+        <div className="self-center max-w-full mt-20 pt-12 max-md:mt-10 max-md:pl-5">
         <div className="gap-5 flex max-md:flex-col max-md:items-stretch max-md:gap-0">
           <div className="flex flex-col items-stretch w-6/12 max-md:w-full max-md:ml-0">
             <div className="flex flex-col items-end max-md:max-w-full max-md:mt-10">
@@ -162,6 +162,7 @@ export default async function Home() {
                 <div className="text-neutral-400 text-base leading-6 self-stretch grow whitespace-nowrap">
                   Only Qualified Doctors
                 </div>
+                
               </div>
               <div className="items-center self-stretch flex justify-between gap-4 mt-4 pr-20 max-md:max-w-full max-md:flex-wrap max-md:pr-5">
                 <div className="text-blue-600 text-base leading-4 whitespace-nowrap my-auto">
@@ -180,10 +181,12 @@ export default async function Home() {
             </div>
           </div>
         </div>
+        </div>
       </div>
 
 
-      <div className="max-w-full items-center self-center flex w-[1296px] flex-col mt-20 px-3 max-md:mt-10">
+      <div className="service">
+        <div className="max-w-full items-center self-center flex w-[1296px] flex-col mt-20 px-3 max-md:mt-10">
         <div className="max-w-full items-center flex w-[600px] flex-col justify-center px-16 max-md:px-5">
           <div className="flex w-[392px] max-w-full flex-col items-center">
             <div className="text-neutral-400 text-center text-base leading-6 whitespace-nowrap justify-center items-stretch border px-6 py-1.5 rounded-[800px] border-solid border-blue-200 max-md:px-5">
@@ -366,11 +369,12 @@ export default async function Home() {
             </div>
           </div>
         </div>
+        </div>
       </div>
 
 
-
-      <div className="items-stretch bg-blue-600 flex w-full flex-col justify-center mt-24 max-md:max-w-full max-md:mt-10">
+      <div className="features">
+        <div className="items-stretch bg-blue-600 flex w-full flex-col justify-center mt-24 max-md:max-w-full max-md:mt-10">
         <div className="flex-wrap w-full max-md:max-w-full max-md:pl-5">
           <div className="gap-5 flex max-md:flex-col max-md:items-stretch max-md:gap-0">
             <div className="flex flex-col items-stretch w-[38%] max-md:w-full max-md:ml-0">
@@ -470,9 +474,10 @@ export default async function Home() {
             </div>
           </div>
         </div>
+        </div>
       </div>
       
-      <div>
+      <div className="doc">
       
       <div className="mainBodyContainer">
         <div className="max-w-[1320px] items-center flex flex-col px-3 max-md:max-w-full">
@@ -566,7 +571,7 @@ export default async function Home() {
       
     </div>
 
-    <div>
+    <div className="appointment">
 
       <div className="mainContainer gap-5">
         <div className="flex gap-5 max-md:flex-col max-md:items-stretch max-md:gap-0">
