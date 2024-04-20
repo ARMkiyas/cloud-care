@@ -202,11 +202,14 @@ export default async function Home() {
             <div className="flex flex-col items-stretch w-[33%] max-md:w-full max-md:ml-0">
               <div className="self-stretch bg-blue-50 flex grow flex-col w-full pl-12 pr-16 py-12 rounded-lg items-start max-md:mt-6 max-md:px-5">
                 <div className="text-blue-600 text-2xl font-black leading-6 whitespace-nowrap justify-center items-center bg-white aspect-square h-[65px] px-5 rounded-[32.5px] max-md:pr-5">
-                <div className = "justify-center items-center">
+                
+                <div className="heart">
+                <div className = "justify-center items-center ">
                 <img
                 loading="lazy"
                 srcSet="/img/home_page/sym/heart.svg" 
                 />
+                </div>
                 </div>
                 </div>
                 <div className="text-blue-950 text-2xl font-bold leading-7 self-stretch mt-6">
@@ -220,11 +223,14 @@ export default async function Home() {
                   diam sed stet.
                 </div>
                 <div className="text-blue-600 text-center text-base font-black leading-4 whitespace-nowrap justify-center items-center bg-white aspect-square h-10 mt-6 px-3.5 rounded-[40px]">
-                <div className = "justify-center items-center">
+                
+                <div className="plus">
+                <div className = "justify-center items-center ">
                 <img
                 loading="lazy"
                 srcSet="/img/home_page/sym/plus.svg" 
                 />
+                </div>
                 </div>
                 </div>
               </div>
@@ -232,11 +238,14 @@ export default async function Home() {
             <div className="flex flex-col items-stretch w-[33%] ml-5 max-md:w-full max-md:ml-0">
               <div className="self-stretch bg-blue-50 flex grow flex-col w-full pl-12 pr-16 py-12 rounded-lg items-start max-md:mt-6 max-md:px-5">
                 <div className="text-blue-600 text-2xl font-black leading-6 whitespace-nowrap justify-center items-center bg-white aspect-square h-[65px] px-5 rounded-[32.5px]">
+                
+                <div className="pu">
                 <div className = "justify-center items-center">
                 <img
                 loading="lazy"
                 srcSet="/img/home_page/sym/pu.svg" 
                 />
+                </div>
                 </div>
                 </div>
                 <div className="text-blue-950 text-2xl font-bold leading-7 self-stretch mt-6">
@@ -250,22 +259,29 @@ export default async function Home() {
                   diam sed stet.
                 </div>
                 <div className="text-blue-600 text-center text-base font-black leading-4 whitespace-nowrap justify-center items-center bg-white aspect-square h-10 mt-6 px-3.5 rounded-[40px]">
+                
+                <div className="plus">
                 <div className = "justify-center items-center">
                 <img
                 loading="lazy"
-                srcSet="/img/home_page/sym/heart.svg" 
+                srcSet="/img/home_page/sym/plus.svg" 
                 />
+                </div>
                 </div>
                 </div>
               </div>
             </div>
             <div className="flex flex-col items-stretch w-[33%] ml-5 max-md:w-full max-md:ml-0">
               <div className="self-stretch bg-blue-50 flex grow flex-col w-full pl-12 pr-16 py-12 rounded-lg items-start max-md:mt-6 max-md:px-5">
+                
+              
                 <div className="text-blue-600 text-2xl font-black leading-6 whitespace-nowrap justify-center items-center bg-white aspect-square h-[65px] px-5 rounded-[32.5px]">
+                <div className="brai">
                 <img
                 loading="lazy"
                 srcSet="/img/home_page/sym/brai.svg" 
                 />
+                </div>
                 </div>
                 <div className="text-blue-950 text-2xl font-bold leading-7 self-stretch mt-6">
                   Neurology
@@ -277,11 +293,15 @@ export default async function Home() {
                   <br />
                   diam sed stet.
                 </div>
+
+                
                 <div className="text-blue-600 text-center text-base font-black leading-4 whitespace-nowrap justify-center items-center bg-white aspect-square h-10 mt-6 px-3.5 rounded-[40px]">
+                <div className="plus">
                 <img
                 loading="lazy"
                 srcSet="/img/home_page/sym/plus.svg" 
                 />
+                </div>
                 </div>
               </div>
             </div>
@@ -292,10 +312,13 @@ export default async function Home() {
             <div className="flex flex-col items-stretch w-[33%] max-md:w-full max-md:ml-0">
               <div className="self-stretch bg-blue-50 flex grow flex-col w-full pl-12 pr-16 py-12 rounded-lg items-start max-md:mt-6 max-md:px-5">
                 <div className="text-blue-600 text-2xl font-black leading-6 whitespace-nowrap justify-center items-center bg-white aspect-square h-[65px] px-5 rounded-[32.5px] max-md:pr-5">
+                
+                <div className="weel">
                 <img
                 loading="lazy"
                 srcSet="/img/home_page/sym/weel.svg" 
                 />
+                </div>
                 </div>
                 <div className="text-blue-950 text-2xl font-bold leading-7 self-stretch mt-6">
                   Orthopedics
@@ -308,20 +331,26 @@ export default async function Home() {
                   diam sed stet.
                 </div>
                 <div className="text-blue-600 text-center text-base font-black leading-4 whitespace-nowrap justify-center items-center bg-white aspect-square h-10 mt-6 px-3.5 rounded-[40px]">
+                
+                <div className="plus">
                 <img
                 loading="lazy"
                 srcSet="/img/home_page/sym/plus.svg" 
                 />
+                </div>
                 </div>
               </div>
             </div>
             <div className="flex flex-col items-stretch w-[33%] ml-5 max-md:w-full max-md:ml-0">
               <div className="self-stretch bg-blue-50 flex grow flex-col w-full pl-12 pr-16 py-12 rounded-lg items-start max-md:mt-6 max-md:px-5">
                 <div className="text-blue-600 text-2xl font-black leading-6 whitespace-nowrap justify-center items-center bg-white aspect-square h-[65px] px-6 rounded-[32.5px] max-md:px-5">
+                
+                <div className="tee">
                 <img
                 loading="lazy"
                 srcSet="/img/home_page/sym/tee.svg" 
                 />
+                </div>
                 </div>
                 <div className="text-blue-950 text-2xl font-bold leading-7 self-stretch mt-6">
                   Dental Surgery
@@ -334,20 +363,26 @@ export default async function Home() {
                   diam sed stet.
                 </div>
                 <div className="text-blue-600 text-center text-base font-black leading-4 whitespace-nowrap justify-center items-center bg-white aspect-square h-10 mt-6 px-3.5 rounded-[40px]">
+                
+                <div className="plus">
                 <img
                 loading="lazy"
                 srcSet="/img/home_page/sym/plus.svg" 
                 />
+                </div>
                 </div>
               </div>
             </div>
             <div className="flex flex-col items-stretch w-[33%] ml-5 max-md:w-full max-md:ml-0">
               <div className="self-stretch bg-blue-50 flex grow flex-col w-full pl-12 pr-16 py-12 rounded-lg items-start max-md:mt-6 max-md:px-5">
                 <div className="text-blue-600 text-2xl font-black leading-6 whitespace-nowrap justify-center items-center bg-white aspect-square h-[65px] px-5 rounded-[32.5px]">
+                
+                <div className="lab">
                 <img
                 loading="lazy"
                 srcSet="/img/home_page/sym/lab.svg" 
                 />
+                </div>
                 </div>
                 <div className="text-blue-950 text-2xl font-bold leading-7 self-stretch mt-6">
                   Laboratory
@@ -360,10 +395,13 @@ export default async function Home() {
                   diam sed stet.
                 </div>
                 <div className="text-blue-600 text-center text-base font-black leading-4 whitespace-nowrap justify-center items-center bg-white aspect-square h-10 mt-6 px-3.5 rounded-[40px]">
+                
+                <div className="plus">
                 <img
                 loading="lazy"
                 srcSet="/img/home_page/sym/plus.svg" 
                 />
+                </div>
                 </div>
               </div>
             </div>
@@ -375,10 +413,14 @@ export default async function Home() {
 
       <div className="features">
         <div className="items-stretch bg-blue-600 flex w-full flex-col justify-center mt-24 max-md:max-w-full max-md:mt-10">
+        
+        <div className="ff">
         <div className="flex-wrap w-full max-md:max-w-full max-md:pl-5">
           <div className="gap-5 flex max-md:flex-col max-md:items-stretch max-md:gap-0">
-            <div className="flex flex-col items-stretch w-[38%] max-md:w-full max-md:ml-0">
+            <div className="flex flex-col items-stretch w-[58%] max-md:w-full max-md:ml-0">
               <div className="flex flex-col my-auto max-md:max-w-full max-md:mt-10">
+                
+                
                 <div className="text-blue-50 text-base leading-6 whitespace-nowrap items-stretch border justify-center px-6 py-1.5 rounded-[800px] border-solid border-blue-200 self-start max-md:px-5">
                   Features
                 </div>
@@ -465,7 +507,10 @@ export default async function Home() {
                 </div>
               </div>
             </div>
+            
+            
             <div className="flex flex-col items-stretch w-[62%] ml-5 max-md:w-full max-md:ml-0">
+              
               <img
                 loading="lazy"
                 srcSet="/img/home_page/doc10.jpg"
@@ -473,6 +518,7 @@ export default async function Home() {
               />
             </div>
           </div>
+        </div>
         </div>
         </div>
       </div>
@@ -544,11 +590,15 @@ export default async function Home() {
               </div>
               <div className="flex flex-col items-stretch w-3/12 ml-5 max-md:w-full max-md:ml-0">
                 <div className="items-stretch self-stretch flex grow flex-col rounded-lg max-md:mt-6">
+                  
+                <div className="team-4">
                   <img
                     loading="lazy"
                     srcSet="/img/doctorPageIMG/team-4.jpg.png"
                     className="aspect-[0.83] object-contain object-center w-full overflow-hidden"
                   />
+                  
+                  </div>
                   <div className="items-center bg-blue-50 flex flex-col px-20 py-6 max-md:px-5">
                     <div className="text-blue-950 text-center text-xl font-bold leading-6 whitespace-nowrap">
                       Doctor Name
