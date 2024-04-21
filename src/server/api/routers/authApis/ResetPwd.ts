@@ -11,6 +11,8 @@ import { TRPCError } from "@trpc/server";
 import { hashPwd } from "@/utils/hashPwdHelper";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { generatePasswordResetToken, verifyPasswordResetToken } from "@/utils/lib/auth/pwdResetHelpers";
+import { SendPwdResetMailPayloadT } from "@/utils/types";
+import { addQueue_EmailToSend } from "@/utils/lib/com_queue";
 
 const crypto = require('crypto');
 
@@ -99,7 +101,29 @@ const PasswordResetRouter = createTRPCRouter({
 
             const jwt = await generatePasswordResetToken(user.id)
 
+
             const reseturl = `${process.env.APP_URL}/auth/reset/${jwt}`
+
+
+            if (input.requsetmode === "email") {
+
+                const message: SendPwdResetMailPayloadT = {
+                    email: user.email,
+                    url: reseturl,
+                    username: user.username
+                }
+
+
+
+                await addQueue_EmailToSend(message, "pwd-reset")
+
+            }
+
+
+            if (input.requsetmode === "phone") {
+
+            }
+
 
 
 

@@ -5,13 +5,14 @@ import Link from "next/link";
 import Image from "next/image";
 import myImage from "./assets/logo-inline-qRb.png";
 import { date, z } from "zod";
-import { Button, Input, SegmentedControl } from "@mantine/core";
+import { Button, Input, InputBase, SegmentedControl } from "@mantine/core";
 import { IconAt } from "@tabler/icons-react";
 import { phoneRegex } from "@/utils/ValidationSchemas/commonSc";
 import { useForm, zodResolver } from "@mantine/form";
 import { useApiClient } from "@/utils/trpc/Trpc";
 import { useRouter } from "next/navigation";
 import { notifications } from "@mantine/notifications";
+import { IMaskInput } from "react-imask";
 
 //
 
@@ -83,9 +84,9 @@ const Page = () => {
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col ">
       <div className="bg-[#111827] h-screen w-screen  mx-auto flex items-center justify-center">
-        <div className="mt-5">
+        <div className="mt-5 ">
           <Image
             className="flex items-center w-1/2 h-12 mx-auto mb-8 xl:w-1/3 xl:h-20 xl:my-5 md:h-18 md:w-1/3 md:h-20 "
             src={myImage}
@@ -110,8 +111,9 @@ const Page = () => {
                   Forgot your password?
                 </div>
                 <div className="text-[#9CA3AF] text-[14px] lg:text-[16px] leading-[24px] font-[400]">
-                  Don&#39;t fret! Just type in your email and we will send you a
-                  link to reset your password!
+                  Don&#39;t fret! Just type in your{" "}
+                  {showEmail ? "email address" : "phone(whatsapp)"} and we will
+                  send you a link to reset your password!
                 </div>
               </div>
               <form
@@ -161,15 +163,20 @@ const Page = () => {
                         className="mt-2"
                         {...form.getInputProps("phone")}
                       >
-                        <Input
+                        <InputBase
                           {...form.getInputProps("phone")}
-                          placeholder="+94123456789"
+                          component={IMaskInput}
+                          mask="+94 (000) 000-0000"
                           mt="md"
                           size="md"
+                          placeholder="Your Phone Number "
                           classNames={{
                             input:
                               "bg-slate-700 text-white p-3 py-2 w-full border-none b focus:border-solid rounded-md text-sm hover:bg-gray-700 focus:bg-gray-700  hover:text-white ",
                           }}
+                          {...form.getInputProps("patientMobile", {
+                            type: "input",
+                          })}
                         />
                       </Input.Wrapper>
                     </div>

@@ -14,6 +14,52 @@ export type UserDataType = TUsersGet["data"][0];
 
 export type TStaffTypes = (typeof stafftypes)[number]
 
+export type reqT = "otp" | "pwd-reset" | "appointment"
+
+type commonOTPPayloadT = {
+    username: string;
+    otp: string;
+}
+
+export type sendEmailOTPPayloadT = {
+
+    email: string;
 
 
+} & commonOTPPayloadT
+
+export type sendMessageOTPPayloadT = {
+    phoneNumber: string;
+} & commonOTPPayloadT
+
+
+
+type commonPWDResetPayloadT = {
+    url: string;
+    username: string;
+}
+
+export type SendPwdResetMailPayloadT = {
+    email: string;
+} & commonPWDResetPayloadT
+
+
+
+type commonAppointmentRequestPayloadT = {
+    type: "booking" | "checking" | "cancelled" | "completed" | "rescheduled";
+    date: string;
+    patientName: string;
+    doctorName: string;
+    time: string;
+    referenceId: string;
+}
+
+
+export type SendEmailAppointmentRequestPayloadT = {
+    email: string;
+} & commonAppointmentRequestPayloadT
+
+export type SendMessageAppointmentPayloadT = {
+    phoneNumber: string;
+} & commonAppointmentRequestPayloadT
 
