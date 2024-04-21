@@ -234,6 +234,7 @@ export default function AppointmentBookingForm({
 
   /// FUNCTION TO HANDLE FORM SUBMISSION
   const formsubmitHanlder = async () => {
+    console.log(form.values);
     try {
       const createAppointment = await mutateAsync({
         AppointmentDate: form.values.AppointmentDate,
@@ -254,7 +255,7 @@ export default function AppointmentBookingForm({
           patientAddress: form.values.patientAddress,
         }),
         ...(form.values.patientMobile && {
-          patientMobile: "+" + form.values.patientMobile.replace(/\D/g, ""),
+          patientMobile: form.values.patientMobile,
         }),
       });
       if (createAppointment && !createError) {

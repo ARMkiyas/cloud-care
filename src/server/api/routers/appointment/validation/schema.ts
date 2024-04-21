@@ -2,7 +2,7 @@
 import "server-only";
 import { Appointmentstatus, gender, title } from "@prisma/client"
 import { date, z } from "zod"
-import { pagenationSchema } from "@/utils/ValidationSchemas/commonSc";
+import { pagenationSchema, phoneValidationSc } from "@/utils/ValidationSchemas/commonSc";
 
 
 export const createAppointmentSchema = z.object({
@@ -17,7 +17,7 @@ export const createAppointmentSchema = z.object({
     patientGender: z.nativeEnum(gender),
     patientDob: z.date(),
     patientAddress: z.string().min(5).optional(),
-    patientMobile: z.string().min(9).max(14).optional(),
+    patientMobile: phoneValidationSc.optional(),
     patientEmail: z.string().email(),
     patientNote: z.string().optional()
 

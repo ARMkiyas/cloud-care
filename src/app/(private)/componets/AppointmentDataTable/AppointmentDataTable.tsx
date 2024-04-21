@@ -266,7 +266,9 @@ export default function AppointmentDataTable() {
           size="sm"
           variant="transparent"
           color="gray"
-          disabled={record.status == "Completed"}
+          disabled={
+            record.status == "Completed" || record.status == "Cancelled"
+          }
           onClick={() => openEditModal([record], "Cancelled")}
         >
           <IconCalendarCancel size={16} />
