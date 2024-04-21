@@ -6,6 +6,7 @@ import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { TRPCError } from "@trpc/server";
 import { updateUserSchema } from "./validation/schema";
 import { generate2FASecret } from "@/utils/OtpHelper";
+import { sendPasswordReset } from "@/utils/lib/auth/pwdResetHelpers";
 
 
 
@@ -27,7 +28,6 @@ const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ 
                 message: "You cannot update your own account here, if you want to update your account go to profile settings and update your account",
             })
         }
-
 
 
 
@@ -58,7 +58,10 @@ const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ 
         }
         );
 
-        console.log(user.twoFactorEnabled, "twoFactorEnabled after");
+        if (input.pwdreet) {
+            await sendPasswordReset(user.id, "email")
+        }
+
 
 
         return {

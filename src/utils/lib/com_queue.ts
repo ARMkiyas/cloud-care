@@ -1,13 +1,13 @@
 import "server-only"
 import { QueueEmailClientSingleton, QueueMessageClientSingleton } from "./storage/QueueClient";
-import { reqT, SendEmailAppointmentRequestPayloadT, sendEmailOTPPayloadT, SendMessageAppointmentPayloadT, sendMessageOTPPayloadT, SendPwdResetMailPayloadT } from "../types";
+import { reqT, SendEmailAppointmentRequestPayloadT, sendEmailOTPPayloadT, SendMessageAppointmentPayloadT, sendMessageOTPPayloadT, SendPwdResetMailPayloadT, SendPwdResetMessagePayloadT } from "../types";
 
 
 
 const encodeMessage = (message: string) => Buffer.from(message).toString('base64')
 
 
-type datapayloadT = SendPwdResetMailPayloadT | sendEmailOTPPayloadT | SendEmailAppointmentRequestPayloadT | sendMessageOTPPayloadT | SendMessageAppointmentPayloadT
+type datapayloadT = SendPwdResetMailPayloadT | sendEmailOTPPayloadT | SendEmailAppointmentRequestPayloadT | sendMessageOTPPayloadT | SendMessageAppointmentPayloadT | SendPwdResetMessagePayloadT
 
 type addQueue_ToSendT = (datapayload: datapayloadT, type: reqT, mode: "email" | "wp" | "both") => Promise<void>
 

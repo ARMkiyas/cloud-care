@@ -7,7 +7,10 @@ import myImage from "./assets/logo-inline-qRb.png";
 import { date, z } from "zod";
 import { Button, Input, InputBase, SegmentedControl } from "@mantine/core";
 import { IconAt } from "@tabler/icons-react";
-import { phoneRegex } from "@/utils/ValidationSchemas/commonSc";
+import {
+  phoneRegex,
+  phoneValidationSc,
+} from "@/utils/ValidationSchemas/commonSc";
 import { useForm, zodResolver } from "@mantine/form";
 import { useApiClient } from "@/utils/trpc/Trpc";
 import { useRouter } from "next/navigation";
@@ -18,11 +21,7 @@ import { IMaskInput } from "react-imask";
 
 // Define the schema for form validation using Zod
 const forgotPasswordPhoneSchema = z.object({
-  phone: z
-    .string()
-    .min(12, "Please Provide valid Phone Number")
-    .max(14, "Please Provide valid Phone Number")
-    .regex(phoneRegex, "Invalid phone Number"),
+  phone: phoneValidationSc,
 });
 
 const forgotPasswordEmailSchema = z.object({
@@ -161,10 +160,8 @@ const Page = () => {
                           label: "text-white text-xl",
                         }}
                         className="mt-2"
-                        {...form.getInputProps("phone")}
                       >
                         <InputBase
-                          {...form.getInputProps("phone")}
                           component={IMaskInput}
                           mask="+94 (000) 000-0000"
                           mt="md"
@@ -174,7 +171,7 @@ const Page = () => {
                             input:
                               "bg-slate-700 text-white p-3 py-2 w-full border-none b focus:border-solid rounded-md text-sm hover:bg-gray-700 focus:bg-gray-700  hover:text-white ",
                           }}
-                          {...form.getInputProps("patientMobile", {
+                          {...form.getInputProps("phone", {
                             type: "input",
                           })}
                         />

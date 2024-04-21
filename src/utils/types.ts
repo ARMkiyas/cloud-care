@@ -44,6 +44,11 @@ export type SendPwdResetMailPayloadT = {
 } & commonPWDResetPayloadT
 
 
+export type SendPwdResetMessagePayloadT = {
+    phoneNumber: string;
+} & commonPWDResetPayloadT
+
+
 export type appointmentNotificationT = "booking" | "checking" | "cancelled" | "completed" | "rescheduled";
 
 export type commonAppointmentRequestPayloadT = {
