@@ -82,6 +82,39 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
 
         const slotTimePerAppointment = (new Date(slot.endTime).getTime() - new Date(slot.startTime).getTime()) / slot.maxAppointmentsPerSlot
 
+
+
+
+        const patientUpsert = await ctx.db.patient.upsert({
+            where: {
+                NIC: input.patientNIC && input.patientNIC.trim(),
+                Passport: input.patientPassport && input.patientPassport.trim()
+            },
+            create: {
+                title: input.patientTitle,
+                firstName: input.patientFirstName,
+                lastName: input.patientLastName,
+                NIC: input.patientNIC && input.patientNIC.trim(),
+                Passport: input.patientPassport && input.patientPassport.trim(),
+                dateOfBirth: new Date(dayjs(input.patientDob).format("YYYY-MM-DD")).toISOString(),
+                email: input.patientEmail,
+                gender: input.patientGender,
+                address: input.patientAddress,
+                phone: input.patientMobile
+            },
+            update: {
+                title: input.patientTitle,
+                firstName: input.patientFirstName,
+                lastName: input.patientLastName,
+                dateOfBirth: new Date(dayjs(input.patientDob).format("YYYY-MM-DD")).toISOString(),
+                email: input.patientEmail,
+                gender: input.patientGender,
+                address: input.patientAddress,
+                phone: input.patientMobile,
+
+            }
+        })
+
         const appointment = await ctx.db.appointment.create({
             data: {
                 doctor: {
@@ -100,24 +133,8 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
                     }
                 },
                 patient: {
-                    connectOrCreate: {
-                        where: {
-                            NIC: input.patientNIC && input.patientNIC.trim(),
-                            Passport: input.patientPassport && input.patientPassport.trim()
-                        },
-
-                        create: {
-                            title: input.patientTitle,
-                            firstName: input.patientFirstName,
-                            lastName: input.patientLastName,
-                            NIC: input.patientNIC && input.patientNIC.trim(),
-                            Passport: input.patientPassport && input.patientPassport.trim(),
-                            dateOfBirth: new Date(dayjs(input.patientDob).format("YYYY-MM-DD")).toISOString(),
-                            email: input.patientEmail,
-                            gender: input.patientGender,
-                            address: input.patientAddress,
-                            phone: input.patientMobile
-                        },
+                    connect: {
+                        id: patientUpsert.id
                     }
                 },
                 appointmentDate: new Date(dayjs(input.AppointmentDate).format("YYYY-MM-DD")).toISOString(),
