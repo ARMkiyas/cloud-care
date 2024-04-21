@@ -45,7 +45,7 @@ export type SendPwdResetMailPayloadT = {
 
 
 
-type commonAppointmentRequestPayloadT = {
+export type commonAppointmentRequestPayloadT = {
     type: "booking" | "checking" | "cancelled" | "completed" | "rescheduled";
     date: string;
     patientName: string;

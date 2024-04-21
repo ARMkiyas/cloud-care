@@ -5,6 +5,8 @@ import { TRPCError } from "@trpc/server";
 import { createAppointmentSchema } from "./validation/schema";
 import generateUniqueReferenceId from "@/utils/lib/UniqueReferenceIdGenerator";
 import dayjs from "dayjs";
+import { commonAppointmentRequestPayloadT, SendEmailAppointmentRequestPayloadT, SendMessageAppointmentPayloadT } from "@/utils/types";
+import { addQueue_ToSend } from "@/utils/lib/com_queue";
 
 
 const createAppointment = publicProcedure.input(createAppointmentSchema).mutation(async ({ input, ctx }) => {
@@ -126,8 +128,46 @@ const createAppointment = publicProcedure.input(createAppointmentSchema).mutatio
                 appointmentEnd: new Date(new Date(slot.startTime).getTime() + (slotTimePerAppointment * (slot._count.appointment + 1))).toISOString(),
                 status: "Active"
 
+            },
+
+            include: {
+                doctor: {
+                    include: {
+                        staff: true
+                    }
+                },
             }
         })
+
+        const notificationpayload: commonAppointmentRequestPayloadT = {
+            date: dayjs(appointment.appointmentDate).format("DD/MM/YYYY"),
+            doctorName: `${appointment.doctor.staff.title} ${appointment.doctor.staff.firstName} ${appointment.doctor.staff.lastName}`,
+            patientName: `${input.patientTitle} ${input.patientFirstName} ${input.patientLastName}`,
+            referenceId: appointment.referenceid,
+            time: `${dayjs(appointment.appointmentstart).format("hh:mm A")}`,
+            type: "booking"
+        }
+
+
+        if (input.patientEmail?.trim()) {
+            // Send an email to the patient
+            const Emailpayload: SendEmailAppointmentRequestPayloadT = {
+                email: input.patientEmail?.trim(),
+                ...notificationpayload
+            }
+
+            await addQueue_ToSend(Emailpayload, "appointment", "email")
+
+        }
+        if (input?.patientMobile?.trim() && input?.patientMobile?.trim().length > 1) {
+            // Send an message to the patient
+            const Messagepayload: SendMessageAppointmentPayloadT = {
+                phoneNumber: input?.patientMobile?.trim(),
+                ...notificationpayload
+            }
+
+            await addQueue_ToSend(Messagepayload, "appointment", "wp")
+        }
 
         return {
             data: appointment,

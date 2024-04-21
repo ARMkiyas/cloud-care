@@ -5,6 +5,7 @@ import { UserRoles } from "@prisma/client";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { TRPCError } from "@trpc/server";
 import { updateUserSchema } from "./validation/schema";
+import { generate2FASecret } from "@/utils/OtpHelper";
 
 
 
@@ -27,6 +28,9 @@ const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ 
             })
         }
 
+
+
+
         const user = await ctx.db.user.update({
             where: {
                 id: input.userid.trim(),
@@ -42,11 +46,19 @@ const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ 
                         }
                     }
                 }),
-                ...(input.twoFactorEnabled && { twoFactorEnabled: input.twoFactorEnabled }),
+                ...(input.twoFactorEnabled ? {
+                    twoFactorEnabled: input.twoFactorEnabled,
+                    twoFactorSecret: generate2FASecret()
+                } : {
+                    twoFactorEnabled: false,
+                    twoFactorSecret: null
+                }),
                 ...(input.image && { image: input.image }),
             }
         }
         );
+
+        console.log(user.twoFactorEnabled, "twoFactorEnabled after");
 
 
         return {

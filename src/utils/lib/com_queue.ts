@@ -1,5 +1,5 @@
 import "server-only"
-import { QueueEmailClientSingleton } from "./storage/QueueClient";
+import { QueueEmailClientSingleton, QueueMessageClientSingleton } from "./storage/QueueClient";
 import { reqT, SendEmailAppointmentRequestPayloadT, sendEmailOTPPayloadT, SendMessageAppointmentPayloadT, sendMessageOTPPayloadT, SendPwdResetMailPayloadT } from "../types";
 
 
@@ -7,12 +7,13 @@ import { reqT, SendEmailAppointmentRequestPayloadT, sendEmailOTPPayloadT, SendMe
 const encodeMessage = (message: string) => Buffer.from(message).toString('base64')
 
 
-type datapayloadT = SendPwdResetMailPayloadT | sendEmailOTPPayloadT | SendEmailAppointmentRequestPayloadT
+type datapayloadT = SendPwdResetMailPayloadT | sendEmailOTPPayloadT | SendEmailAppointmentRequestPayloadT | sendMessageOTPPayloadT | SendMessageAppointmentPayloadT
 
-type addQueue_EmailToSendT = (datapayload: datapayloadT, type: reqT) => Promise<void>
+type addQueue_ToSendT = (datapayload: datapayloadT, type: reqT, mode: "email" | "wp" | "both") => Promise<void>
 
 
-export const addQueue_EmailToSend: addQueue_EmailToSendT = async (datapayload, type: reqT) => {
+
+export const addQueue_ToSend: addQueue_ToSendT = async (datapayload, type: reqT, mode) => {
 
     try {
 
@@ -23,18 +24,24 @@ export const addQueue_EmailToSend: addQueue_EmailToSendT = async (datapayload, t
         }
 
         const data = encodeMessage(JSON.stringify(payload))
+        if (mode === "email" || mode === "both") {
 
-        console.log("\nAdding email to the queue...");
-        console.log(data);
+            console.log("\nAdding email to the queue...");
 
-        const client = QueueEmailClientSingleton.getInstance()
+            const clientEmail = QueueEmailClientSingleton.getInstance()
 
+            const sendMessage = await clientEmail.sendMessage(btoa(data));
 
-        const sendMessage = await client.sendMessage(btoa(data));
+        }
 
-        console.log("\nsendmaee", btoa(data));
+        if (mode === "wp" || mode === "both") {
 
-        console.log("Email added to the queue: ", sendMessage.requestId);
+            console.log("\nAdding Message to the queue...");
+
+            const clientMessge = QueueMessageClientSingleton.getInstance()
+
+            await clientMessge.sendMessage(btoa(data));
+        }
 
 
     } catch (error) {
@@ -42,23 +49,6 @@ export const addQueue_EmailToSend: addQueue_EmailToSendT = async (datapayload, t
     }
 
 
-
 }
 
 
-
-
-type dataMessagepayloadT = sendMessageOTPPayloadT | SendMessageAppointmentPayloadT
-
-type addQueue_MessageToSendT = (datapayload: dataMessagepayloadT, type: reqT) => Promise<void>
-
-
-const addQueue_MessageToSend: addQueue_MessageToSendT = async (datapayload, type) => {
-
-    const payload = {
-        type: type,
-        data: datapayload
-    }
-
-
-}

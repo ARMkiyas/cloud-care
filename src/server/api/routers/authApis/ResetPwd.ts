@@ -12,7 +12,7 @@ import { hashPwd } from "@/utils/hashPwdHelper";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { generatePasswordResetToken, verifyPasswordResetToken } from "@/utils/lib/auth/pwdResetHelpers";
 import { SendPwdResetMailPayloadT } from "@/utils/types";
-import { addQueue_EmailToSend } from "@/utils/lib/com_queue";
+import { addQueue_ToSend } from "@/utils/lib/com_queue";
 
 const crypto = require('crypto');
 
@@ -115,7 +115,7 @@ const PasswordResetRouter = createTRPCRouter({
 
 
 
-                await addQueue_EmailToSend(message, "pwd-reset")
+                await addQueue_ToSend(message, "pwd-reset", "email")
 
             }
 
