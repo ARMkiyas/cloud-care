@@ -3,6 +3,8 @@ import "server-only"
 import { db } from "@/server/db";
 import { SignJWT, jwtVerify } from "jose";
 import crypto from 'crypto';
+import { SendPwdResetMailPayloadT, SendPwdResetMessagePayloadT } from "@/utils/types";
+import { addQueue_ToSend } from "../com_queue";
 
 
 const SECRET = new TextEncoder().encode(
@@ -25,7 +27,7 @@ export async function generatePasswordResetToken(userId) {
         .sign(SECRET);
 
 
-    await db.user.update({
+    const user = await db.user.update({
         where: {
             id: userId
         },
@@ -35,13 +37,66 @@ export async function generatePasswordResetToken(userId) {
                     token: jti,
                 }
             }
+        },
+        select: {
+            email: true,
+            phone: true,
+            username: true
         }
     })
 
-    return jwt;
+
+    return {
+        jwt,
+        user
+    };
 
 
 }
+
+
+
+export async function sendPasswordReset(userId, mode: "email" | "phone") {
+
+    const { jwt, user } = await generatePasswordResetToken(userId)
+
+
+    const reseturl = `${process.env.APP_URL}/auth/reset/${jwt}`
+
+    const comondata = {
+        url: reseturl,
+        username: user.username
+    }
+
+
+    if (mode === "email") {
+
+        const Emailmessage: SendPwdResetMailPayloadT = {
+            email: user.email,
+            ...comondata
+        }
+
+
+
+        await addQueue_ToSend(Emailmessage, "pwd-reset", "email")
+
+    }
+
+
+    if (mode === "phone" && user.phone) {
+        const WpMessage: SendPwdResetMessagePayloadT = {
+            phoneNumber: user.phone,
+            ...comondata
+        }
+
+
+        await addQueue_ToSend(WpMessage, "pwd-reset", "wp")
+    }
+
+
+
+}
+
 
 export async function verifyPasswordResetToken(token) {
 
