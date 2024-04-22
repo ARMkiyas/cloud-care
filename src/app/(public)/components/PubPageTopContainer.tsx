@@ -1,3 +1,5 @@
+"use client";
+
 interface pubPageTopContainerProps {
   title: string;
   path: string[];
