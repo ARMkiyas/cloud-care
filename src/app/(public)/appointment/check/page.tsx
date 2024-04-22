@@ -14,7 +14,7 @@ import {
   Text,
 } from "@mantine/core";
 import { IMaskInput } from "react-imask";
-import { IconCalendarPlus } from "@tabler/icons-react";
+import { IconCalendarSearch } from "@tabler/icons-react";
 import Link from "next/link";
 import { useForm, zodResolver } from "@mantine/form";
 import { useApiClient } from "@/utils/trpc/Trpc";
@@ -80,8 +80,6 @@ export default function page() {
           : { patientPassport: form.values.idnumber }),
         referenceId: form.values.referenceId,
       });
-
-      console.log(response);
     } catch (error) {
       console.log(error);
     }
@@ -193,8 +191,11 @@ export default function page() {
                   </div>
                   <div className="w-full text-center">
                     <Button
-                      leftSection={<IconCalendarPlus />}
+                      leftSection={<IconCalendarSearch />}
                       loading={isLoading}
+                      loaderProps={{
+                        type: "dots",
+                      }}
                       fullWidth
                       type="submit"
                       size="lg"

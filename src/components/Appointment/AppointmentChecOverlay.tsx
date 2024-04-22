@@ -1,14 +1,11 @@
 import { Badge, Button, Chip, Divider, Overlay, Text } from "@mantine/core";
 import React from "react";
-import AnimatedCheck from "../icon/animatedCheck/AnimatedCheck";
 import {
   IconCalendarCheck,
   IconCalendarClock,
   IconCalendarDot,
   IconCalendarOff,
   IconCalendarSearch,
-  IconCircleCheck,
-  IconListSearch,
   IconStethoscope,
   IconUser,
 } from "@tabler/icons-react";
