@@ -11,6 +11,7 @@ import AppointmentBookingForm from "@/components/Appointment/AppointmentBookingF
 import PubPageTopContainer from "./components/PubPageTopContainer";
 import AppointmentContactCard from "./components/AppointmentContactCard";
 
+
 export const dynamic = "force-dynamic";
 
 // This function is used to call the API server
@@ -40,15 +41,15 @@ export default async function Home() {
                   Heppiness
                 </div>
                 <div className="items-stretch content-start flex-wrap flex justify-between gap-5 mt-6 pt-6 px-3 max-md:max-w-full">
-                  <div className="justify-center flex grow basis-[0%] flex-col pl-10 pr-50 border-l-blue-50 border-l border-solid items-start max-md:px-5">
+                  <div className="justify-center flex grow basis-[0%] flex-col pl-10 pr-50 items-start max-md:px-5 hbox">
                     <div className="text-white text-3xl font-bold leading-10">
                       123
-                    </div>
+                    </div>  
                     <div className="text-blue-50 text-base leading-6 whitespace-nowrap mt-1">
                       Expert Doctors
                     </div>
                   </div>
-                  <div className="justify-center flex grow basis-[0%] flex-col pl-6 pr-20 border-l-blue-50 border-l border-solid items-start max-md:px-5">
+                  <div className="justify-center flex grow basis-[0%] flex-col pl-6 pr-20 items-start max-md:px-5 hbox hb">
                     <div className="text-white text-3xl font-bold leading-10 whitespace-nowrap">
                       1234
                     </div>
@@ -56,7 +57,7 @@ export default async function Home() {
                       Medical Stuff
                     </div>
                   </div>
-                  <div className="justify-center flex grow basis-[0%] flex-col pl-6 pr-20 border-l-blue-50 border-l border-solid items-start max-md:px-5">
+                  <div className="justify-center flex grow basis-[0%] flex-col pl-6 pr-20 items-start max-md:px-5 hbox">
                     <div className="text-white text-3xl font-bold leading-10 whitespace-nowrap">
                       12345
                     </div>

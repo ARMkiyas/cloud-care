@@ -68,7 +68,21 @@
 
 .appointment{
   margin-left: 115px;
-  margin-right: 82px;
+  margin-right: 92px;
+}
+
+.hbox {
+  border-left: 1px solid white;
+  border-bottom: none;
+  border-top: none;
+  border-right: none;
+  
+}
+
+.hb{
+
+  margin-left: 60px;
+
 }
 
 
