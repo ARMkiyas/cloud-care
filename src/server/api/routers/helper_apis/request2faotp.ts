@@ -1,6 +1,6 @@
 import "server-only";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../../trpc";
-import { generateOTP } from "@utils/OtpHelper"
+import { generateOTP, sendotp } from "@utils/OtpHelper"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 
 
@@ -33,9 +33,8 @@ export const request2faotp = createTRPCRouter({
 
                 }
 
-                const otp = await generateOTP(user.twoFactorSecret)
+                await sendotp(user.username, user.twoFactorSecret, user.email, user.phone)
 
-                console.log(otp);
 
                 // await ctx.db.log.create({
                 //     data: {
