@@ -30,12 +30,60 @@ const CheckAppointmentProcedure = publicProcedure.input(CheckAppointmentProcedur
 
                     }
                 }
+            },
+            include: {
+                patient: {
+                    select: {
+                        title: true,
+                        firstName: true,
+                        lastName: true,
+                        NIC: true,
+                        Passport: true,
+
+                    }
+                },
+                doctor: {
+                    select: {
+                        staff: {
+                            select: {
+                                title: true,
+                                firstName: true,
+                                lastName: true,
+                            },
+
+                        },
+                        specialization: true,
+                    }
+                }
             }
+
 
         })
 
+
+
+        const responsedata = {
+            doctor: {
+                name: `${appointments.doctor.staff.title} ${appointments.doctor.staff.firstName} ${appointments.doctor.staff.lastName}`,
+                docspecialization: appointments.doctor.specialization,
+            },
+            patient: {
+                name: `${appointments.patient.title} ${appointments.patient.firstName} ${appointments.patient.lastName}`,
+                NIC: appointments.patient.NIC,
+                Passport: appointments.patient.Passport,
+            },
+            referenceId: appointments.referenceid,
+            date: appointments.appointmentDate,
+            time: appointments.appointmentstart,
+            number: appointments.appointmentNumber,
+            status: appointments.status,
+            created: appointments.createdat,
+            updated: appointments.updatedat,
+
+        }
+
         return {
-            data: appointments,
+            data: responsedata,
             status: 200,
             error: null,
             ok: true,

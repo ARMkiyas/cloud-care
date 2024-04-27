@@ -9,6 +9,8 @@ import "@mantine/notifications/styles.css";
 import "@mantine/dates/styles.css";
 import "mantine-datatable/styles.layer.css";
 import "mantine-contextmenu/styles.layer.css";
+import "mantine-react-table/styles.css";
+
 import "@/styles/globals.css";
 
 import theme from "@styles/Mglobaltheme";

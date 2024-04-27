@@ -48,13 +48,17 @@ const PageLinks = [
     label: "Staffs",
     icon: FaUserDoctor,
     links: [
-      { label: "All Staff", link: "/dashboard/staffs/all-staff" },
+      { label: "All Staff", link: "/dashboard/staffs/all-staffs" },
       { label: "Doctors", link: "/dashboard/staffs/doctors" },
 
       { label: "Nurses", link: "/dashboard/staffs/nurses" },
       {
         label: "Administrators and Managers",
         link: "/dashboard/staffs/admins",
+      },
+      {
+        label: "Other Staffs",
+        link: "/dashboard/staffs/others",
       },
     ],
     permission: permissions.STAFF_READ,

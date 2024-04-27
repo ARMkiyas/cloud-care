@@ -15,12 +15,24 @@ import { db } from "./db";
 import type { Adapter } from "next-auth/adapters";
 import { hashPwd, verifyPwd } from "@utils/hashPwdHelper";
 
-import { generateOTP, verifyOtp } from "@utils/OtpHelper"
+import { generateOTP, sendotp, verifyOtp } from "@utils/OtpHelper"
 import { date, z } from "zod";
 import { PrismaClient, Permissions, UserRoles } from "@prisma/client";
 import { JWT } from "next-auth/jwt";
 import { EncryptJWT, SignJWT, base64url, jwtVerify, jwtDecrypt } from "jose";
 
+
+
+
+const profileUpdateSchema = z.object({
+  name: z.string().min(1, "name Requred"),
+  email: z.string().email(),
+  image: z.string(),
+  username: z.string().min(1, "username Requred"),
+  twoFactorEnabled: z.boolean(),
+
+
+})
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -179,20 +191,23 @@ export const authOptions: NextAuthOptions = {
 
 
 
+          console.log(user);
+
 
           if (!user) return null
 
           const isvalid = await verifyPwd(password, user.password)
 
+
           if (isvalid && isvalid !== undefined) {
 
-            //Any object returned will be saved in `user` property of the JWT
 
+            //Any object returned will be saved in `user` property of the JWT
+            console.log(isvalid);
             if (user.twoFactorEnabled) {
 
-              const otp = await generateOTP(user.twoFactorSecret)
+              await sendotp(user.username, user.twoFactorSecret, user.email, user.phone)
 
-              console.log("2fa otp:", otp);
 
             }
 
@@ -266,10 +281,26 @@ export const authOptions: NextAuthOptions = {
       return true
     },
 
-    async jwt({ token, user, account, profile, isNewUser }) {
+    async jwt({ token, user, account, profile, isNewUser, trigger, session }) {
 
 
+      if (trigger === "update") {
+        console.log(session && profileUpdateSchema.safeParse(session).success);
+        if (session && profileUpdateSchema.safeParse(session).success) {
+          return {
+            ...token,
+            name: session.name,
+            email: session.email,
+            image: session.image,
+            username: session.username,
+            picture: session.image,
+            twoFactorEnabled: session.twoFactorEnabled,
+          }
+        }
 
+
+        return token
+      }
 
       if (user && account) {
         const access_token = account.provider === "2fa" && await getaccesstoken({
