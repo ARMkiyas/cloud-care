@@ -48,7 +48,7 @@ export const createStaffSchema = z.object({
     NIC: z.string().min(10).max(12).optional(),
     Passport: z.string().min(7).optional(),
     idNumber: z.string(),
-    image: imageSchema.optional(),
+    image: z.string().optional(),
     staffType: z.enum(["doctor", "nurse", "admin", "others"]),
     department: z.union([z.nativeEnum(adminDepartment), z.nativeEnum(MedicalDepartments)], {
         required_error: "Department is required",

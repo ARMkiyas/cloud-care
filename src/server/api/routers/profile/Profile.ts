@@ -44,7 +44,7 @@ export const profileRouter = createTRPCRouter({
                 }
 
             }
-            const updated_imageurl = input.picture ? await userImageUploader(input.picture) : null
+            const updated_imageurl = input.picture ? "dhdf" : null
 
             const update = await ctx.db.user.update({
                 where: {

@@ -14,6 +14,7 @@ import appointmentRouter from "./routers/appointment/appointmentRoot";
 import scheduleRouter from "./routers/schedule/scheduleRouter";
 import PasswordResetRouter from "./routers/authApis/ResetPwd";
 import { profileRouter } from "./routers/profile/Profile";
+import { requestimgUploadLink } from "./routers/helper_apis/requestimgUploadLink";
 
 
 // This is the primary router for server. All routers added in /api/trpc/[Routers] should be manually added here.
@@ -27,6 +28,8 @@ export const appRouter = createTRPCRouter({
     appointment: appointmentRouter,
     pwdreset: PasswordResetRouter,
     profile: profileRouter,
+
+    requestimgUploadLink: requestimgUploadLink,
 
 })
 

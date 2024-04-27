@@ -7,6 +7,7 @@ import { userImageUploader } from "@/utils/fileuploadhandler/userimageuploder"
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error"
 import { updatestaffSchema } from "./validation/schema"
 import dayjs from "dayjs";
+import { get_imageSigedURL } from "@/utils/lib/get_imageSigedURL";
 
 const updatestaffProceture = protectedProcedure.input(updatestaffSchema).mutation(async ({ ctx, input }) => {
 
@@ -54,7 +55,7 @@ const updatestaffProceture = protectedProcedure.input(updatestaffSchema).mutatio
                         NIC: input.data.NIC,
                         Passport: input.data.Passport,
                         phone: input.data.phone,
-                        image: input.data.image ? await userImageUploader(input.data.image, staff.image) : staff.image,
+                        image: input.data.image ? await get_imageSigedURL(input.data.image) : staff.image,
                         ...input.data.staffType === "admin" ? {
                             admin: {
                                 update: {
@@ -113,11 +114,7 @@ const updatestaffProceture = protectedProcedure.input(updatestaffSchema).mutatio
 
                 return update;
             },
-            {
-                maxWait: 7000, // default: 2000
-                timeout: 50000, // default: 5000
-                isolationLevel: Prisma.TransactionIsolationLevel.Serializable, // optional, default defined by database configuration
-            }
+
         )
 
 
