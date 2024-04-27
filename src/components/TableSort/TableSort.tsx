@@ -21,6 +21,7 @@ import { modals } from "@mantine/modals";
 import { MdLockReset } from "react-icons/md";
 import { notifications } from "@mantine/notifications";
 import { UserDataType } from "@/utils/types";
+import { useSession } from "next-auth/react";
 
 const ITEMS_PER_PAGE = 15;
 
@@ -36,6 +37,8 @@ const roleOptions: { label: string; value: UserRoles }[] = [
 interface RowData extends UserDataType {}
 
 const TableSort = ({}) => {
+  const { data: sessiondata } = useSession();
+
   const {
     mutateAsync: updateAsync,
     isError: userUpdateError,
@@ -90,6 +93,7 @@ const TableSort = ({}) => {
     modals.openConfirmModal({
       title: "Please confirm your action",
       centered: true,
+      hidden: !sessiondata?.user?.Permissions.includes("USERS_EDIT"),
       children: (
         <Text size="sm">
           Are you Sure you want to edit this? Please click one of these buttons
@@ -108,6 +112,7 @@ const TableSort = ({}) => {
     modals.openConfirmModal({
       title: "Delete your profile",
       centered: true,
+      hidden: !sessiondata?.user?.Permissions.includes("USERS_DELETE"),
       children: (
         <Text size="sm">Are you sure you want to delete this user?</Text>
       ),
@@ -122,6 +127,8 @@ const TableSort = ({}) => {
     });
 
   const toggleEditing = (userId: string) => {
+    if (!sessiondata?.user?.Permissions.includes("USERS_EDIT")) return;
+
     setEditingRow(editingRow === userId ? null : userId);
     // Reset edited data when toggling editing
     setEditedData(
@@ -312,7 +319,9 @@ const TableSort = ({}) => {
 
   return (
     <div className="space-y-3">
-      <ButtonAdd />
+      {sessiondata?.user?.Permissions.includes("APPOINTMENTS_WRITE") && (
+        <ButtonAdd />
+      )}
 
       <TextInput
         placeholder="Search by any field"
@@ -331,8 +340,10 @@ const TableSort = ({}) => {
               <Table.Th>User Name</Table.Th>
               <Table.Th className="text-center">2FA</Table.Th>
               <Table.Th className="text-center">Role</Table.Th>
-
-              <Table.Th>Action</Table.Th>
+              {(sessiondata?.user?.Permissions.includes("USERS_EDIT") ||
+                sessiondata?.user?.Permissions.includes("USERS_DELETE")) && (
+                <Table.Th>Action</Table.Th>
+              )}
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
@@ -430,33 +441,47 @@ const TableSort = ({}) => {
                         </div>
                       ) : (
                         <div className="flex items-center space-x-2">
-                          <ActionIcon
-                            color="green"
-                            onClick={() => toggleEditing(user.id)}
-                          >
-                            <IconEdit size="1rem" />
-                          </ActionIcon>
-                          <ActionIcon
-                            color="red"
-                            onClick={() => openDeleteModal(user.id)}
-                          >
-                            <IconTrash size="1rem" />
-                          </ActionIcon>
-                          <HoverCard shadow="md">
-                            <HoverCard.Target>
+                          {sessiondata?.user?.Permissions.includes(
+                            "STAFF_EDIT",
+                          ) && (
+                            <>
                               <ActionIcon
-                                color="blue"
-                                onClick={() =>
-                                  handlePasswordReset(user.id, user.username)
-                                }
+                                color="green"
+                                onClick={() => toggleEditing(user.id)}
                               >
-                                <MdLockReset size="1.4rem" />
+                                <IconEdit size="1rem" />
                               </ActionIcon>
-                            </HoverCard.Target>
-                            <HoverCard.Dropdown>
-                              <Text size="xs">Reset Password</Text>
-                            </HoverCard.Dropdown>
-                          </HoverCard>
+                              <HoverCard shadow="md">
+                                <HoverCard.Target>
+                                  <ActionIcon
+                                    color="blue"
+                                    onClick={() =>
+                                      handlePasswordReset(
+                                        user.id,
+                                        user.username,
+                                      )
+                                    }
+                                  >
+                                    <MdLockReset size="1.4rem" />
+                                  </ActionIcon>
+                                </HoverCard.Target>
+                                <HoverCard.Dropdown>
+                                  <Text size="xs">Reset Password</Text>
+                                </HoverCard.Dropdown>
+                              </HoverCard>
+                            </>
+                          )}
+
+                          {sessiondata?.user?.Permissions?.includes(
+                            "USERS_DELETE",
+                          ) && (
+                            <ActionIcon
+                              color="red"
+                              onClick={() => openDeleteModal(user.id)}
+                            >
+                              <IconTrash size="1rem" />
+                            </ActionIcon>
+                          )}
                         </div>
                       )}
                     </Table.Td>

@@ -12,8 +12,11 @@ import { IconPlus } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { UserForm } from "../UserForm/UserForm";
 import { useApiClient } from "@/utils/trpc/Trpc";
+import { useSession } from "next-auth/react";
+import { notifications } from "@mantine/notifications";
 
 export function ButtonAdd() {
+  const { data: sessiondata } = useSession();
   const theme = useMantineTheme();
   const [opened, { open, close }] = useDisclosure(false);
 
