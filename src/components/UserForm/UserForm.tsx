@@ -15,6 +15,7 @@ import {
   Select,
   Loader,
   Combobox,
+  Chip,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useApiClient } from "@/utils/trpc/Trpc";
@@ -39,7 +40,6 @@ export function UserForm({
   const [users, setUsers] = useState<any[]>([]);
   const [staffMembers, setStaffMembers] = useState<any[]>([]);
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
-  const [files, setFiles] = useState<File[]>([]);
 
   const form = useForm({
     initialValues: {
@@ -49,6 +49,7 @@ export function UserForm({
       role: "",
       confirmPassword: "",
       image: "",
+      _2fa: true,
     },
   });
 
@@ -93,9 +94,8 @@ export function UserForm({
         username: form.values.username,
         //@ts-ignore
         role: form.values.role,
-        twoFactorEnabled: false,
+        twoFactorEnabled: form.values._2fa,
         //@ts-ignore
-        image: files[0] || undefined,
       });
 
       notifications.show({
@@ -106,12 +106,14 @@ export function UserForm({
 
       // Reset form and loading state
       form.reset();
-      setFiles([]);
+
       setLoading(false);
       setUsers((prevUsers) => [...prevUsers, response]);
     } catch (error) {
       // Handle errors from API call
-      setError("Failed to save user data. Please try again.");
+      setError(
+        "Failed to save user data.Make sure required data provided, Please try again.",
+      );
 
       setLoading(false);
     }
@@ -138,8 +140,6 @@ export function UserForm({
 
   const staffMembersselect = updateStaffMembers(staffdata);
 
-  console.log("staffMembers:", updateStaffMembers(staffdata));
-
   return (
     <Paper
       p={noPadding ? 0 : "lg"}
@@ -151,28 +151,6 @@ export function UserForm({
       }}
     >
       <form onSubmit={form.onSubmit(handleSubmit)}>
-        <Group justify="center">
-          <FileButton
-            onChange={setFiles}
-            accept="image/png,image/jpeg"
-            multiple
-          >
-            {(props) => <Button {...props}>Upload Profile</Button>}
-          </FileButton>
-        </Group>
-
-        {files.length > 0 && (
-          <Text size="sm" mt="sm">
-            Picked files:
-          </Text>
-        )}
-
-        <ul>
-          {files.map((file, index) => (
-            <li key={index}>{file.name}</li>
-          ))}
-        </ul>
-
         <LoadingOverlay visible={loading} />
         <Group grow>
           <TextInput
@@ -185,6 +163,7 @@ export function UserForm({
           <Select
             label="Select Staff Member"
             placeholder="Select Staff Member"
+            required
             disabled={isFetching}
             value={selectedStaffId}
             onChange={(value) => setSelectedStaffId(value)}
@@ -205,13 +184,11 @@ export function UserForm({
               component="select"
               rightSection={<IconChevronDown size={14} stroke={1.5} />}
               pointer
-              mt="md"
               {...form.getInputProps("role")}
             >
               <option value=" ">Select Role</option>
-              <option value="ADMIN">Admin</option>
               <option value="ROOTUSER">Root User</option>
-              <option value="STAFF">Staff</option>
+              <option value="ADMIN">Admin</option>
               <option value="DOCTOR">Doctor</option>
               <option value="NURSE">Nurse</option>
               <option value="GUEST">Guest</option>
@@ -244,6 +221,20 @@ export function UserForm({
             {error}
           </Text>
         )}
+        <Input.Wrapper label="Role" className="mt-5" required>
+          <Chip
+            classNames={{
+              root: "w-full",
+            }}
+            {...form.getInputProps("_2fa", {
+              type: "checkbox",
+            })}
+          >
+            {form.values._2fa
+              ? "2 Factor Authentication Enabled"
+              : "2 Factor Authentication  Disabled"}
+          </Chip>
+        </Input.Wrapper>
 
         <Group justify="space-between" mt="xl">
           <Button color="blue" type="submit">

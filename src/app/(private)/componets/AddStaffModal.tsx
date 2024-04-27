@@ -10,6 +10,7 @@ import {
   TMedicalDepartments,
   TOtherJobTitles,
 } from "@/utils/comonDatas";
+import { frontSASimageUpload } from "@/utils/lib/frontSASimageUpload";
 import { Ttitle, gender, title } from "@/utils/lib/others/person";
 import { useApiClient } from "@/utils/trpc/Trpc";
 import {
@@ -101,6 +102,17 @@ const TextInputClasses: ClassNames<
 const FormGroupStyles: HTMLAttributes<HTMLDivElement>["className"] =
   "flex items-stretch justify-between gap-4 mt-5 max-md:max-w-full max-md:flex-wrap";
 
+async function getBase64(file): Promise<string | ArrayBuffer> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+    reader.onerror = reject;
+  });
+}
+
 export default function AddStaffModal({
   opened,
   close,
@@ -138,6 +150,8 @@ export default function AddStaffModal({
     return () => form.setValues(initData);
   }, [editdata?.data]);
 
+  const [loading, setLoading] = React.useState(false);
+
   console.log(editdata);
 
   const { mutateAsync, isLoading } =
@@ -149,12 +163,38 @@ export default function AddStaffModal({
         });
         form.reset();
       },
+      onError(error) {
+        setLoading(false);
+      },
     });
 
   const utils = useApiClient.useUtils();
 
+  const { mutateAsync: getimagesas, isLoading: getsaasimagesas } =
+    useApiClient.requestimgUploadLink.request.useMutation({
+      onError: (error) => {
+        setLoading(false);
+      },
+    });
+
   const CreateHanlder = async (val: TformValue) => {
     try {
+      // uploading your img file
+      setLoading(true);
+      let imageupload = null;
+      if (val?.picture) {
+        const sasurl = await getimagesas({
+          imagetype: val.picture.type,
+          name: val.firstName,
+        });
+
+        imageupload = await frontSASimageUpload(
+          sasurl.data.url,
+          sasurl.data.blobname,
+          val.picture,
+        );
+      }
+
       const create = await mutateAsync({
         ...val,
         ...(val.idType === "NIC"
@@ -172,8 +212,15 @@ export default function AddStaffModal({
         staffType: val.staffType,
         department: val.department as TadminDepartment | TMedicalDepartments,
         gender: val.gender === "Male" ? "male" : "female",
+        ...(val.picture && {
+          image: imageupload,
+        }),
       });
-    } catch {}
+      setLoading(false);
+    } catch {
+      setLoading(false);
+      throw new Error("Error while creating new staff");
+    }
   };
 
   const {
@@ -189,11 +236,28 @@ export default function AddStaffModal({
       });
       close();
     },
+    onError(error) {
+      setLoading(false);
+    },
   });
 
   const editHandler = async (val: TformValue) => {
     try {
-      console.log(editdata);
+      setLoading(true);
+      let imageupload = null;
+      if (val?.picture) {
+        const sasurl = await getimagesas({
+          imagetype: val.picture.type,
+          name: val.firstName,
+        });
+
+        imageupload = await frontSASimageUpload(
+          sasurl.data.url,
+          sasurl.data.blobname,
+          val.picture,
+        );
+      }
+
       const update = await updateAsy({
         staffID: editdata.id,
         data: {
@@ -213,9 +277,15 @@ export default function AddStaffModal({
           staffType: val.staffType,
           department: val.department as TadminDepartment | TMedicalDepartments,
           gender: val.gender === "Male" ? "male" : "female",
+          ...(val.picture && {
+            image: imageupload,
+          }),
         },
       });
-    } catch (error) {}
+    } catch (error) {
+      setLoading(false);
+      throw new Error("Error while updating staff");
+    }
   };
 
   return (
@@ -347,6 +417,7 @@ export default function AddStaffModal({
               placeholder="Upload Picture (optional)"
               leftSectionPointerEvents="none"
               classNames={TextInputClasses}
+              style={{ maxWidth: "33%" }}
               clearable
               accept="image/png,image/jpg,image/jpeg"
               {...form.getInputProps("picture")}
@@ -402,7 +473,7 @@ export default function AddStaffModal({
                   type="reset"
                   variant="gradient"
                   gradient={{ from: "lime", to: "teal", deg: 90 }}
-                  disabled={isLoading}
+                  disabled={isLoading || getsaasimagesas || loading}
                   onClick={form.reset}
                 >
                   Reset
@@ -413,7 +484,7 @@ export default function AddStaffModal({
                   type="submit"
                   variant="gradient"
                   gradient={{ from: "lime", to: "teal", deg: 90 }}
-                  loading={isLoading}
+                  loading={isLoading || getsaasimagesas || loading}
                 >
                   Create an New Staff
                 </Button>
@@ -425,7 +496,7 @@ export default function AddStaffModal({
                 type="submit"
                 variant="gradient"
                 gradient={{ from: "lime", to: "teal", deg: 90 }}
-                loading={updating}
+                loading={updating || loading}
               >
                 Edit Staff
               </Button>
