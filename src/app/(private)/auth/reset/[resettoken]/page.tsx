@@ -135,7 +135,7 @@ export default function page({ params }: paramsT) {
                     color="green"
                     loaderProps={{ type: "dots" }}
                   >
-                    Login to your account
+                    Reset Password
                   </Button>
                 </div>
               </form>

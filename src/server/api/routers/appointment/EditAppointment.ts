@@ -5,6 +5,9 @@ import { UserRoles } from "@prisma/client";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { EditAppointmentProcedureSchema } from "./validation/schema";
 import { assert, count } from "console";
+import { appointmentNotificationT, commonAppointmentRequestPayloadT, SendEmailAppointmentRequestPayloadT, SendMessageAppointmentPayloadT } from "@/utils/types";
+import dayjs from "dayjs";
+import { addQueue_ToSend } from "@/utils/lib/com_queue";
 
 
 
@@ -51,12 +54,37 @@ const EditAppointmentProcedure = protectedProcedure.input(EditAppointmentProcedu
                     },
                     data: {
                         status: item.status,
+                    },
+                    include: {
+                        doctor: {
+                            select: {
+                                staff: {
+                                    select: {
+                                        title: true,
+                                        firstName: true,
+                                        lastName: true
+                                    }
+                                }
+                            }
+                        },
+                        patient: {
+                            select: {
+                                title: true,
+                                firstName: true,
+                                lastName: true,
+                                email: true,
+                                phone: true
+                            }
+                        }
                     }
                 })
 
             })
 
+
         )
+
+
 
 
 
@@ -67,6 +95,48 @@ const EditAppointmentProcedure = protectedProcedure.input(EditAppointmentProcedu
             })
 
         }
+
+
+
+        // sending notification 
+
+
+
+        appointment.map(async (item) => {
+            let payload = {
+                date: dayjs(item.appointmentDate).format("DD/MM/YYYY"),
+                doctorName: `${item.doctor.staff.title} ${item.doctor.staff.firstName} ${item.doctor.staff.lastName}`,
+                patientName: `${item.patient.title} ${item.patient.title} ${item.patient.lastName}`,
+                referenceId: item.referenceid,
+                time: `${dayjs(item.appointmentstart).format("hh:mm A")}`,
+                type: item.status === "Active" ? "rescheduled" : item.status === "Cancelled" ? "cancelled" : item.status === "Completed" ? "completed" : "booking" as appointmentNotificationT
+            }
+
+            if (item.patient.email?.trim()) {
+                // Send an email to the patient
+                const Emailpayload: SendEmailAppointmentRequestPayloadT = {
+                    email: item.patient.email?.trim(),
+                    ...payload
+                }
+
+                await addQueue_ToSend(Emailpayload, "appointment", "email")
+
+            }
+
+            if (item.patient.phone?.trim()) {
+                // Send an email to the patient
+                const Emailpayload: SendMessageAppointmentPayloadT = {
+                    phoneNumber: item.patient.phone?.trim(),
+                    ...payload
+                }
+
+                await addQueue_ToSend(Emailpayload, "appointment", "wp")
+
+            }
+
+
+
+        })
 
 
 
