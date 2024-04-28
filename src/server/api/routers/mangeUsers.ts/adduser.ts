@@ -18,7 +18,7 @@ const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, i
 
     try {
 
-        if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
+        if ((ctx.session.user.role !== UserRoles.ROOTUSER) && !(ctx.session.user?.Permissions.includes("USERS_WRITE"))) {
             throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",

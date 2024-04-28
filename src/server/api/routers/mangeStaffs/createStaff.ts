@@ -37,7 +37,7 @@ import { get_imageSigedURL } from "@/utils/lib/get_imageSigedURL";
 const createStaffProceture = protectedProcedure.input(createStaffSchema).mutation(async ({ ctx, input }) => {
 
     try {
-        if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
+        if ((ctx.session.user.role !== UserRoles.ROOTUSER) && !(ctx.session.user?.Permissions.includes("STAFF_WRITE"))) {
             throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
