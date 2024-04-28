@@ -85,5 +85,13 @@
 
 }
 
+.doc2{
+  position: absolute;
+  margin-top: 320px;
+  margin-right: 320px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 8px;
+}
 
 

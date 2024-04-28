@@ -102,16 +102,22 @@ export default async function Home() {
         <div className="gap-5 flex max-md:flex-col max-md:items-stretch max-md:gap-0">
           <div className="flex flex-col items-stretch w-6/12 max-md:w-full max-md:ml-0">
             <div className="flex flex-col items-end max-md:max-w-full max-md:mt-10">
+              
+              <div className="doc3">
               <img
                 loading="lazy"
                 srcSet="/img/home_page/doc3.jpg"
                 className="aspect-square object-contain object-center w-[459px] overflow-hidden max-w-full"
               />
+              </div>
+
+              <div className="doc2">
               <img
                 loading="lazy"
                 srcSet="/img/home_page/doc2.jpg"
                 className="aspect-square object-contain object-center w-[306px] overflow-hidden max-w-full self-start"
               />
+              </div>
             </div>
           </div>
           <div className="flex flex-col items-stretch w-6/12 ml-5 max-md:w-full max-md:ml-0">
