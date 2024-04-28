@@ -1,32 +1,21 @@
-
-
-.all{
+.all {
   align-items: center;
-
 }
 
-.about{
+.about {
   margin-left: 120px;
 }
 
-
-.service{
-  margin-left: 110px;
-  
-}
-
-.features{
+.features {
   align-content: center;
   margin-bottom: 50px;
-  
-  
 }
 
-.lab{
+.lab {
   margin-top: 20px;
 }
 
-.doc{
+.doc {
   margin-left: 90px;
 }
 
@@ -35,38 +24,35 @@
   margin-left: 50px;
 }
 
-
-.heart{
+.heart {
   margin-top: 20px;
 }
 
-.plus{
+.plus {
   margin-top: 11px;
 }
 
-.brai{
+.brai {
   margin-top: 20px;
 }
 
-.weel{
+.weel {
   margin-top: 20px;
 }
 
-.tee{
+.tee {
   margin-top: 20px;
 }
 
-.pu{
+.pu {
   margin-top: 20px;
 }
 
-.ff{
+.ff {
   margin-left: 100px;
-  
-
 }
 
-.appointment{
+.appointment {
   margin-left: 115px;
   margin-right: 92px;
 }
@@ -76,16 +62,13 @@
   border-bottom: none;
   border-top: none;
   border-right: none;
-  
 }
 
-.hb{
-
+.hb {
   margin-left: 60px;
-
 }
 
-.doc2{
+.doc2 {
   position: absolute;
   margin-top: 320px;
   margin-right: 320px;
@@ -93,5 +76,3 @@
   background-color: white;
   border-radius: 8px;
 }
-
-
