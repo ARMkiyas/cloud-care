@@ -30,9 +30,9 @@ export default function page() {
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
 
-  const startIndex = (currentPage - 1) * 8;
-  const endIndex = startIndex + 8;
-  const doctorsPerPage = filteredDoctors.slice(startIndex, endIndex);
+  const doctorsPerPage = 8;
+  const startIndex = (currentPage - 1) * doctorsPerPage;
+  const endIndex = Math.min(startIndex + doctorsPerPage, filteredDoctors.length);
 
   const renderDoctors = filteredDoctors.concat(userdata.data.filter(doctor => !filteredDoctors.includes(doctor)));
   const handleNavLinkClick = (label) => {
@@ -101,7 +101,7 @@ export default function page() {
           </div>
           <div className="flex space-x-5 flex-wrap justify-center place-items-center w-full" >
           {filteredDoctors.length > 0 ? (
-              doctorsPerPage.map((doctor, index) => (
+              filteredDoctors.slice(startIndex, endIndex).map((doctor, index) => (
             <div className="flex flex-col w-1/5 justify-center mt-5" key={index}>
                 <div className="items-stretch self-stretch flex grow flex-col rounded-lg max-md:mt-6">
                   <img
@@ -139,9 +139,10 @@ export default function page() {
         <div className="flex items-start gap-3.5 mr-2.5 mt-9 self-end">
           
           <Pagination
-            total={Math.ceil(filteredDoctors.length / 8)} // Total number of pages
-            size="sm" // Size of pagination component (optional)
-            color="#1b2c51" // Color of pagination component (optional)
+            total={Math.ceil(filteredDoctors.length / doctorsPerPage)} 
+            size="sm" 
+            color="#1b2c51" 
+            onChange={(newPage) => setCurrentPage(newPage)}
           />
         </div>
       </div>

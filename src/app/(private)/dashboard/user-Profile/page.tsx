@@ -48,7 +48,16 @@ export default function page() {
   
   const handleEditClick = () => {
     setEditing(true);
+    
+    setEditedData({
+      name: session.user.name,
+      username: session.user.username,
+      email: session.user.email,
+      phone: session.user.phone,
+      twoFactorEnabled: session.user.twoFactorEnabled,
+    });
   };
+  
 
   const handleSaveClick = async () => {
     try{
@@ -127,7 +136,7 @@ export default function page() {
           <div className="flex justify-center items-center ">
             <Image className='w-1/3 m-2 mt-5'
               src={session.user.image}
-              height={180}
+              height={200}
               width={130}
               alt="Profile Image"
               style={{ borderRadius: '50%' }} 
@@ -222,7 +231,7 @@ export default function page() {
                   <TextInput
                     value={editedData.phone}
                     onChange={handleInputChange}
-                    name="email"
+                    name="phone"
                   />
                 ) : (
                   session.user.phone
