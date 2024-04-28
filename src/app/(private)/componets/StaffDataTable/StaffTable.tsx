@@ -39,6 +39,7 @@ import {
   TMedicalDepartments,
 } from "@/utils/comonDatas";
 import dayjs from "dayjs";
+import { useSession } from "next-auth/react";
 
 type staffType = TStaffGet["data"][0];
 
@@ -49,6 +50,8 @@ type TstaffTableProps = {
 };
 
 export default function StaffTable({ type }: TstaffTableProps) {
+  const { data: sessiondata } = useSession();
+
   const {
     data: staffData,
     isLoading: staffGetLoading,
@@ -220,6 +223,8 @@ export default function StaffTable({ type }: TstaffTableProps) {
 
       confirmProps: { color: "red" },
 
+      hidden: !sessiondata?.user?.Permissions.includes("STAFF_DELETE"),
+
       onConfirm: () => deleteStaffHandler(row.original.id),
     });
 
@@ -315,7 +320,9 @@ export default function StaffTable({ type }: TstaffTableProps) {
       //   event: UIEvent<HTMLDivElement>, //add an event listener to the table container element
       // ) => fetchMoreOnBottomReached(event.target as HTMLDivElement),
     },
-    enableRowActions: true,
+    enableRowActions:
+      sessiondata?.user?.Permissions.includes("STAFF_EDIT") ||
+      sessiondata?.user?.Permissions.includes("STAFF_DELETE"),
     renderDetailPanel: ({ row }) => (
       <Box
         style={{
@@ -381,17 +388,20 @@ export default function StaffTable({ type }: TstaffTableProps) {
     ),
     renderRowActions: ({ row, table }) => (
       <Flex gap="md">
-        <Tooltip label="Edit">
-          <ActionIcon onClick={() => EditBtnHandler(row.original)}>
-            <IconEdit size={14} />
-          </ActionIcon>
-        </Tooltip>
-
-        <Tooltip label="Delete">
-          <ActionIcon color="red" onClick={() => openDeleteConfirmModal(row)}>
-            <IconTrash size={14} />
-          </ActionIcon>
-        </Tooltip>
+        {sessiondata?.user?.Permissions.includes("STAFF_EDIT") && (
+          <Tooltip label="Edit">
+            <ActionIcon onClick={() => EditBtnHandler(row.original)}>
+              <IconEdit size={14} />
+            </ActionIcon>
+          </Tooltip>
+        )}
+        {sessiondata?.user?.Permissions.includes("STAFF_EDIT") && (
+          <Tooltip label="Delete">
+            <ActionIcon color="red" onClick={() => openDeleteConfirmModal(row)}>
+              <IconTrash size={14} />
+            </ActionIcon>
+          </Tooltip>
+        )}
       </Flex>
     ),
 
@@ -408,8 +418,13 @@ export default function StaffTable({ type }: TstaffTableProps) {
 
   return (
     <>
-      <AddStaffModal {...editModel} edit={true} />
-      <MantineReactTable table={table} />
+      {sessiondata?.user?.Permissions.includes("STAFF_EDIT") && (
+        <AddStaffModal {...editModel} edit={true} />
+      )}
+
+      {sessiondata?.user?.Permissions.includes("STAFF_EDIT") && (
+        <MantineReactTable table={table} />
+      )}
     </>
   );
 }

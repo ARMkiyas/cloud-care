@@ -36,6 +36,7 @@ import { notifications } from "@mantine/notifications";
 import { useContextMenu } from "mantine-contextmenu";
 import { AppointmentDataType } from "@/utils/types";
 import { Appointmentstatus } from "@/utils/comonDatas";
+import { useSession } from "next-auth/react";
 
 const PAGE_SIZE = 15;
 
@@ -48,6 +49,8 @@ type searchQueryType = {
 };
 
 export default function AppointmentDataTable() {
+  const { data: sessiondata, status } = useSession();
+
   const [selectedRecords, setSelectedRecords] = useState([]);
 
   const isTouch = useMediaQuery("(pointer: coarse)");
@@ -234,7 +237,12 @@ export default function AppointmentDataTable() {
           size="sm"
           variant="transparent"
           color="green"
-          disabled={record.status == "Active" || record.status == "Completed"}
+          hidden={!sessiondata?.user?.Permissions.includes("APPOINTMENTS_EDIT")}
+          disabled={
+            record.status == "Active" ||
+            record.status == "Completed" ||
+            !sessiondata?.user?.Permissions.includes("APPOINTMENTS_EDIT")
+          }
           onClick={() => openEditModal([record], "Active")}
         >
           <IconCheckbox size={16} />
@@ -251,8 +259,11 @@ export default function AppointmentDataTable() {
           size="sm"
           variant="transparent"
           color="green"
+          hidden={!sessiondata?.user?.Permissions.includes("APPOINTMENTS_EDIT")}
           disabled={
-            record.status == "Cancelled" || record.status == "Completed"
+            record.status == "Cancelled" ||
+            record.status == "Completed" ||
+            !sessiondata?.user?.Permissions.includes("APPOINTMENTS_EDIT")
           }
           onClick={() => openEditModal([record], "Completed")}
         >
@@ -266,8 +277,11 @@ export default function AppointmentDataTable() {
           size="sm"
           variant="transparent"
           color="gray"
+          hidden={!sessiondata?.user?.Permissions.includes("APPOINTMENTS_EDIT")}
           disabled={
-            record.status == "Completed" || record.status == "Cancelled"
+            record.status == "Completed" ||
+            record.status == "Cancelled" ||
+            !sessiondata?.user?.Permissions?.includes("APPOINTMENTS_EDIT")
           }
           onClick={() => openEditModal([record], "Cancelled")}
         >
@@ -279,6 +293,12 @@ export default function AppointmentDataTable() {
           size="sm"
           variant="transparent"
           color="red"
+          hidden={
+            !sessiondata?.user?.Permissions?.includes("APPOINTMENTS_DELETE")
+          }
+          disabled={
+            !sessiondata?.user?.Permissions.includes("APPOINTMENTS_DELETE")
+          }
           onClick={() => {
             return openDeleteModal([record]);
           }}
@@ -300,7 +320,10 @@ export default function AppointmentDataTable() {
         // },
         {
           key: "active",
-          hidden: record.status === "Active",
+          hidden:
+            record.status === "Active" ||
+            !sessiondata?.user?.Permissions.includes("APPOINTMENTS_EDIT"),
+
           title: `Active ${record.patient.title} ${record.patient.firstName} ${record.patient.lastName} appointment`,
           icon: <IconCheckbox size={14} />,
           color: "green",
@@ -311,7 +334,8 @@ export default function AppointmentDataTable() {
           hidden:
             record.status === "Completed" ||
             record.status === "Cancelled" ||
-            record.status === "Pending",
+            record.status === "Pending" ||
+            !sessiondata?.user?.Permissions.includes("APPOINTMENTS_EDIT"),
           title: `complete ${record.patient.title} ${record.patient.firstName} ${record.patient.lastName} appointment`,
           icon: <IconCalendarCheck size={14} />,
           color: "green",
@@ -320,13 +344,18 @@ export default function AppointmentDataTable() {
         {
           key: "Cancel Appointment",
           icon: <IconCalendarCancel size={14} />,
-          hidden: record.status === "Cancelled",
+          hidden:
+            record.status === "Cancelled" ||
+            !sessiondata?.user?.Permissions.includes("APPOINTMENTS_EDIT"),
           title: `Cancel ${record.patient.title} ${record.patient.firstName} ${record.patient.lastName} appointment`,
           color: "gray",
           onClick: () => openEditModal([record], "Cancelled"),
         },
         {
           key: "delete",
+          hidden: !sessiondata?.user?.Permissions.includes(
+            "APPOINTMENTS_DELETE",
+          ),
           title: `Delete ${record.patient.title} ${record.patient.firstName} ${record.patient.lastName} appointment`,
           icon: <IconTrashX size={14} />,
           color: "red",
@@ -340,7 +369,8 @@ export default function AppointmentDataTable() {
             !selectedRecords.map((r) => r.id).includes(record.id) ||
             selectedRecords.map((r) => r.status).includes("Active") ||
             selectedRecords.map((r) => r.status).includes("Cancelled") ||
-            selectedRecords.map((r) => r.status).includes("Completed"),
+            selectedRecords.map((r) => r.status).includes("Completed") ||
+            !sessiondata?.user?.Permissions.includes("APPOINTMENTS_EDIT"),
           title: `Active ${selectedRecords.length} selected records`,
           icon: <IconCheckbox size={14} />,
           color: "green",
@@ -352,7 +382,8 @@ export default function AppointmentDataTable() {
             selectedRecords.length <= 1 ||
             !selectedRecords.map((r) => r.id).includes(record.id) ||
             selectedRecords.map((r) => r.status).includes("Pending") ||
-            selectedRecords.map((r) => r.status).includes("Cancelled"),
+            selectedRecords.map((r) => r.status).includes("Cancelled") ||
+            !sessiondata?.user?.Permissions.includes("APPOINTMENTS_EDIT"),
           title: `complete ${selectedRecords.length} selected records`,
           icon: <IconCheckbox size={14} />,
           color: "green",
@@ -362,7 +393,8 @@ export default function AppointmentDataTable() {
           key: "ceancelMany",
           hidden:
             selectedRecords.length <= 1 ||
-            !selectedRecords.map((r) => r.id).includes(record.id),
+            !selectedRecords.map((r) => r.id).includes(record.id) ||
+            !sessiondata?.user?.Permissions.includes("APPOINTMENTS_EDIT"),
 
           title: `Cancel ${selectedRecords.length} selected records`,
           icon: <IconCalendarCancel size={14} />,
@@ -373,7 +405,8 @@ export default function AppointmentDataTable() {
           key: "deleteMany",
           hidden:
             selectedRecords.length <= 1 ||
-            !selectedRecords.map((r) => r.id).includes(record.id),
+            !selectedRecords.map((r) => r.id).includes(record.id) ||
+            !sessiondata?.user?.Permissions.includes("APPOINTMENTS_DELETE"),
           title: `Delete ${selectedRecords.length} selected records`,
           icon: <IconTrash size={14} />,
           color: "red",
@@ -675,6 +708,9 @@ export default function AppointmentDataTable() {
             leftSection={<IconTrashX size={16} />}
             color="red"
             radius={8}
+            hidden={
+              !sessiondata?.user?.Permissions.includes("APPOINTMENTS_DELETE")
+            }
             onClick={() => {
               openDeleteModal(selectedRecords);
             }}
@@ -695,6 +731,7 @@ export default function AppointmentDataTable() {
         verticalAlign="center"
         pinLastColumn
         selectionTrigger="cell"
+        hidden={!sessiondata?.user?.Permissions.includes("APPOINTMENTS_READ")}
         selectedRecords={selectedRecords}
         onSelectedRecordsChange={setSelectedRecords}
         page={page}

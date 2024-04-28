@@ -51,7 +51,7 @@ declare module "next-auth" {
     user: {
       id: string;
       role: UserRoles;
-      Permissions: Permissions,
+      Permissions: Permissions[],
       username: string;
       _2fa_valid: boolean;
       twoFactorEnabled: boolean;
@@ -65,7 +65,7 @@ declare module "next-auth" {
   interface User extends DefaultUser {
     id: string;
     role: UserRoles;
-    Permissions: Permissions,
+    Permissions: Permissions[],
     username: string;
     _2fa_valid: boolean;
     twoFactorEnabled: boolean;
@@ -84,7 +84,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     role: UserRoles;
-    Permissions: Permissions,
+    Permissions: Permissions[],
     username: string;
     _2fa_valid: boolean;
     twoFactorEnabled: boolean;
@@ -98,7 +98,7 @@ declare module "next-auth/jwt" {
 interface accesstokenpayload {
   usserid: string;
   role: UserRoles;
-  Permissions: Permissions,
+  Permissions: Permissions[],
   username: string;
   email: string;
 
@@ -217,7 +217,7 @@ export const authOptions: NextAuthOptions = {
             return {
               ...user,
               role: user.role.role,
-              Permissions: user.role.permissions,
+              Permissions: user.role?.permissions,
               _2fa_valid: user.twoFactorEnabled ? false : true,
             } as any
 
@@ -308,7 +308,7 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           usserid: user.id,
           username: user.username,
-          Permissions: user.Permissions
+          Permissions: user?.Permissions
         })
 
 
@@ -317,7 +317,7 @@ export const authOptions: NextAuthOptions = {
           ...token,
           id: user.id,
           role: user.role,
-          Permissions: user.Permissions,
+          Permissions: user?.Permissions,
           username: user.username,
           _2fa_valid: user._2fa_valid,
           twoFactorEnabled: user.twoFactorEnabled,
@@ -345,7 +345,7 @@ export const authOptions: NextAuthOptions = {
             role: token.role,
             usserid: token.id,
             username: token.username,
-            Permissions: token.Permissions
+            Permissions: token?.Permissions
           })
 
           const newtoken = {

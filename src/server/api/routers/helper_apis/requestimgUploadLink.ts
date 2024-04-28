@@ -5,6 +5,8 @@ import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { z } from "zod";
 import { ACCEPTED_IMAGE_TYPES } from "@/utils/ValidationSchemas/commonSc";
 import { userImageUploader } from "@/utils/fileuploadhandler/userimageuploder";
+import { UserRoles, Permissions } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 
 
 
@@ -25,8 +27,8 @@ export const requestimgUploadLink = createTRPCRouter({
 
             try {
 
-                console.log("input", input);
-                console.log(input.imagetype.split("/")[1]);
+
+
                 const url = await userImageUploader(input.name, input.imagetype, input.existingImage)
 
                 const result = {
