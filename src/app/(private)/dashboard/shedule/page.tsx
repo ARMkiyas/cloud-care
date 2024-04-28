@@ -28,6 +28,7 @@ import classes from "./TableSort.module.css";
 import { IconPencil, IconTrash } from "@tabler/icons-react";
 import { useApiClient } from "@/utils/trpc/Trpc";
 import { TScheduleGet } from "@/server/api/ApiTypeFactory";
+import { useSession } from "next-auth/react";
 interface RowData {
   id: string;
   doctorName: string;
@@ -87,6 +88,8 @@ function Th({ children, onSort }: ThProps) {
 }
 
 export default function TableSort() {
+  const { data: sessiondata } = useSession();
+
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const {
@@ -469,28 +472,35 @@ export default function TableSort() {
         <Table.Td>{row.endTime}</Table.Td>
 
         {/* <Table.Td>{row.maxAppointments}</Table.Td> */}
-        <Table.Td>
-          <Group style={{ margin: "-8px -4px" }}>
-            <IconPencil
-              style={{
-                width: rem(20),
-                height: rem(20),
-                color: "green",
-                cursor: "pointer",
-              }}
-              onClick={() => handleEditModalOpen(row)}
-            />
-            <IconTrash
-              style={{
-                width: rem(20),
-                height: rem(20),
-                color: "red",
-                cursor: "pointer",
-              }}
-              onClick={() => handleDeleteRowConfirm(row)}
-            />
-          </Group>
-        </Table.Td>
+        {(sessiondata?.user.Permissions.includes("SCHEDULES_EDIT") ||
+          sessiondata?.user.Permissions.includes("SCHEDULES_DELETE")) && (
+          <Table.Td>
+            <Group style={{ margin: "-8px -4px" }}>
+              {sessiondata?.user?.Permissions.includes("SCHEDULES_EDIT") && (
+                <IconPencil
+                  style={{
+                    width: rem(20),
+                    height: rem(20),
+                    color: "green",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleEditModalOpen(row)}
+                />
+              )}
+              {sessiondata?.user?.Permissions.includes("SCHEDULES_DELETE") && (
+                <IconTrash
+                  style={{
+                    width: rem(20),
+                    height: rem(20),
+                    color: "red",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => handleDeleteRowConfirm(row)}
+                />
+              )}
+            </Group>
+          </Table.Td>
+        )}
       </Table.Tr>
     ));
   return (
@@ -504,15 +514,17 @@ export default function TableSort() {
           marginRight: "3px",
         }}
       >
-        <Button
-          onClick={handleModalOpen}
-          style={{ backgroundColor: "#4CAF50" }}
-        >
-          <Group>
-            <IconPlus />
-            <span style={{ color: "white" }}>Add New Schedule</span>
-          </Group>
-        </Button>
+        {sessiondata?.user.Permissions.includes("SCHEDULES_WRITE") && (
+          <Button
+            onClick={handleModalOpen}
+            style={{ backgroundColor: "#4CAF50" }}
+          >
+            <Group>
+              <IconPlus />
+              <span style={{ color: "white" }}>Add New Schedule</span>
+            </Group>
+          </Button>
+        )}
       </div>
 
       <ScrollArea>
@@ -642,17 +654,20 @@ export default function TableSort() {
                 End Time
               </Table.Th>
               {/* <Table.Th style={{ display: 'table-cell', textAlign: 'left', fontWeight: 500, borderBottom: '2px solid #ddd', backgroundColor: '#E6F4EA' }}>Max Appointments</Table.Th> */}
-              <Table.Th
-                style={{
-                  display: "table-cell",
-                  textAlign: "left",
-                  fontWeight: 500,
-                  borderBottom: "2px solid #ddd",
-                  backgroundColor: "#E6F4EA",
-                }}
-              >
-                Actions
-              </Table.Th>
+              {(sessiondata?.user.Permissions.includes("SCHEDULES_EDIT") ||
+                sessiondata?.user.Permissions.includes("SCHEDULES_DELETE")) && (
+                <Table.Th
+                  style={{
+                    display: "table-cell",
+                    textAlign: "left",
+                    fontWeight: 500,
+                    borderBottom: "2px solid #ddd",
+                    backgroundColor: "#E6F4EA",
+                  }}
+                >
+                  Actions
+                </Table.Th>
+              )}
             </Table.Tr>
             {rows.length > 0 ? (
               rows
@@ -674,6 +689,7 @@ export default function TableSort() {
         onClose={handleModalClose}
         title="Add New Schedule"
         size="sm"
+        hidden={!sessiondata?.user.Permissions.includes("SCHEDULES_WRITE")}
       >
         {/* <TextInput
           label="Schedule ID"
@@ -796,6 +812,7 @@ export default function TableSort() {
         opened={editModalOpened}
         onClose={handleEditModalClose}
         title="Edit Schedule"
+        hidden={!sessiondata?.user.Permissions.includes("SCHEDULES_EDIT")}
         size="sm"
       >
         {editingRowData && (
