@@ -45,7 +45,7 @@ export default withAuth(
         if (req.nextUrl.pathname === "/dashboard/user-management" && !req.nextauth.token.Permissions.includes(permissions.USERS_READ)) {
             return NextResponse.rewrite(new URL("/dashboard/ErrorPages/401", req.url))
         }
-        if (req.nextUrl.pathname === "/dashboard/staffs/" && !req.nextauth.token.Permissions.includes(permissions.STAFF_READ)) {
+        if (req.nextUrl.pathname.match(/\/dashboard\/staffs\/(.*)/) && !req.nextauth.token.Permissions.includes(permissions.STAFF_READ)) {
             return NextResponse.rewrite(new URL("/dashboard/ErrorPages/401", req.url))
         }
 

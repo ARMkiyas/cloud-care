@@ -51,6 +51,22 @@ export type TUsersDeleteInput = RouterInputs["manageUsers"]["deleteUser"];
 
 
 
+// type of the `getSchedule` procedure
+export type TScheduleGet = RouterOutput["schedule"]["get"];
+export type TScheduleGetInput = RouterInputs["schedule"]["get"];
+
+// type of the `createSchedule` procedure
+export type TScheduleCreate = RouterOutput["schedule"]["create"];
+export type TScheduleCreateInput = RouterInputs["schedule"]["create"];
+
+// type of the `updateSchedule` procedure
+export type TScheduleUpdate = RouterOutput["schedule"]["update"];
+export type TScheduleUpdateInput = RouterInputs["schedule"]["update"];
+
+// type of the `deleteSchedule` procedure
+export type TScheduleDelete = RouterOutput["schedule"]["delete"];
+export type TScheduleDeleteInput = RouterInputs["schedule"]["delete"];
+
 
 
 

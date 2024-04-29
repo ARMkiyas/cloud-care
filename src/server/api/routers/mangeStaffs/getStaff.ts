@@ -13,7 +13,7 @@ const getStaffProceture = protectedProcedure
     .query(async ({ ctx, input }) => {
 
         try {
-            if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
+            if ((ctx.session.user.role !== UserRoles.ROOTUSER) && !(ctx.session.user?.Permissions.includes("STAFF_READ"))) {
                 throw new TRPCError({
                     code: "UNAUTHORIZED",
                     message: "You are not authorized to perform this action",
@@ -61,6 +61,9 @@ const getStaffProceture = protectedProcedure
                             },
                             admin: {
                                 isNot: input?.staffType === "admins" ? null : undefined
+                            },
+                            OtherStaffs: {
+                                isNot: input?.staffType === "others" ? null : undefined
                             }
 
                         }
@@ -70,6 +73,7 @@ const getStaffProceture = protectedProcedure
                     admin: true,
                     nurse: true,
                     doctor: true,
+                    OtherStaffs: true
 
                 },
                 orderBy: {

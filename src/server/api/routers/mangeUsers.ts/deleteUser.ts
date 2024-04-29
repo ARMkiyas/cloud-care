@@ -13,6 +13,14 @@ const deleteUser = protectedProcedure.input(deleteUserSchema).mutation(async ({ 
 
     try {
 
+        if ((ctx.session.user.role !== "ROOTUSER") && !(ctx.session.user?.Permissions.includes("USERS_DELETE"))) {
+            throw new TRPCError({
+                code: "UNAUTHORIZED",
+                message: "You are not authorized to perform this action",
+            })
+        }
+
+
         if (ctx.session.user.id === input.userid.trim()) {
             throw new TRPCError({
                 code: "BAD_REQUEST",

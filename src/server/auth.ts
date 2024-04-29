@@ -15,7 +15,7 @@ import { db } from "./db";
 import type { Adapter } from "next-auth/adapters";
 import { hashPwd, verifyPwd } from "@utils/hashPwdHelper";
 
-import { generateOTP, verifyOtp } from "@utils/OtpHelper"
+import { generateOTP, sendotp, verifyOtp } from "@utils/OtpHelper"
 import { date, z } from "zod";
 import { PrismaClient, Permissions, UserRoles } from "@prisma/client";
 import { JWT } from "next-auth/jwt";
@@ -52,8 +52,8 @@ declare module "next-auth" {
     user: {
       id: string;
       role: UserRoles;
-      Permissions: Permissions,
       phone?: string;
+      Permissions: Permissions[],
       username: string;
       _2fa_valid: boolean;
       twoFactorEnabled: boolean;
@@ -67,8 +67,8 @@ declare module "next-auth" {
   interface User extends DefaultUser {
     id: string;
     role: UserRoles;
-    Permissions: Permissions,
     phone?: string;
+    Permissions: Permissions[],
     username: string;
     _2fa_valid: boolean;
     twoFactorEnabled: boolean;
@@ -88,7 +88,7 @@ declare module "next-auth/jwt" {
     id: string;
     role: UserRoles;
     phone?: string;
-    Permissions: Permissions,
+    Permissions: Permissions[],
     username: string;
     _2fa_valid: boolean;
     twoFactorEnabled: boolean;
@@ -102,7 +102,7 @@ declare module "next-auth/jwt" {
 interface accesstokenpayload {
   usserid: string;
   role: UserRoles;
-  Permissions: Permissions,
+  Permissions: Permissions[],
   username: string;
   email: string;
   phone?: string;
@@ -196,20 +196,23 @@ export const authOptions: NextAuthOptions = {
 
 
 
+          console.log(user);
+
 
           if (!user) return null
 
           const isvalid = await verifyPwd(password, user.password)
 
+
           if (isvalid && isvalid !== undefined) {
 
-            //Any object returned will be saved in `user` property of the JWT
 
+            //Any object returned will be saved in `user` property of the JWT
+            console.log(isvalid);
             if (user.twoFactorEnabled) {
 
-              const otp = await generateOTP(user.twoFactorSecret)
+              await sendotp(user.username, user.twoFactorSecret, user.email, user.phone)
 
-              console.log("2fa otp:", otp);
 
             }
 
@@ -219,7 +222,7 @@ export const authOptions: NextAuthOptions = {
             return {
               ...user,
               role: user.role.role,
-              Permissions: user.role.permissions,
+              Permissions: user.role?.permissions,
               _2fa_valid: user.twoFactorEnabled ? false : true,
             } as any
 
@@ -312,7 +315,7 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           usserid: user.id,
           username: user.username,
-          Permissions: user.Permissions
+          Permissions: user?.Permissions
         })
 
 
@@ -322,7 +325,7 @@ export const authOptions: NextAuthOptions = {
           id: user.id,
           phone: user?.phone,
           role: user.role,
-          Permissions: user.Permissions,
+          Permissions: user?.Permissions,
           username: user.username,
           _2fa_valid: user._2fa_valid,
           twoFactorEnabled: user.twoFactorEnabled,
@@ -351,7 +354,7 @@ export const authOptions: NextAuthOptions = {
             role: token.role,
             usserid: token.id,
             username: token.username,
-            Permissions: token.Permissions
+            Permissions: token?.Permissions
           })
 
           const newtoken = {

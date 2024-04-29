@@ -120,7 +120,7 @@ export const adminDepartment = [
 
 
 
-export const stafftypes = ["all-staffs", "doctors", "nurses", "admins"] as const;
+export const stafftypes = ["all-staffs", "doctors", "nurses", "admins", "others"] as const;
 
 
 export type TstaffTypes = (typeof stafftypes)[number]

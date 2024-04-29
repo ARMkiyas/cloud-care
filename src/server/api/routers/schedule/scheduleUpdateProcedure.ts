@@ -15,7 +15,7 @@ const scheduleUpdateProcedure = protectedProcedure.input(scheduleUpdateProcedure
     try {
 
 
-        if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
+        if ((ctx.session.user.role !== UserRoles.ROOTUSER) && !(ctx.session.user?.Permissions.includes("SCHEDULES_EDIT"))) {
             throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
@@ -66,14 +66,6 @@ const scheduleUpdateProcedure = protectedProcedure.input(scheduleUpdateProcedure
             })
 
         }
-
-        if (schedule._count.Appointment > 0) {
-            throw new TRPCError({
-                code: "UNPROCESSABLE_CONTENT",
-                message: "cannot update schedule with appointments"
-            })
-        }
-
         // check is the doctor already have a schedule for the given date and time if the recurrence is once and it's a new schedule
 
         const docid = schedule.doctorId
@@ -84,10 +76,12 @@ const scheduleUpdateProcedure = protectedProcedure.input(scheduleUpdateProcedure
 
         const Timevalidate = await ValidateDB(docid, date, startTime, endTime, day, true, input.scheduleId)
 
+
         if (!Timevalidate) {
+            console.log("Timevalidate", Timevalidate);
             throw new TRPCError({
                 code: "UNPROCESSABLE_CONTENT",
-                message: "cannot update schedule"
+                message: "Invalid Time Frame, The Time Frame you have Provided already reserved or  Cann't be used for the given Doctor"
             })
         }
 

@@ -5,6 +5,8 @@ import { UserRoles } from "@prisma/client";
 import ErrorHandler from "@/utils/global-trpcApi-prisma-error";
 import { TRPCError } from "@trpc/server";
 import { updateUserSchema } from "./validation/schema";
+import { generate2FASecret } from "@/utils/OtpHelper";
+import { sendPasswordReset } from "@/utils/lib/auth/pwdResetHelpers";
 
 
 
@@ -12,7 +14,7 @@ const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ 
 
     try {
 
-        if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
+        if ((ctx.session.user.role !== UserRoles.ROOTUSER) && !(ctx.session.user?.Permissions.includes("USERS_EDIT"))) {
             throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
@@ -26,6 +28,8 @@ const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ 
                 message: "You cannot update your own account here, if you want to update your account go to profile settings and update your account",
             })
         }
+
+
 
         const user = await ctx.db.user.update({
             where: {
@@ -42,11 +46,22 @@ const updateUser = protectedProcedure.input(updateUserSchema).mutation(async ({ 
                         }
                     }
                 }),
-                ...(input.twoFactorEnabled && { twoFactorEnabled: input.twoFactorEnabled }),
+                ...(input.twoFactorEnabled ? {
+                    twoFactorEnabled: input.twoFactorEnabled,
+                    twoFactorSecret: generate2FASecret()
+                } : {
+                    twoFactorEnabled: false,
+                    twoFactorSecret: null
+                }),
                 ...(input.image && { image: input.image }),
             }
         }
         );
+
+        if (input.pwdreet) {
+            await sendPasswordReset(user.id, "email")
+        }
+
 
 
         return {

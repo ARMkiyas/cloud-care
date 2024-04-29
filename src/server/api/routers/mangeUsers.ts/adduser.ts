@@ -18,7 +18,7 @@ const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, i
 
     try {
 
-        if ((ctx.session.user.role !== UserRoles.ADMIN) && (ctx.session.user.role !== UserRoles.ROOTUSER)) {
+        if ((ctx.session.user.role !== UserRoles.ROOTUSER) && !(ctx.session.user?.Permissions.includes("USERS_WRITE"))) {
             throw new TRPCError({
                 code: "UNAUTHORIZED",
                 message: "You are not authorized to perform this action",
@@ -56,7 +56,7 @@ const addUser = protectedProcedure.input(adduserschema).mutation(async ({ ctx, i
                 password: await hashPwd(input.password),
                 twoFactorEnabled: input.twoFactorEnabled === false ? false : true,
                 twoFactorSecret: input.twoFactorEnabled === false ? undefined : generate2FASecret(),
-                image: input.image ? await userImageUploader(input.image) : staff.image ? staff.image : getAvatar("person", staff.gender),
+                image: input.image ? "" : staff.image ? staff.image : getAvatar("person", staff.gender),
                 role: {
                     connect: {
                         role: input.role ? input.role : UserRoles.GUEST

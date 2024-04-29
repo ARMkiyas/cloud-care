@@ -24,7 +24,15 @@ export const profileRouter = createTRPCRouter({
     profileUpdate: protectedProcedure.input(profileUpdateSchema).mutation(async ({ ctx, input }) => {
         console.log("input", input);
         try {
-            if (input.username?.trim() !== ctx.session.user.username || input.email?.trim() !== ctx.session.user.email || input.phone?.trim() !== ctx.session.user.phone) {
+
+            if (ctx.session.user?.username?.trim() !== input.username?.trim()) {
+                new TRPCError({
+                    code: "UNAUTHORIZED",
+                    message: "You cannot update profile other than your own profile",
+                })
+            }
+
+            if (input.username?.trim() || input.email?.trim() || input.phone?.trim()) {
                 const alreadyUserName = await ctx.db.user.findFirst({
                     where: {
                         ...input.username && { username: input.username.trim() },
@@ -44,7 +52,8 @@ export const profileRouter = createTRPCRouter({
                 }
 
             }
-            const updated_imageurl = input.picture ? await userImageUploader(input.picture) : null
+
+            const updated_imageurl = input.picture ? "dhdf" : null
 
             const update = await ctx.db.user.update({
                 where: {
