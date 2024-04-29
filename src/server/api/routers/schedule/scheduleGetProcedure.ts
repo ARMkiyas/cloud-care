@@ -18,9 +18,9 @@ const scheduleGetProcedure = protectedProcedure.input(scheduleGetProcedureSchema
             })
         }
 
-
+        let docid = input.doctorId
         // allow only doctor to get his schedule
-        ctx.session.user.role === UserRoles.DOCTOR ? input.doctorId = ctx.session.user.id : null
+        ctx.session.user.role === UserRoles.DOCTOR ? docid = ctx.session.user.id : null
 
 
         const scheduleQuery = {

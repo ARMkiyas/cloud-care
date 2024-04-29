@@ -14,10 +14,9 @@ import { useApiClient } from "@/utils/trpc/Trpc";
 
 export default function page() {
   const {
-    data: userdata,
-    isLoading,
-    error,
-  } = useApiClient.manageStaff.GetPubDoctors.useQuery({});
+    "0": userdata,
+    "1": { isLoading, error },
+  } = useApiClient.manageStaff.GetPubDoctors.useSuspenseQuery({});
   const [searchQuery, setSearchQuery] = useState("");
   const [menuOpened, setMenuOpened] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -33,8 +32,6 @@ export default function page() {
     );
   });
   console.log("userdata", userdata);
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error: {error.message}</div>;
 
   const doctorsPerPage = 8;
   const startIndex = (currentPage - 1) * doctorsPerPage;
