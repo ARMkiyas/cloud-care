@@ -32,12 +32,12 @@ export const profileRouter = createTRPCRouter({
                 })
             }
 
-            if (input.username?.trim() || input.email?.trim() || input.phone?.trim()) {
+            if (input.username?.trim() !== ctx.session.user.username?.trim() || input.email?.trim() !== ctx.session.user.email?.trim() || input.phone?.trim() !== ctx.session.user.phone?.trim()) {
                 const alreadyUserName = await ctx.db.user.findFirst({
                     where: {
-                        ...input.username && { username: input.username.trim() },
-                        ...input.email && { email: input.email.trim() },
-                        ...input.phone && { phone: input.phone.trim() }
+                        ...input.username !== ctx.session.user.username?.trim() && { username: input.username.trim() },
+                        ...input.email !== ctx.session.user.email?.trim() && { email: input.email.trim() },
+                        ...input.phone !== ctx.session.user.phone?.trim() && { phone: input.phone.trim() }
 
                     }
                 })
@@ -47,7 +47,7 @@ export const profileRouter = createTRPCRouter({
                 if (alreadyUserName) {
                     throw new TRPCError({
                         code: "UNPROCESSABLE_CONTENT",
-                        message: `${input.email ? "Email" : input.username ? "username" : "Phone number"} already exists`,
+                        message: `${input.email !== ctx.session.user.email?.trim() ? "Email" : input.username !== ctx.session.user.username?.trim() ? "username" : "Phone number"} already exists`,
                     })
                 }
 
