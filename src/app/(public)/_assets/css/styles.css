@@ -1,3 +1,78 @@
-.bg {
-  color: blue;
+.all {
+  align-items: center;
+}
+
+.about {
+  margin-left: 120px;
+}
+
+.features {
+  align-content: center;
+  margin-bottom: 50px;
+}
+
+.lab {
+  margin-top: 20px;
+}
+
+.doc {
+  margin-left: 90px;
+}
+
+.appointment {
+  margin-top: 90px;
+  margin-left: 50px;
+}
+
+.heart {
+  margin-top: 20px;
+}
+
+.plus {
+  margin-top: 11px;
+}
+
+.brai {
+  margin-top: 20px;
+}
+
+.weel {
+  margin-top: 20px;
+}
+
+.tee {
+  margin-top: 20px;
+}
+
+.pu {
+  margin-top: 20px;
+}
+
+.ff {
+  margin-left: 100px;
+}
+
+.appointment {
+  margin-left: 115px;
+  margin-right: 92px;
+}
+
+.hbox {
+  border-left: 1px solid white;
+  border-bottom: none;
+  border-top: none;
+  border-right: none;
+}
+
+.hb {
+  margin-left: 60px;
+}
+
+.doc2 {
+  position: absolute;
+  margin-top: 320px;
+  margin-right: 320px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 8px;
 }
