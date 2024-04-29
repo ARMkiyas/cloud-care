@@ -1,31 +1,26 @@
 // this page is for home page
+"use client";
 
 import Testclient from "./Testclient";
-import { apiServer } from "@/utils/trpc/TrpcServer";
+
 import "./_assets/css/styles.css";
-import { getServerAuthSession } from "@/server/auth";
+
 import { Button } from "@mantine/core";
 import { Pagination } from "@mantine/core";
 
 import AppointmentBookingForm from "@/components/Appointment/AppointmentBookingForm";
 import PubPageTopContainer from "./components/PubPageTopContainer";
 import AppointmentContactCard from "./components/AppointmentContactCard";
-
-export const dynamic = "force-dynamic";
+import { useApiClient } from "@/utils/trpc/Trpc";
+import Link from "next/link";
 
 // This function is used to call the API server
-const callapi = async () => {
-  // Call the API server's hello function, passing in the text "From Server"
-  const data = await apiServer.example.hello.query({
-    text: "From server",
-  });
-
-  // Return the data that was returned from the server
-  return data;
-};
 
 export default async function Home() {
-  const data = await callapi();
+  const { data, isLoading, error } =
+    useApiClient.manageStaff.GetPubDoctors.useQuery({
+      limit: 3,
+    });
 
   return (
     <div className="all">
@@ -77,16 +72,7 @@ export default async function Home() {
                   />
                   <div className="relative flex w-[392px] max-w-full flex-col items-stretch mt-96 max-md:mt-10">
                     <div className="text-white text-7xl font-black leading-[96px] max-md:text-4xl">
-                      Cardiology
-                    </div>
-                    <div className="flex items-stretch self-center justify-between gap-4 mt-96 max-md:mt-10">
-                      <div className="justify-center items-center border flex w-[45px] shrink-0 h-[45px] flex-col rounded-[45px] border-solid border-white" />
-                      <img
-                        loading="lazy"
-                        srcSet="/img2/home_page/doc1.jpg"
-                        className="aspect-[1.67] object-contain object-center w-[75px] justify-center items-center overflow-hidden shrink-0 max-w-full"
-                      />
-                      <div className="justify-center items-center border flex w-[45px] shrink-0 h-[45px] flex-col rounded-[45px] border-solid border-white" />
+                      CloudCare
                     </div>
                   </div>
                 </div>
@@ -119,7 +105,10 @@ export default async function Home() {
               </div>
             </div>
             <div className="flex flex-col items-stretch w-6/12 ml-5 max-md:w-full max-md:ml-0">
-              <div className="flex flex-col max-md:max-w-full max-md:mt-10">
+              <div
+                className="flex flex-col max-md:max-w-full max-md:mt-10"
+                id="aboutpage"
+              >
                 <div className="text-neutral-400 text-base leading-6 whitespace-nowrap items-stretch border justify-center px-6 py-1.5 rounded-[800px] border-solid border-blue-200 self-start max-md:px-5">
                   About Us
                 </div>
@@ -170,15 +159,6 @@ export default async function Home() {
                     Medical Research Professionals
                   </div>
                 </div>
-
-                <Button
-                  size="xl"
-                  className="text-white text-center text-base font-medium leading-6 whitespace-nowrap items-stretch border bg-blue-600 justify-center mt-8 px-12 py-4 rounded-[400px] border-solid border-blue-600 self-start max-md:px-5"
-                  variant="filled"
-                  radius="lg"
-                >
-                  Read More
-                </Button>
               </div>
             </div>
           </div>
@@ -510,79 +490,38 @@ export default async function Home() {
             </div>
             <div className="self-stretch mt-12 max-md:max-w-full max-md:mt-10">
               <div className="flex gap-5 max-md:flex-col max-md:items-stretch max-md:gap-0">
-                <div className="flex flex-col items-stretch w-3/12 max-md:w-full max-md:ml-0">
-                  <div className="flex flex-col items-stretch self-stretch rounded-lg grow max-md:mt-6">
-                    <img
-                      loading="lazy"
-                      srcSet="/img/doctorPageIMG/team-1.jpg.png"
-                      className="aspect-[0.83] object-contain object-center w-full overflow-hidden"
-                    />
-                    <div className="flex flex-col items-center px-20 py-6 bg-blue-50 max-md:px-5">
-                      <div className="text-xl font-bold leading-6 text-center text-blue-950 whitespace-nowrap">
-                        Doctor Name
-                      </div>
-                      <div className="mt-2 text-base leading-6 text-center text-blue-600 whitespace-nowrap">
-                        Department
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col items-stretch w-3/12 ml-5 max-md:w-full max-md:ml-0">
-                  <div className="flex flex-col items-stretch self-stretch rounded-lg grow max-md:mt-6">
-                    <img
-                      loading="lazy"
-                      srcSet="/img/doctorPageIMG/team-2.jpg.png"
-                      className="aspect-[0.83] object-contain object-center w-full overflow-hidden"
-                    />
-                    <div className="flex flex-col items-center px-20 py-6 bg-blue-50 max-md:px-5">
-                      <div className="text-xl font-bold leading-6 text-center text-blue-950 whitespace-nowrap">
-                        Doctor Name
-                      </div>
-                      <div className="mt-2 text-base leading-6 text-center text-blue-600 whitespace-nowrap">
-                        Department
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col items-stretch w-3/12 ml-5 max-md:w-full max-md:ml-0">
-                  <div className="flex flex-col items-stretch self-stretch rounded-lg grow max-md:mt-6">
-                    <img
-                      loading="lazy"
-                      srcSet="/img/doctorPageIMG/team-3.jpg.png"
-                      className="aspect-[0.83] object-contain object-center w-full overflow-hidden"
-                    />
-                    <div className="flex flex-col items-center px-20 py-6 bg-blue-50 max-md:px-5">
-                      <div className="text-xl font-bold leading-6 text-center text-blue-950 whitespace-nowrap">
-                        Doctor Name
-                      </div>
-                      <div className="mt-2 text-base leading-6 text-center text-blue-600 whitespace-nowrap">
-                        Department
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col items-stretch w-3/12 ml-5 max-md:w-full max-md:ml-0">
-                  <div className="flex flex-col items-stretch self-stretch rounded-lg grow max-md:mt-6">
-                    <div className="team-4">
+                {data?.data.map((doctor, index) => (
+                  <div className="flex flex-col items-stretch w-3/12 max-md:w-full max-md:ml-0">
+                    <div className="flex flex-col items-stretch self-stretch rounded-lg grow max-md:mt-6">
                       <img
                         loading="lazy"
-                        srcSet="/img/doctorPageIMG/team-4.jpg.png"
+                        src={doctor.image}
+                        height={200}
                         className="aspect-[0.83] object-contain object-center w-full overflow-hidden"
                       />
-                    </div>
-                    <div className="flex flex-col items-center px-20 py-6 bg-blue-50 max-md:px-5">
-                      <div className="text-xl font-bold leading-6 text-center text-blue-950 whitespace-nowrap">
-                        Doctor Name
-                      </div>
-                      <div className="mt-2 text-base leading-6 text-center text-blue-600 whitespace-nowrap">
-                        Department
+                      <div className="flex flex-col items-center px-20 py-6 bg-blue-50 max-md:px-5">
+                        <div className="text-xl font-bold leading-6 text-center text-blue-950 whitespace-nowrap">
+                          {doctor.name}
+                        </div>
+                        <div className="mt-2 text-base leading-6 text-center text-blue-600 whitespace-nowrap">
+                          {doctor.departments}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
+          <Button
+            size="md"
+            variant="filled"
+            radius="xl"
+            component={Link}
+            href={"/doctors"}
+          >
+            See More
+          </Button>
         </div>
       </div>
 
