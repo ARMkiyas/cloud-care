@@ -491,7 +491,10 @@ export default async function Home() {
             <div className="self-stretch mt-12 max-md:max-w-full max-md:mt-10">
               <div className="flex gap-5 max-md:flex-col max-md:items-stretch max-md:gap-0">
                 {data?.data.map((doctor, index) => (
-                  <div className="flex flex-col items-stretch w-3/12 max-md:w-full max-md:ml-0">
+                  <div
+                    className="flex flex-col items-stretch w-3/12 max-md:w-full max-md:ml-0"
+                    key={`${doctor.name}-${index}-homepage`}
+                  >
                     <div className="flex flex-col items-stretch self-stretch rounded-lg grow max-md:mt-6">
                       <img
                         loading="lazy"
