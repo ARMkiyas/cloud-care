@@ -144,7 +144,8 @@ const getaccesstoken = async (payload: accesstokenpayload) => {
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(primsa) as Adapter,
   session: {
-    strategy: "jwt"
+    strategy: "jwt",
+    maxAge: 2 * 24 * 60 * 60, // 2 days
   },
   secret: process.env.NEXT_SECRET,
   pages: {
