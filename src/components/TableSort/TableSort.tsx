@@ -182,6 +182,7 @@ const TableSort = ({}) => {
   const handleFieldChange = (field: keyof RowData, value: string) => {
     // Update edited data when any field changes
     if (editedData) {
+      console.log("editedData", editedData);
       if (field === "role") {
         setEditedData({
           ...editedData,
@@ -196,6 +197,7 @@ const TableSort = ({}) => {
         setEditedData({ ...editedData, [field]: value });
       }
     } else {
+      console.log("editedDataeelase", editedData);
       // If editedData is null, create a new object with the updated field
       const updatedUser = userdata?.data.find((user) => user.id === editingRow);
       const newData = updatedUser
@@ -355,7 +357,7 @@ const TableSort = ({}) => {
                     <Table.Td>
                       {editingRow === user.id ? (
                         <TextInput
-                          value={editedData?.email || user.email}
+                          value={editedData?.email}
                           onChange={(event) =>
                             handleFieldChange("email", event.target.value)
                           }
@@ -367,7 +369,7 @@ const TableSort = ({}) => {
                     <Table.Td>
                       {editingRow === user.id ? (
                         <TextInput
-                          value={editedData?.phone || user.phone}
+                          value={editedData?.phone}
                           onChange={(event) =>
                             handleFieldChange("phone", event.target.value)
                           }

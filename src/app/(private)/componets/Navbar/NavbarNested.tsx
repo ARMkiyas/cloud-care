@@ -33,12 +33,6 @@ const PageLinks = [
     permission: permissions.SCHEDULES_READ,
   },
   {
-    label: "Patients",
-    icon: IconDisabled,
-    rootLink: "/dashboard/patients",
-    permission: permissions.PATIENTS_READ,
-  },
-  {
     label: "User Management",
     icon: GrUserManager,
     rootLink: "/dashboard/user-management",
@@ -63,12 +57,12 @@ const PageLinks = [
     ],
     permission: permissions.STAFF_READ,
   },
-  {
-    label: "System Logs",
-    icon: BiLogInCircle,
-    rootLink: "/dashboard/system-logs",
-    permission: permissions.LOGS_READ,
-  },
+  // {
+  //   label: "System Logs",
+  //   icon: BiLogInCircle,
+  //   rootLink: "/dashboard/system-logs",
+  //   permission: permissions.LOGS_READ,
+  // },
 ];
 
 export function NavbarNested() {

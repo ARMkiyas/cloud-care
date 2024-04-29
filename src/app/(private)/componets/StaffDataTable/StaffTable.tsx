@@ -422,7 +422,7 @@ export default function StaffTable({ type }: TstaffTableProps) {
         <AddStaffModal {...editModel} edit={true} />
       )}
 
-      {sessiondata?.user?.Permissions.includes("STAFF_EDIT") && (
+      {sessiondata?.user?.Permissions.includes("STAFF_READ") && (
         <MantineReactTable table={table} />
       )}
     </>
