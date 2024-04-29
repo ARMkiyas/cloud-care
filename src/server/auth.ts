@@ -27,6 +27,7 @@ import { EncryptJWT, SignJWT, base64url, jwtVerify, jwtDecrypt } from "jose";
 const profileUpdateSchema = z.object({
   name: z.string().min(1, "name Requred"),
   email: z.string().email(),
+  phone: z.string().optional(),
   image: z.string(),
   username: z.string().min(1, "username Requred"),
   twoFactorEnabled: z.boolean(),
@@ -51,6 +52,7 @@ declare module "next-auth" {
     user: {
       id: string;
       role: UserRoles;
+      phone?: string;
       Permissions: Permissions[],
       username: string;
       _2fa_valid: boolean;
@@ -65,6 +67,7 @@ declare module "next-auth" {
   interface User extends DefaultUser {
     id: string;
     role: UserRoles;
+    phone?: string;
     Permissions: Permissions[],
     username: string;
     _2fa_valid: boolean;
@@ -84,6 +87,7 @@ declare module "next-auth/jwt" {
   interface JWT {
     id: string;
     role: UserRoles;
+    phone?: string;
     Permissions: Permissions[],
     username: string;
     _2fa_valid: boolean;
@@ -101,6 +105,7 @@ interface accesstokenpayload {
   Permissions: Permissions[],
   username: string;
   email: string;
+  phone?: string;
 
 }
 
@@ -289,12 +294,13 @@ export const authOptions: NextAuthOptions = {
         if (session && profileUpdateSchema.safeParse(session).success) {
           return {
             ...token,
-            name: session.name,
-            email: session.email,
-            image: session.image,
-            username: session.username,
-            picture: session.image,
-            twoFactorEnabled: session.twoFactorEnabled,
+            name: session.name || token.name,
+            email: session.email || token.email,
+            phone: session?.phone || token?.phone,
+            image: session.image || token.image,
+            username: session.username || token.username,
+            picture: session.image || token.image,
+            twoFactorEnabled: session.twoFactorEnabled || token.twoFactorEnabled,
           }
         }
 
@@ -305,6 +311,7 @@ export const authOptions: NextAuthOptions = {
       if (user && account) {
         const access_token = account.provider === "2fa" && await getaccesstoken({
           email: user.email,
+          phone: user?.phone,
           role: user.role,
           usserid: user.id,
           username: user.username,
@@ -316,6 +323,7 @@ export const authOptions: NextAuthOptions = {
         return {
           ...token,
           id: user.id,
+          phone: user?.phone,
           role: user.role,
           Permissions: user?.Permissions,
           username: user.username,
@@ -342,6 +350,7 @@ export const authOptions: NextAuthOptions = {
 
           const newaccess_token = await getaccesstoken({
             email: token.email,
+            phone: token?.phone,
             role: token.role,
             usserid: token.id,
             username: token.username,
@@ -372,6 +381,7 @@ export const authOptions: NextAuthOptions = {
           ...session.user,
           role: token?.role,
           Permissions: token?.Permissions,
+          phone: token?.phone,
           id: token?.id,
           username: token?.username,
           _2fa_valid: token?._2fa_valid,
