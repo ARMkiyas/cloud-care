@@ -1,6 +1,6 @@
 version: "1"
 services:
-  cloudcare:
+  cloudCare:
     build:
       context: ./
       target: Production
