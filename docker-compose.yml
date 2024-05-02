@@ -1,0 +1,9 @@
+version: "1"
+services:
+  cloudcare:
+    build:
+      context: ./
+      target: Production
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
