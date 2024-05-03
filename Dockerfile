@@ -7,13 +7,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
-RUN \
-    if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-    elif [ -f package-lock.json ]; then npm ci; \
-    elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
-    else yarn install; \
-    fi
+COPY package.json ./
+RUN yarn install
 
 
 # Rebuild the source code only when needed
@@ -25,7 +20,7 @@ COPY . .
 # RUN --mount=type=secret,id=_env,target=.env cat .env  
 
 
-RUN yarn generate && yarn build
+RUN yarn run build
 
 
 # If using npm comment out above and use below instead
