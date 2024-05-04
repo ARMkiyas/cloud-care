@@ -1,10 +1,13 @@
 version: "1"
 services:
   cloud-care:
+    image: cloud-care:latest
     build:
+      tags:
+        - "cloud-care:latest"
       context: ./
       dockerfile: Dockerfile
-    restart: always 
+    restart: always
     environment:
       - NODE_ENV=production
     ports:

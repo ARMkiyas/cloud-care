@@ -16,6 +16,8 @@ import Link from "next/link";
 
 // This function is used to call the API server
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const { data, isLoading, error } =
     useApiClient.manageStaff.GetPubDoctors.useQuery({

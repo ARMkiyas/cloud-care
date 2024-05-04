@@ -12,6 +12,8 @@ import {
 } from "@tabler/icons-react";
 import { useApiClient } from "@/utils/trpc/Trpc";
 
+export const dynamic = "force-dynamic";
+
 export default function page() {
   const {
     "0": userdata,

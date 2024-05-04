@@ -10,8 +10,6 @@ import React from "react";
 import Header from "./components/navbar/Header";
 import Footer from "./components/footer/Footer";
 
-export const dynamic = "force-dynamic";
-
 export default function layout({ children }: { children: React.ReactNode }) {
   return (
     <>
