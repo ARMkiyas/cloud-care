@@ -8,6 +8,9 @@ import PubPageTopContainer from "../../components/PubPageTopContainer";
 import AppointmentBookingForm from "@/components/Appointment/AppointmentBookingForm";
 import { Overlay } from "@mantine/core";
 
+
+export const dynamic = "force-dynamic";
+
 export default function page() {
   return (
     <div>

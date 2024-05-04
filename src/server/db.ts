@@ -2,8 +2,6 @@ import "server-only"
 import { PrismaClient } from '@prisma/client';
 import { withAccelerate } from '@prisma/extension-accelerate'
 
-import { env } from "../env.mjs";
-
 
 // Singleton pattern for creating an accelerated PrismaClient instance.
 const createAcceleratedPrismaClient = () => {
@@ -25,4 +23,4 @@ export const db =
   globalForPrisma.db ??
   createAcceleratedPrismaClient();
 
-if (env.NODE_ENV !== "production") globalForPrisma.db = db;
+if (process.env.NODE_ENV !== "production") globalForPrisma.db = db;

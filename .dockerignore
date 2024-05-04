@@ -6,6 +6,12 @@ README.md
 .next
 docker
 .git
+.env
+.env.local
+.env.development
+.env*.local
+.env.sample
+
 
 yarn.lock
 package-lock.json

@@ -17,6 +17,8 @@ import { useDisclosure } from "@mantine/hooks";
 
 */
 
+export const dynamic = "force-dynamic";
+
 export default function layout({ children }: { children: React.ReactNode }) {
   const [opened, { toggle }] = useDisclosure();
   async function signouthandler(
