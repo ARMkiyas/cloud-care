@@ -1,3 +1,4 @@
+#sync all the changes from the upstream repository to your forked repository
 name: sync
 
 on:

@@ -5,6 +5,7 @@ services:
     build:
       tags:
         - "cloud-care:latest"
+        - "armkiyas/cloud-care:latest"
       context: ./
       dockerfile: Dockerfile
     restart: always
