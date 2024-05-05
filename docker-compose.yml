@@ -5,10 +5,12 @@ services:
     build:
       tags:
         - "cloud-care:latest"
+        - "armkiyas/cloud-care:latest"
       context: ./
       dockerfile: Dockerfile
     restart: always
-    environment:
-      - NODE_ENV=production
+    # add environment variables here that have secrets to be used in the app runtime
+    # env_file:
+    #   - .env    # uncomment this line if you have a .env/.env.local file with secrets
     ports:
       - "80:80"
