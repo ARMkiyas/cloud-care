@@ -10,11 +10,11 @@ WORKDIR /app
 COPY . .
 
 
-RUN npm install -g pnpm 
 
-RUN pnpm i
+
+RUN npm install
 # RUN --mount=type=secret,id=_env,target=.env cat .env  
-RUN pnpm build
+RUN npm run build 
 
 # If using npm comment out above and use below instead
 # RUN npm run build
