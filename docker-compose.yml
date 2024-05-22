@@ -13,4 +13,4 @@ services:
     # env_file:
     #   - .env    # uncomment this line if you have a .env/.env.local file with secrets
     ports:
-      - "80:80"
+      - "80:3000"

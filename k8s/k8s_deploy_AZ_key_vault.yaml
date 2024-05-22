@@ -1,0 +1,167 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudcare-app
+  namespace: default
+  labels:
+    app: cloudcare-app
+    azure.workload.identity/use: "true"
+spec:
+  selector:
+    matchLabels:
+      app: cloudcare-app
+  replicas: 2
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: cloudcare-app
+    spec:
+      serviceAccountName: "workload-identity-sa"
+      # initContainers:
+      # Init containers are exactly like regular containers, except:
+      # - Init containers always run to completion.
+      # - Each init container must complete successfully before the next one starts.
+      containers:
+        - name: cloudcare-app
+          image: armkiyas/cloud-care:latest
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 100m
+              memory: 100Mi
+          # livenessProbe:
+          #   tcpSocket:
+          #     port: 3000
+          #   initialDelaySeconds: 5
+          #   timeoutSeconds: 5
+          #   successThreshold: 1
+          #   failureThreshold: 3
+          #   periodSeconds: 10
+          # readinessProbe:
+          #   httpGet:
+          #     path: /_status/healthz
+          #     port: 3000
+          #   initialDelaySeconds: 5
+          #   timeoutSeconds: 2
+          #   successThreshold: 1
+          #   failureThreshold: 3
+          #   periodSeconds: 10
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: localtime
+              mountPath: /etc/localtime
+            - name: secrets-store01-inline
+              mountPath: "/mnt/secrets-store"
+              readOnly: true 
+          env:                                      # add env from secret got from azure key vault 
+            - name: ACCESS_TOKEN_SECRET              # name on varivable 
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   # name secretObjects from SecretProviderClass
+                  key: ACCESS_TOKEN_SECRET                       # kay of data field to populate
+            - name: AZ_BLOB_CONTAINER_NAME              
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   
+                  key: AZ_BLOB_CONTAINER_NAME
+            - name: AZ_BLOB_READ_KEY              
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   
+                  key: AZ_BLOB_READ_KEY                            
+            - name: AZ_BLOB_SAS_URL              
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   
+                  key: AZ_BLOB_SAS_URL   
+            - name: AZ_QUEUE_SAS_URL              
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   
+                  key: AZ_QUEUE_SAS_URL
+            - name: AZURE_STORAGE_EMAIL_QUEUE_NAME              
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   
+                  key: AZURE_STORAGE_EMAIL_QUEUE_NAME
+            - name: AZURE_STORAGE_MESSAGE_QUEUE-NAME                 
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   
+                  key: AZURE_STORAGE_MESSAGE_QUEUE-NAME                               
+            - name: DATABASE_URL              
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   
+                  key: DATABASE_URL   
+            - name: DATABASE_URL              
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   
+                  key: DATABASE_URL   
+            - name: DB_EDGE_ACCELERATE                
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   
+                  key: DB_EDGE_ACCELERATE  
+            - name: NEXT_PUBLIC_AZ_BLOB_CONTAINER_NAME              
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   
+                  key: NEXT_PUBLIC_AZ_BLOB_CONTAINER_NAME
+            - name: NEXT_SECRET                
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   
+                  key: NEXT_SECRET                              
+            - name: NEXTAUTH_SECRET              
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   
+                  key: NEXTAUTH_SECRET   
+            - name: RESET_PASSWORD_TOKEN_SECRET              
+              valueFrom: 
+                secretKeyRef: 
+                  name: cloudcaresecret                   
+                  key: RESET_PASSWORD_TOKEN_SECRET                             
+      volumes:
+        - name: localtime
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+        - name: secrets-store01-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+                secretProviderClass: "azure-kvname-wi"
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudcare-app-service
+  namespace: default
+spec:
+  selector:
+    app: cloudcare-app
+  type: ClusterIP
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
+  ports:
+    - name: cloudcare-app-service
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
+
