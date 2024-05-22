@@ -34,12 +34,12 @@ export default async function Home() {
                 <div className="text-white text-6xl font-black leading-[67px] max-md:max-w-full max-md:text-4xl max-md:leading-[54px]">
                   good Health Is The Root Of All
                   <br />
-                  Heppiness
+                  Heppiness!
                 </div>
                 <div className="flex flex-wrap items-stretch content-start justify-between gap-5 px-3 pt-6 mt-6 max-md:max-w-full">
                   <div className="justify-center flex grow basis-[0%] flex-col pl-10 pr-50 items-start max-md:px-5 hbox">
                     <div className="text-3xl font-bold leading-10 text-white">
-                      123
+                      100+
                     </div>
                     <div className="mt-1 text-base leading-6 text-blue-50 whitespace-nowrap">
                       Expert Doctors
