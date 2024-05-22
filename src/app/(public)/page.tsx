@@ -32,7 +32,7 @@ export default async function Home() {
             <div className="flex flex-col items-stretch w-6/12 max-md:w-full max-md:ml-0">
               <div className="max-w-[1920px] items-stretch flex flex-col my-auto px-9 py-12 max-md:max-w-full max-md:mt-10 max-md:px-5">
                 <div className="text-white text-6xl font-black leading-[67px] max-md:max-w-full max-md:text-4xl max-md:leading-[54px]">
-                  Great Health Is The Root Of All
+                  good Health Is The Root Of All
                   <br />
                   Heppiness
                 </div>
