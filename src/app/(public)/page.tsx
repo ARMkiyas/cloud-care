@@ -39,7 +39,7 @@ export default async function Home() {
                 <div className="flex flex-wrap items-stretch content-start justify-between gap-5 px-3 pt-6 mt-6 max-md:max-w-full">
                   <div className="justify-center flex grow basis-[0%] flex-col pl-10 pr-50 items-start max-md:px-5 hbox">
                     <div className="text-3xl font-bold leading-10 text-white">
-                      100+
+                      200+
                     </div>
                     <div className="mt-1 text-base leading-6 text-blue-50 whitespace-nowrap">
                       Expert Doctors
