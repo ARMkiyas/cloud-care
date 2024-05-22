@@ -1,6 +1,6 @@
-# Cloud Care - Hospital Management System
+# Cloud Care - OPT supporting system
 
-Cloud Care is a secure and efficient Hospital Management System built using Next.js. It offers a web-based interface to streamline healthcare operations, replacing manual processes with automated functionalities. The system ensures data security and follows strict security measures to protect sensitive information.
+Cloud Care is a secure and OPT supporting system built using Next.js. It offers a web-based interface to streamline healthcare operations, replacing manual processes with automated functionalities. The system ensures data security and follows strict security measures to protect sensitive information.
 
 ## Table of Contents
 - [Key Features](#key-features)
