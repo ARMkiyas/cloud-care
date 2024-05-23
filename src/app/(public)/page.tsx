@@ -55,7 +55,7 @@ export default async function Home() {
                   </div>
                   <div className="justify-center flex grow basis-[0%] flex-col pl-6 pr-20 items-start max-md:px-5 hbox">
                     <div className="text-3xl font-bold leading-10 text-white whitespace-nowrap">
-                      12345
+                      1000+
                     </div>
                     <div className="mt-1 text-base leading-6 text-blue-50 whitespace-nowrap">
                       Total Patients
