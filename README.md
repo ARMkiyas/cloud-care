@@ -5,6 +5,7 @@ Cloud Care is a secure and OPT supporting system built using Next.js. It offers 
 ## Table of Contents
 - [Key Features](#key-features)
 - [Benefits](#benefits)
+- [Deployment Architecture](#deployment-architecture)
 - [Collaboration and Running the Project](#collaboration-and-running-the-project)
 - [Conclusion](#conclusion)
 
@@ -24,6 +25,29 @@ Cloud Care is a secure and OPT supporting system built using Next.js. It offers 
 - Ensures secure handling of blood requests and inventory tracking.
 - Streamlines patient transport scheduling and tracking with data privacy.
 - Simplifies inventory management and reordering processes while maintaining security.
+
+## Deployment Architecture
+The deployment architecture of Cloud Care leverages Terraform for infrastructure management and an Azure Function App named "azure-com-service-with-queue-trigger" for seamless communication within the system. This architecture ensures scalability, reliability, and security.
+
+### Azure Services Used
+- **Azure Front Door**: Provides global load balancing, SSL termination, and Web Application Firewall (WAF) capabilities for secure and optimized access to Cloud Care.
+- **Azure Virtual Network**: Establishes a secure network environment for Azure resources, ensuring isolation and controlled access.
+- **Azure Container App**: Hosts the Cloud Care application in a scalable and managed container environment, facilitating deployment and management.
+- **Azure Database for PostgreSQL**: Stores application data securely with built-in high availability and scalability features.
+- **Azure Storage**: Manages and stores unstructured data securely, supporting various application needs.
+- **Azure Key Vault**: Safeguards cryptographic keys and secrets used by Cloud Care, ensuring secure access and compliance.
+- **Azure Communication Services**: Facilitates communication capabilities within Cloud Care, ensuring reliable messaging and interaction features.
+- **Azure Functions** supports serverless compute for executing specific tasks or responding to events.
+
+
+![Cloud Care Deployment Architecture](insert-your-image-url-here)
+
+Explore the Supporting Terraform configurations at [Cloud Care Terraform Repository](https://github.com/your-username/cloud-care-terraform).
+
+### Azure Function App
+The "azure-com-service-with-queue-trigger" Azure Function App manages communication between different components of Cloud Care, ensuring efficient message queuing and processing.
+
+Access the Azure Function App repository at [Azure Function App Repository](https://github.com/your-username/azure-com-service-with-queue-trigger).
 
 
 ## Collaboration and Running the Project
