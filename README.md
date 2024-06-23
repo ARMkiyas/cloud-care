@@ -40,7 +40,7 @@ The deployment architecture of Cloud Care leverages Terraform for infrastructure
 - **Azure Functions** supports serverless compute for executing specific tasks or responding to events.
 
 
-![Cloud Care Deployment Architecture](https://raw.githubusercontent.com/ARMkiyas/cloud-care/ARMkiyas-patch-2/Architecture.jpg)
+![Cloud Care Deployment Architecture](https://raw.githubusercontent.com/ARMkiyas/cloud-care/master/Architecture.jpg)
 
 Explore the Supporting Terraform configurations at [Cloud Care Terraform Repository](https://github.com/ARMkiyas/automated-azure-secure-serverless-container-application-infra).
 
