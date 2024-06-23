@@ -40,14 +40,14 @@ The deployment architecture of Cloud Care leverages Terraform for infrastructure
 - **Azure Functions** supports serverless compute for executing specific tasks or responding to events.
 
 
-![Cloud Care Deployment Architecture](insert-your-image-url-here)
+![Cloud Care Deployment Architecture](https://raw.githubusercontent.com/ARMkiyas/cloud-care/ARMkiyas-patch-2/Architecture.jpg)
 
-Explore the Supporting Terraform configurations at [Cloud Care Terraform Repository](https://github.com/your-username/cloud-care-terraform).
+Explore the Supporting Terraform configurations at [Cloud Care Terraform Repository](https://github.com/ARMkiyas/automated-azure-secure-serverless-container-application-infra).
 
 ### Azure Function App
 The "azure-com-service-with-queue-trigger" Azure Function App manages communication between different components of Cloud Care, ensuring efficient message queuing and processing.
 
-Access the Azure Function App repository at [Azure Function App Repository](https://github.com/your-username/azure-com-service-with-queue-trigger).
+Access the Azure Function App repository at [Azure Function App Repository](https://github.com/ARMkiyas/azure-com-service-with-queue-tigger).
 
 
 ## Collaboration and Running the Project
